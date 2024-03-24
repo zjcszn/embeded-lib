@@ -1,0 +1,70 @@
+TODO:
+- differentation of variables for read and write commands
+- help command (printing all commands posibilities with descriptions)
+- documentation updated (buffer sized, return enum types, write variable nums, buf size hints)
+- helper setters and getters for variables
+
+0.11.0
+* optional context in commands and data_getter in variables
+* optional extended read and write variable handler with parent command
+
+0.10.1
+* single working buffer insteads of two separated for atcmd and unsolicited events
+
+0.10.0
+* separate atcmd and unsolicited event state machines
+
+0.9.0
+* variables accessors
+
+0.8.1
+* fix commands shourtcuts
+
+0.8.0
+* print commands list feature
+
+0.7.1
+* more flexible command group initialization (pointers)
+
+0.7.0
+* function for checking unsolicited buffer
+* some refactoring regarding unsolicited buffer
+* helper function cat_search_variable_by_name added
+* commands group with searching feature added
+* disable feature for commands and groups added
+
+0.6.0
+* async non blocking io->write
+* async unsolicited read/test event (injected at idle and hold state)
+* hold commands parse processing feature (for delayed unsolicited read responses)
+* behavior differentation by callbacks return values
+* only-test flag in commands descriptor (for fast disable read/write/run)
+* helper function for searching command by name
+* multiple responses triggered by single request pattern support
+* generic mutex descriptor interface
+* return value states enum types
+
+0.5.3
+* function for checking internal busy state added
+
+0.5.2
+* small fix in auto description response
+
+0.5.1
+* description field in command added (used in auto help message)
+
+0.5.0
+* test command parser with auto help messages
+* output string end-line encoding same as input string
+* very basic demo example application added
+
+0.4.0
+* high level parsing for command arguments
+* int, uint, hex, hexbuf, string argument types
+* validating arguments values range
+
+0.3.0
+* independent buffers (parsing buffer and state buffer)
+
+0.2.0
+* passing command struct instead of command name in command handlers

@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\mbmaster">
+      <UniqueIdentifier>{736a617d-6739-4719-b547-5233214f0d0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\port">
+      <UniqueIdentifier>{00bfcd01-b2f4-41ac-b8f2-a5313a8d2a06}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\demo-tcp2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\mbmaster\mbm.c">
+      <Filter>Source Files\mbmaster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\mbmaster\ascii\mbmascii.c">
+      <Filter>Source Files\mbmaster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\mbmaster\rtu\mbmcrc.c">
+      <Filter>Source Files\mbmaster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\mbmaster\functions\mbmfunccoils.c">
+      <Filter>Source Files\mbmaster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\mbmaster\functions\mbmfuncdisc.c">
+      <Filter>Source Files\mbmaster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\mbmaster\functions\mbmfuncfiles.c">
+      <Filter>Source Files\mbmaster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\mbmaster\functions\mbmfuncholding.c">
+      <Filter>Source Files\mbmaster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\mbmaster\functions\mbmfuncinput.c">
+      <Filter>Source Files\mbmaster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\mbmaster\functions\mbmfuncraw.c">
+      <Filter>Source Files\mbmaster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\mbmaster\rtu\mbmrtu.c">
+      <Filter>Source Files\mbmaster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\mbmaster\tcp\mbmtcp.c">
+      <Filter>Source Files\mbmaster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\mbmaster\udp\mbmudp.c">
+      <Filter>Source Files\mbmaster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\mbmaster\common\mbutils.c">
+      <Filter>Source Files\mbmaster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\port\mbportevent.c">
+      <Filter>Source Files\port</Filter>
+    </ClCompile>
+    <ClCompile Include="..\port\mbportother.c">
+      <Filter>Source Files\port</Filter>
+    </ClCompile>
+    <ClCompile Include="..\port\mbportserial.c">
+      <Filter>Source Files\port</Filter>
+    </ClCompile>
+    <ClCompile Include="..\port\mbporttcp.c">
+      <Filter>Source Files\port</Filter>
+    </ClCompile>
+    <ClCompile Include="..\port\mbportudp.c">
+      <Filter>Source Files\port</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\port\mbporttimer.c">
+      <Filter>Source Files\port</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\port\mbmconfig.h">
+      <Filter>Source Files\mbmaster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\mbmaster\include\mbm.h">
+      <Filter>Source Files\mbmaster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\mbmaster\ascii\mbmascii.h">
+      <Filter>Source Files\mbmaster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\mbmaster\rtu\mbmcrc.h">
+      <Filter>Source Files\mbmaster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\mbmaster\include\internal\mbmiconfig.h">
+      <Filter>Source Files\mbmaster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\mbmaster\rtu\mbmrtu.h">
+      <Filter>Source Files\mbmaster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\mbmaster\include\common\mbtypes.h">
+      <Filter>Source Files\mbmaster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\mbmaster\include\common\mbutils.h">
+      <Filter>Source Files\mbmaster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\mbmaster\include\common\mbframe.h">
+      <Filter>Source Files\mbmaster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\port\mbport.h">
+      <Filter>Source Files\port</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\mbmaster\include\common\mbportlayer.h">
+      <Filter>Source Files\port</Filter>
+    </ClInclude>
+    <ClInclude Include="..\stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,21 @@
+--cpu=Cortex-M4.fp.sp
+"stm32f407_ll_i2c_dma\main.o"
+"stm32f407_ll_i2c_dma\gpio.o"
+"stm32f407_ll_i2c_dma\dma.o"
+"stm32f407_ll_i2c_dma\i2c.o"
+"stm32f407_ll_i2c_dma\stm32f4xx_it.o"
+"stm32f407_ll_i2c_dma\bsp_i2c_dma.o"
+"stm32f407_ll_i2c_dma\dev_i2c_dma.o"
+"stm32f407_ll_i2c_dma\dwt_delay.o"
+"stm32f407_ll_i2c_dma\startup_stm32f407xx.o"
+"stm32f407_ll_i2c_dma\stm32f4xx_ll_gpio.o"
+"stm32f407_ll_i2c_dma\stm32f4xx_ll_dma.o"
+"stm32f407_ll_i2c_dma\stm32f4xx_ll_i2c.o"
+"stm32f407_ll_i2c_dma\stm32f4xx_ll_rcc.o"
+"stm32f407_ll_i2c_dma\stm32f4xx_ll_utils.o"
+"stm32f407_ll_i2c_dma\stm32f4xx_ll_exti.o"
+"stm32f407_ll_i2c_dma\system_stm32f4xx.o"
+--strict --scatter "stm32f407_ll_i2c_dma\stm32f407_ll_i2c_dma.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "stm32f407_ll_i2c_dma.map" -o stm32f407_ll_i2c_dma\stm32f407_ll_i2c_dma.axf

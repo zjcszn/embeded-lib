@@ -1,0 +1,7 @@
+{
+  "files.associations": {
+    "bsp_i2c_dma.h": "c",
+    "stm32f4xx_ll_bus.h": "c",
+    "dev_i2c_dma.h": "c"
+  }
+}

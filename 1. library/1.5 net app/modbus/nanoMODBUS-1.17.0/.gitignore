@@ -1,0 +1,8 @@
+.idea
+cmake-build*
+build*
+/tests/cmake-build*
+/tests/build*
+/examples/cmake-build*
+/examples/build*
+doxygen

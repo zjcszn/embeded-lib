@@ -1,0 +1,7 @@
+﻿下面的统计条件(1.不编译MP3; 2.不编译WEBSERVER; 3.关闭DEBUG)
+Program Size: Code=297820 RO-data=47832 RW-data=1324 ZI-data=19428  
+
+下面的统计条件(0级优化)
+MP3模块占用flash资源约63KBYTE
+WEBSERVER占用flash资源约37KBYTE
+LWIP占用flash资源约67KBYTE

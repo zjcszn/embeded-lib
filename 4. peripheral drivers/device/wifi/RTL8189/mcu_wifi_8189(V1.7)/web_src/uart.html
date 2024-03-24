@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>无标题文档</title>
+<style type="text/css">
+<!--
+.STYLE16 {font-size: 16px}
+.STYLE17 {font-size: 24px; }
+.STYLE18 {font-size: 24px; font-weight: bold; }
+-->
+</style>
+</head>
+
+<body>
+<form id="form1" name="form1" method="post" action=""><center>
+<table width="300" height="227" border="0" bordercolor="#000000" bgcolor="#eeeeee">
+  <tr>
+    <td height="61" colspan="2"><div align="center"><span class="STYLE18">UART透传模式配置</span></div><hr /></td>
+    </tr>
+  <tr>
+    <td width="43%" height="46"><div align="right"><span class="STYLE16">串口波特率:</span></div></td>
+    <td width="57%"><span class="STYLE16">
+      <select name="dtu_baud" size="1" id="dtu_baud">
+        <option value="9600">9600</option>
+        <option value="19200">19200</option>
+        <option value="38400" selected="selected">38400</option>
+        <option value="57600">57600</option>
+        <option value="115200">115200</option>
+        <option value="230400">230400</option>
+        <option value="460800">460800</option>
+        <option value="921600">921600</option>
+        <option value="2250000">2250000</option>
+        <option value="4500000">4500000</option>
+      </select>
+      (bps)</span></td>
+  </tr>
+  <tr>
+    <td height="68" colspan="2"><div align="center"><span class="STYLE16">
+      <input name="dtu_open" type="checkbox" id="dtu_open" value="1" />
+      启用透传模式
+    </span></div>      <span class="STYLE16"><label></label>
+        </span></td>
+    </tr>
+  <tr>
+    <td height="42" colspan="2"><div align="center"><span class="STYLE16">
+      <input name="bt_save" type="submit" id="bt_save" value="保存" />
+    </span></div>      
+      <span class="STYLE16"><label></label>
+          </span></td>
+    </tr>
+</table>
+<label>  </label>
+<label></label>
+</center>
+</form>
+</body>
+</html>

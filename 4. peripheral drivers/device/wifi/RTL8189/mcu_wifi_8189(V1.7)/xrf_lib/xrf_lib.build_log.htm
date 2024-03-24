@@ -1,0 +1,69 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Tool Versions:</h2>
+IDE-Version: ¦ÌVision V5.15
+Copyright (C) 2015 ARM Ltd and ARM Germany GmbH. All rights reserved.
+License Information: 1 Microsoft, Microsoft, LIC=LSNX7-E3LL2-NNFAF-66U8F-ZTP5P-6L3Z4
+ 
+Tool Versions:
+Toolchain:       MDK-ARM Standard  Version: 5.15.0
+Toolchain Path:  C:\Keil_v5\ARM\ARMCC\Bin
+C Compiler:      Armcc.exe V5.05 update 2 (build 169)
+Assembler:       Armasm.exe V5.05 update 2 (build 169)
+Linker/Locator:  ArmLink.exe V5.05 update 2 (build 169)
+Library Manager: ArmAr.exe V5.05 update 2 (build 169)
+Hex Converter:   FromElf.exe V5.05 update 2 (build 169)
+CPU DLL:         SARMCM3.DLL V5.15.0
+Dialog DLL:      DCM.DLL V1.13.2.0
+Target DLL:      UL2CM3.DLL V1.155.8.0
+Dialog DLL:      TCM.DLL V1.14.5.0
+ 
+<h2>Project:</h2>
+E:\8189\lib_src\keil_pro\wifi_lib.uvprojx
+Project File Date:  09/20/2015
+
+<h2>Output:</h2>
+*** Using Compiler 'V5.05 update 2 (build 169)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
+Build target 'Target 1'
+compiling xrf_debug.c...
+..\xrf_debug.c(79): warning:  #550-D: variable "p_buff" was set but never used
+        char buff[256], *p_buff;
+..\xrf_debug.c(1846): warning:  #223-D: function "rtw_cfg80211_set_wpa_version" declared implicitly
+        ret = rtw_cfg80211_set_wpa_version(psecuritypriv, sme->crypto.wpa_versions);
+..\xrf_debug.c(1867): warning:  #223-D: function "rtw_cfg80211_set_auth_type" declared implicitly
+        ret = rtw_cfg80211_set_auth_type(psecuritypriv, sme->auth_type);
+..\xrf_debug.c(1883): warning:  #223-D: function "rtw_cfg80211_set_wpa_ie" declared implicitly
+        ret = rtw_cfg80211_set_wpa_ie(padapter, sme->ie, sme->ie_len);
+..\xrf_debug.c(1888): warning:  #223-D: function "rtw_cfg80211_set_cipher" declared implicitly
+                ret = rtw_cfg80211_set_cipher(psecuritypriv, sme->crypto.ciphers_pairwise[0], _TRUE);
+..\xrf_debug.c(1955): warning:  #223-D: function "rtw_cfg80211_set_cipher" declared implicitly
+        ret = rtw_cfg80211_set_cipher(psecuritypriv, sme->crypto.cipher_group, _FALSE);
+..\xrf_debug.c(1960): warning:  #223-D: function "rtw_cfg80211_set_key_mgt" declared implicitly
+                ret = rtw_cfg80211_set_key_mgt(psecuritypriv, sme->crypto.akm_suites[0]);
+..\xrf_debug.c(1974): warning:  #188-D: enumerated type mixed with another type
+        authmode = psecuritypriv->ndisauthtype;
+..\xrf_debug.c: 8 warnings, 0 errors
+creating Library...
+"..\..\mcu_wifi_8189\xrf_lib\xrf_lib.lib" - 0 Error(s), 8 Warning(s).
+
+<h2>Software Packages used:</h2>
+
+Package Vendor: ARM
+                http://www.keil.com/pack/ARM.CMSIS.4.3.0.pack
+                ARM::CMSIS:CORE:4.1.0
+                CMSIS (Cortex Microcontroller Software Interface Standard)
+   * Component: CORE Version: 4.1.0
+
+<h2>Collection of Component include folders:</h2>
+  E:\8189\lib_src\keil_pro\RTE
+  C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.3.0\CMSIS\Include
+  C:\Keil_v5\ARM\PACK\Keil\STM32F2xx_DFP\2.3.0\Drivers\CMSIS\Device\ST\STM32F2xx\Include
+
+<h2>Collection of Component Files used:</h2>
+
+   * Component: ARM::CMSIS:CORE:4.1.0
+</pre>
+</body>
+</html>

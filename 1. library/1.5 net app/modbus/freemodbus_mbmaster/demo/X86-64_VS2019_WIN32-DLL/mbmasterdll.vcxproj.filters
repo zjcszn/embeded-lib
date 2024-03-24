@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="PORT">
+      <UniqueIdentifier>{d476f8fe-acfc-4a8d-8677-168eae367494}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DLL">
+      <UniqueIdentifier>{17f0b739-cd48-4332-9d77-e009cdd184cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MODBUS">
+      <UniqueIdentifier>{1e9f8beb-826b-40a2-8206-d1b4aa5f77a8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="port\mbmconfig.h">
+      <Filter>PORT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mbmaster\include\internal\mbmiconfig.h">
+      <Filter>PORT</Filter>
+    </ClInclude>
+    <ClInclude Include="port\mbport.h">
+      <Filter>PORT</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>DLL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mbmaster\include\common\mbframe.h">
+      <Filter>MODBUS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mbmaster\include\mbm.h">
+      <Filter>MODBUS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mbmaster\include\common\mbportlayer.h">
+      <Filter>MODBUS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mbmaster\include\common\mbtypes.h">
+      <Filter>MODBUS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mbmaster\include\common\mbutils.h">
+      <Filter>MODBUS</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="port\mbportevent.c">
+      <Filter>PORT</Filter>
+    </ClCompile>
+    <ClCompile Include="port\mbportother.c">
+      <Filter>PORT</Filter>
+    </ClCompile>
+    <ClCompile Include="port\mbportserial.c">
+      <Filter>PORT</Filter>
+    </ClCompile>
+    <ClCompile Include="port\mbporttcp.c">
+      <Filter>PORT</Filter>
+    </ClCompile>
+    <ClCompile Include="port\mbporttimerce.c">
+      <Filter>PORT</Filter>
+    </ClCompile>
+    <ClCompile Include="mbmaster.cpp">
+      <Filter>DLL</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>DLL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mbmaster\mbm.c">
+      <Filter>MODBUS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mbmaster\ascii\mbmascii.c">
+      <Filter>MODBUS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mbmaster\rtu\mbmcrc.c">
+      <Filter>MODBUS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mbmaster\functions\mbmfunccoils.c">
+      <Filter>MODBUS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mbmaster\functions\mbmfuncdisc.c">
+      <Filter>MODBUS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mbmaster\functions\mbmfuncfiles.c">
+      <Filter>MODBUS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mbmaster\functions\mbmfuncholding.c">
+      <Filter>MODBUS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mbmaster\functions\mbmfuncinput.c">
+      <Filter>MODBUS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mbmaster\functions\mbmfuncraw.c">
+      <Filter>MODBUS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mbmaster\functions\mbmfuncslaveid.c">
+      <Filter>MODBUS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mbmaster\rtu\mbmrtu.c">
+      <Filter>MODBUS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mbmaster\tcp\mbmtcp.c">
+      <Filter>MODBUS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mbmaster\common\mbutils.c">
+      <Filter>MODBUS</Filter>
+    </ClCompile>
+    <ClCompile Include="port\mbportudp.c">
+      <Filter>PORT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mbmaster\udp\mbmudp.c">
+      <Filter>MODBUS</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,28 @@
+
+1. May 17, 2023
+--------------------------------------------------------------------------------------------------
+When JD_FORMAT == 3 (grayscale output) and JD_FASTDECODE >= 1, overflow occures at integer conversions and it results a noise in the output image.
+
+This problem was reported via email.
+
+To fix this preblem, apply following patch to the tjpgd.c.
+
+--- tjpgd.c	Thu Jul  1 00:16:07 2021
++++ tjpgd3_p1.c	Wed May 17 00:28:41 2023
+@@ -1,5 +1,5 @@
+ /*----------------------------------------------------------------------------/
+-/ TJpgDec - Tiny JPEG Decompressor R0.03                      (C)ChaN, 2021
++/ TJpgDec - Tiny JPEG Decompressor R0.03 w/patch1             (C)ChaN, 2021
+ /-----------------------------------------------------------------------------/
+ / The TJpgDec is a generic JPEG decompressor module for tiny embedded systems.
+ / This is a free software that opened for education, research and commercial
+@@ -850,7 +850,11 @@
+ 					if (mx == 16) {					/* Double block width? */
+ 						if (ix == 8) py += 64 - 8;	/* Jump to next block if double block height */
+ 					}
+-					*pix++ = (uint8_t)*py++;			/* Get and store a Y value as grayscale */
++					if (JD_FASTDECODE >= 1) {
++						*pix++ = BYTECLIP(*py++);	/* Get and store a Y value as grayscale */
++					} else {
++						*pix++ = *py++;				/* Get and store a Y value as grayscale */
++					}

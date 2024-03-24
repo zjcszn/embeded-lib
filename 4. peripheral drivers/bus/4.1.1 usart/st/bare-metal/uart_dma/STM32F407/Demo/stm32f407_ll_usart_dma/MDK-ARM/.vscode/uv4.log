@@ -1,0 +1,3 @@
+Load "stm32f407_ll_usart_dma\\stm32f407_ll_usart_dma.axf" 
+Erase Done.Programming Done.Verify OK.Application running ...
+Flash Load finished at 21:29:34

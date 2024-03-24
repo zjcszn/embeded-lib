@@ -1,0 +1,3 @@
+#define WHD_VERSION "3.0.0.22316"
+#define WHD_BRANCH "v3.0.0"
+#define WHD_DATE "2023-12-04 07:24:34 -0600"

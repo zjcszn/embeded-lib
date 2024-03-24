@@ -1,0 +1,11 @@
+{
+  "files.associations": {
+    "bsp_spi_master_poll.h": "c",
+    "stm32f407xx.h": "c",
+    "stm32f4xx_ll_spi.h": "c",
+    "stm32f4xx_ll_gpio.h": "c",
+    "stm32f4xx_ll_bus.h": "c",
+    "bsp_spi_master_dma.h": "c",
+    "bsp_spi_master_soft.h": "c"
+  }
+}

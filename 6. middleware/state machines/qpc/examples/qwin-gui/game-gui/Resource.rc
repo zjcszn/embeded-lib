@@ -1,0 +1,157 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "winres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""winres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_APPLICATION DIALOGEX 0, 0, 559, 439
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Fly 'n' Shoot game"
+CLASS "MY_CLASS"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         IDB_BACKGROUND,IDB_BACKGROUND,"Static",SS_BITMAP,7,7,552,411
+    DEFPUSHBUTTON   "Quit",IDOK,461,19,93,25
+    CONTROL         IDB_LCD,IDC_LCD,"Static",SS_BITMAP,51,80,171,158
+    CONTROL         "USER0",IDC_USER0,"Button",BS_OWNERDRAW | WS_TABSTOP,160,315,45,43
+    CONTROL         "USER1",IDC_USER1,"Button",BS_OWNERDRAW | WS_TABSTOP,70,316,45,44
+    CONTROL         IDB_LED_OFF,IDC_LED0,"Static",SS_BITMAP,278,324,6,16
+    CONTROL         IDB_LED_OFF,IDC_LED1,"Static",SS_BITMAP,255,323,6,16
+    CONTROL         IDB_SEG,IDC_STATIC,"Static",SS_BITMAP,252,206,97,54
+    CONTROL         IDB_SEG8,IDC_SEG0,"Static",SS_BITMAP,321,214,19,36
+    CONTROL         IDB_SEG8,IDC_SEG1,"Static",SS_BITMAP,301,214,19,36
+    CONTROL         IDB_SEG8,IDC_SEG2,"Static",SS_BITMAP,281,214,19,36
+    CONTROL         IDB_SEG8,IDC_SEG3,"Static",SS_BITMAP,261,214,19,36
+    CTEXT           "https://www.state-machine.com",IDC_STATIC,222,420,140,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_BACKGROUND          BITMAP                  "Res/BOARD.bmp"
+
+IDB_BTN_DWN             BITMAP                  "Res/BTN_DWN.bmp"
+
+IDB_BTN_UP              BITMAP                  "Res/BTN_UP.bmp"
+
+IDB_LCD                 BITMAP                  "Res/LCD.bmp"
+
+IDB_LED_OFF             BITMAP                  "Res/LED_OFF.bmp"
+
+IDB_LED_ON              BITMAP                  "Res/LED_ON.bmp"
+
+IDB_SEG                 BITMAP                  "Res/seg.bmp"
+
+IDB_SEG0                BITMAP                  "Res/seg0.bmp"
+
+IDB_SEG1                BITMAP                  "Res/seg1.bmp"
+
+IDB_SEG2                BITMAP                  "Res/seg2.bmp"
+
+IDB_SEG3                BITMAP                  "Res/seg3.bmp"
+
+IDB_SEG4                BITMAP                  "Res/seg4.bmp"
+
+IDB_SEG5                BITMAP                  "Res/seg5.bmp"
+
+IDB_SEG6                BITMAP                  "Res/seg6.bmp"
+
+IDB_SEG7                BITMAP                  "Res/seg7.bmp"
+
+IDB_SEG8                BITMAP                  "Res/seg8.bmp"
+
+IDB_SEG9                BITMAP                  "Res/seg9.bmp"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_APPLICATION, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 552
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 432
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_APPLICATION AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

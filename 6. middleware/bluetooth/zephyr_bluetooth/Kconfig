@@ -1,0 +1,80 @@
+mainmenu "Zephyr Bluetooth Configuration"
+
+config NET_BUF
+	bool "Network buffer support"
+	help
+	  This option enables support for generic network protocol
+	  buffers.
+
+if NET_BUF
+
+config NET_BUF_USER_DATA_SIZE
+	int "Size of user_data available in every network buffer"
+	default 8
+	range 4 65535
+	help
+	  Amount of memory reserved in each network buffer for user data. In
+	  most cases this can be left as the default value.
+
+config NET_BUF_LOG
+	bool "Network buffer logging"
+	select LOG
+	help
+	  Enable logs and checks for the generic network buffers.
+
+#module = NET_BUF
+#module-str = net_buf
+#source "subsys/logging/Kconfig.template.log_config"
+
+if NET_BUF_LOG
+
+config NET_BUF_WARN_ALLOC_INTERVAL
+	int "Interval of Network buffer allocation warnings"
+	default 1
+	range 0 60
+	help
+	  Interval in seconds of Network buffer allocation warnings which are
+	  generated when a buffer cannot immediately be allocated with K_FOREVER
+	  which may lead to deadlocks. Setting it to 0 makes warnings to be
+	  printed only once per allocation.
+
+config NET_BUF_SIMPLE_LOG
+	bool "Network buffer memory debugging"
+	select LOG
+	help
+	  Enable extra debug logs and checks for the generic network buffers.
+
+endif # NET_BUF_LOG
+
+config NET_BUF_POOL_USAGE
+	bool "Network buffer pool usage tracking"
+	help
+	  Enable network buffer pool tracking. This means that:
+	  * amount of free buffers in the pool is remembered
+	  * total size of the pool is calculated
+	  * pool name is stored and can be shown in debugging prints
+
+endif # NET_BUF
+
+config SYSTEM_WORKQUEUE_STACK_SIZE
+	int "System workqueue stack size"
+	default 2048
+
+config SYSTEM_WORKQUEUE_PRIORITY
+	int "System workqueue priority"
+	default 0
+	help
+	  By default, system work queue priority is the lowest cooperative
+	  priority. This means that any work handler, once started, won't
+	  be preempted by any other thread until finished.
+
+config BT_CTLR_CRYPTO
+	bool "Enable crypto functions in Controller"
+	default n
+	select ENTROPY_GENERATOR
+	help
+		Use random number generation and AES encryption support functions
+		provided by the controller.
+
+#source "core/src/tinycrypt/Kconfig"
+source "core/src/Kconfig"

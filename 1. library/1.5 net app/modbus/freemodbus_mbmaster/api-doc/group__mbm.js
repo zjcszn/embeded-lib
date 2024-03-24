@@ -1,0 +1,68 @@
+var group__mbm =
+[
+    [ "MODBUS Configuration", "group__mbm__cfg.html", "group__mbm__cfg" ],
+    [ "xMBMFileSubReadReq_t", "structxMBMFileSubReadReq__t.html", [
+      [ "usFileNumber", "structxMBMFileSubReadReq__t.html#a7adf13ac1b8f58ab6f25abe43049ed1e", null ],
+      [ "usRecordLength", "structxMBMFileSubReadReq__t.html#a907a026e97ff009cdc206f9b5be05158", null ],
+      [ "usRecordNumber", "structxMBMFileSubReadReq__t.html#ae431129e8140af445e763629e0651f86", null ]
+    ] ],
+    [ "xMBMFileSubReadResp_t", "structxMBMFileSubReadResp__t.html", [
+      [ "pubResponse", "structxMBMFileSubReadResp__t.html#a8d37840863aba918861016ed63e82000", null ],
+      [ "usResponseLength", "structxMBMFileSubReadResp__t.html#a6e7a666cf46368444aecbc0a4f46a5f4", null ]
+    ] ],
+    [ "xMBMFileSubWriteReq_t", "structxMBMFileSubWriteReq__t.html", [
+      [ "pubRecordData", "structxMBMFileSubWriteReq__t.html#aa73ea69fd189d24a93da77e800362979", null ],
+      [ "usFileNumber", "structxMBMFileSubWriteReq__t.html#a68e7abc28acbe9b11d262f83df7d8a2c", null ],
+      [ "usRecordLength", "structxMBMFileSubWriteReq__t.html#ab3c8704fe6728ce4c6fdc9d866b3d0f2", null ],
+      [ "usRecordNumber", "structxMBMFileSubWriteReq__t.html#a43de51620d59681dda9e6533e78e88ec", null ]
+    ] ],
+    [ "xMBMHandle", "group__mbm.html#ga39ff7ecabacfd2155328f82045368d74", null ],
+    [ "eMBMQueryState", "group__mbm.html#gaca22d8b649564e798570df743ed2b044", [
+      [ "MBM_STATE_NONE", "group__mbm.html#ggaca22d8b649564e798570df743ed2b044a1b7983bec439e0c938c9fcf4884c4cf7", null ],
+      [ "MBM_STATE_SEND", "group__mbm.html#ggaca22d8b649564e798570df743ed2b044a3704db87ad004a0c23f0db8d5bd5558d", null ],
+      [ "MBM_STATE_WAITING", "group__mbm.html#ggaca22d8b649564e798570df743ed2b044ad65daf91bac311102dbf613549b21b10", null ],
+      [ "MBM_STATE_DISASSEMBLE", "group__mbm.html#ggaca22d8b649564e798570df743ed2b044a4c4bcbc459b13d2b59d224225ff81095", null ],
+      [ "MBM_STATE_ERROR", "group__mbm.html#ggaca22d8b649564e798570df743ed2b044aefae878247af9f2db939c6c924e34bb9", null ],
+      [ "MBM_STATE_DONE", "group__mbm.html#ggaca22d8b649564e798570df743ed2b044a5c4c54c89d5d940ed32ee8fa0d55d280", null ]
+    ] ],
+    [ "eMBMClose", "group__mbm.html#gaf70e17b30721fad9bfa97df32d76c43a", null ],
+    [ "eMBMGetStatistics", "group__mbm.html#ga38e2186fb377dc6807e34c2978e68d73", null ],
+    [ "eMBMMaskWriteRegister", "group__mbm.html#ga35ad5b33d0ccc547d7f844554f2de5d2", null ],
+    [ "eMBMReadCoils", "group__mbm.html#ga0eeca54955d2ba278a2528808bd9705e", null ],
+    [ "eMBMReadDiscreteInputs", "group__mbm.html#gad999f2307357c6c05fcb52c4a06e6a87", null ],
+    [ "eMBMReadFileRecord", "group__mbm.html#gaa09b4525fdd9d221c9d48d40ba56f3b8", null ],
+    [ "eMBMReadHoldingRegisters", "group__mbm.html#ga136a52e63da3a4e353203948e737cd42", null ],
+    [ "eMBMReadInputRegisters", "group__mbm.html#ga615a34b18c4e93785125c89de55c3bfa", null ],
+    [ "eMBMReadWriteMultipleRegisters", "group__mbm.html#gad00eb7be697e8f89a687f4bb22d8cb66", null ],
+    [ "eMBMReadWriteRAWPDU", "group__mbm.html#ga6dcc22b3167c37a3424d0049f12eab6c", null ],
+    [ "eMBMRegisterProtAnalyzer", "group__mbm.html#ga5fb1de90f8eafa4321b3a4781854bb74", null ],
+    [ "eMBMReportSlaveID", "group__mbm.html#ga464ea91b34f860c88ca50b6795984e7a", null ],
+    [ "eMBMResetStatistics", "group__mbm.html#ga1ac98110b158e86c16332df0703121c3", null ],
+    [ "eMBMSerialInit", "group__mbm.html#ga6d15a39b8ea45d2ab50e5951615e8ed3", null ],
+    [ "eMBMSerialInitExt", "group__mbm.html#gac74f170aa8f7e71cb0ca0e0f32cb5a02", null ],
+    [ "eMBMSetSlaveTimeout", "group__mbm.html#gaa9c3b86a71907fe1450dc1652e5ab9cc", null ],
+    [ "eMBMTCPConnect", "group__mbm.html#ga8bb69ce870efbcebcae69d62bc7ec93e", null ],
+    [ "eMBMTCPDisconnect", "group__mbm.html#gad6f5c0ada100b309ba32c06ef646da8c", null ],
+    [ "eMBMTCPInit", "group__mbm.html#ga8ed45e6af7c0078901bc460b136f82cc", null ],
+    [ "eMBMUDPInit", "group__mbm.html#ga8d07d81e5f395979314919d2634af520", null ],
+    [ "eMBMUDPSetSlave", "group__mbm.html#gaafab766276af3a117f7b1969f3081158", null ],
+    [ "eMBMWriteCoils", "group__mbm.html#gaeeceb2922f58c0df0a53d38885305715", null ],
+    [ "eMBMWriteFileRecord", "group__mbm.html#ga19014cb4fe74a3f10ad344755d0441ec", null ],
+    [ "eMBMWriteMultipleRegisters", "group__mbm.html#ga1e0d9166403d5170e0de3fc365b6deff", null ],
+    [ "eMBMWriteSingleCoil", "group__mbm.html#ga4441839f7b7f48e8ce0e357db87daa29", null ],
+    [ "eMBMWriteSingleRegister", "group__mbm.html#gabdc2ddc7fda6022ccfda8b94eb2e5394", null ],
+    [ "vMBMMaskWriteRegisterPolled", "group__mbm.html#gad2b1feaff5f800c554ac1701e11607ac", null ],
+    [ "vMBMReadCoilsPolled", "group__mbm.html#ga5aef2e1e004552811a4232d2afec61f4", null ],
+    [ "vMBMReadDiscreteInputsPolled", "group__mbm.html#ga65d6f42f061c62aa8da37d6110396feb", null ],
+    [ "vMBMReadFileRecordPolled", "group__mbm.html#ga610ec05392e913a2088c577718e5da89", null ],
+    [ "vMBMReadHoldingRegistersPolled", "group__mbm.html#ga3658094a1c51a51ac5bdb1972974b62e", null ],
+    [ "vMBMReadInputRegistersPolled", "group__mbm.html#ga64900771ca6c95c57df5e6a7040da202", null ],
+    [ "vMBMReadWriteMultipleRegistersPolled", "group__mbm.html#gaaacad64422c656aaacfdff4bf8486a6f", null ],
+    [ "vMBMReadWriteRAWPDUPolled", "group__mbm.html#gaea745bf7819e92758d156c8167459904", null ],
+    [ "vMBMReportSlaveID", "group__mbm.html#ga498439f80cf54f3f6c0e682f13b910e9", null ],
+    [ "vMBMWriteCoilsPolled", "group__mbm.html#ga3a3ad933943a25e382fcca41714c3f01", null ],
+    [ "vMBMWriteFileRecordPolled", "group__mbm.html#ga33a8c0c949f81237ac0bcac9a5d9a6ae", null ],
+    [ "vMBMWriteMultipleRegistersPolled", "group__mbm.html#ga02d5f48ea8d2fa5b2290572098dd6d40", null ],
+    [ "vMBMWriteSingleCoilPolled", "group__mbm.html#ga292993bce43830d6f75a535c7d6fd476", null ],
+    [ "vMBMWriteSingleRegisterPolled", "group__mbm.html#ga9ae6bcc86348b59e12fdfa41738b3221", null ]
+];

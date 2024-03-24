@@ -1,0 +1,4 @@
+CompileFlags:
+  CompilationDatabase: >-
+    f:\GithubRepo\embeded-lib\3.
+    algorithms\dsp\CMSIS-DSP-1.15.0\Examples\cmsis_build\tmp\variance\VHT-Corstone-310\Release

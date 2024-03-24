@@ -1,0 +1,18 @@
+{
+  "files.associations": {
+    "bsp_i2c.h": "c",
+    "stm32f407xx.h": "c",
+    "stm32f4xx_ll_i2c.h": "c",
+    "bsp_i2c_hw.h": "c",
+    "bsp_i2c_sw.h": "c",
+    "dwt_delay.h": "c",
+    "perf_counter.h": "c",
+    "dev_i2c.h": "c",
+    "bsp_lcd1602.h": "c",
+    "custom_button.h": "c",
+    "bsp_key.h": "c",
+    "string.h": "c",
+    "multi_task.h": "c",
+    "stm32f4xx_ll_bus.h": "c"
+  }
+}
