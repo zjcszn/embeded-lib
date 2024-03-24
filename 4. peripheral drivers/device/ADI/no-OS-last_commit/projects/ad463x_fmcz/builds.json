@@ -1,0 +1,12 @@
+{
+      "xilinx": {
+        "uart": {
+              "flags" : "",
+              "hardware" : ["ad4630_fmc_zed"]
+        },
+        "iio": {
+            "flags" : "IIOD=y",
+            "hardware" : ["ad4630_fmc_zed"]
+          }
+      }
+}

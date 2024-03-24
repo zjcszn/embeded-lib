@@ -1,0 +1,10 @@
+{
+  "aducm3029": {
+    "capacitive_length_demo": {
+      "flags" : ""
+    },
+    "iio_capacitive_length_demo": {
+	"flags" : "IIOD=y"
+      }
+  }
+}
