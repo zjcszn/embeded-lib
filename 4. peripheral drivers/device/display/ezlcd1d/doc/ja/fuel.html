@@ -1,0 +1,47 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="up" title="EZ-LCD" href="../00index_j.html">
+<link rel="alternate" hreflang="en" title="English" href="../en/fuel.html">
+<link rel="stylesheet" href="../css_j.css" type="text/css" media="screen" title="ELM Default">
+<title>EZ-LCD - lcd_put_fuel</title>
+</head>
+
+<body>
+
+<div class="para">
+<h2>lcd_put_fuel</h2>
+<p>バッテリ・アイコンを表示します。</p>
+<pre>
+void lcd_put_fuel (
+    int8_t <em>val</em>,    <span>/* アイコンの形状 */</span>
+    uint8_t <em>chr</em>    <span>/* ユーザ文字 */</span>
+)
+</pre>
+</div>
+
+<div class="para">
+<h4>引数</h4>
+<dl class="par">
+<dt>val</dt>
+<dd>アイコンの形状を-1から5の範囲で指定します。5はフル・チャージ、0は空、-1はACプラグを示します。</dd>
+<dt>chr</dt>
+<dd>使用するユーザ文字コードを指定します。</dd>
+</dl>
+</div>
+
+<div class="para">
+<h4>解説</h4>
+<p>カーソルの位置にバッテリ・アイコンを表示し、カーソルを1カラム進めます。ユーザ文字コードには他の機能と重ならない値を使用しなければなりません。</p>
+</div>
+
+<div class="para">
+<h4>対応情報</h4>
+<p><tt>_USE_CGRAM</tt>と<tt>_USE_FUEL</tt>が共に1のとき使用可能です。</p>
+</div>
+
+<p class="foot"><a href="../00index_j.html">戻る</a></p>
+</body>
+</html>

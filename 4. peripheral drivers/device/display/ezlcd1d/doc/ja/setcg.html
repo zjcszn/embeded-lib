@@ -1,0 +1,50 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="up" title="EZ-LCD" href="../00index_j.html">
+<link rel="alternate" hreflang="en" title="English" href="../en/setcg.html">
+<link rel="stylesheet" href="../css_j.css" type="text/css" media="screen" title="ELM Default">
+<title>EZ-LCD - lcd_setcg</title>
+</head>
+
+<body>
+
+<div class="para">
+<h2>lcd_setcg</h2>
+<p>ユーザ文字をLCDCに登録します。</p>
+<pre>
+void lcd_setcg (
+    uint8_t <em>chr</em>,       <span>/* 先頭の文字コード */</span>
+    uint8_t <em>n</em>,         <span>/* 文字数 */</span>
+    const uint8_t* <em>pat</em> <span>/* 文字パターンへのポインタ */</span>
+);
+</pre>
+</div>
+
+<div class="para">
+<h4>引数</h4>
+<dl class="par">
+<dt>chr</dt>
+<dd>登録するユーザ文字の先頭のコード(0～7)を指定します。</dd>
+<dt>n</dt>
+<dd>登録するユーザ文字の数。</dd>
+<dt>pat</dt>
+<dd>文字パターン(n×8バイトの配列)へのポインタ。</dd>
+</dl>
+</div>
+
+<div class="para">
+<h4>解説</h4>
+<p>ユーザー文字のパターンを登録します。文字パターンはLCDCのCGRAMに書き込まれ、表示中のユーザ文字には即時反映さえます。デュアル・コントローラの場合は、両方のLCDCに同じパターンが書き込まれます。</p>
+</div>
+
+<div class="para">
+<h4>対応情報</h4>
+<p><tt>_USE_CGRAM</tt>が1のとき使用可能です。</p>
+</div>
+
+<p class="foot"><a href="../00index_j.html">戻る</a></p>
+</body>
+</html>

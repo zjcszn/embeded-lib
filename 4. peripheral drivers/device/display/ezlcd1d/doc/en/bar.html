@@ -1,0 +1,59 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="up" title="EZ-LCD" href="../00index_e.html">
+<link rel="alternate" hreflang="ja" title="Japanese" href="../ja/bar.html">
+<link rel="stylesheet" href="../css_e.css" type="text/css" media="screen" title="ELM Default">
+<title>EZ-LCD - lcd_put_bar</title>
+</head>
+
+<body>
+
+<div class="para">
+<h2>lcd_put_bar</h2>
+<p>These functions draw high resolution graphical indicator in bargraph and point into a limited width of columns.</p>
+<pre>
+void lcd_put_bar (   <span>/* Draw a bargraph */</span>
+    uint16_t <em>val</em>,    <span>/* Bar length (value) */</span>
+    uint8_t <em>width</em>,   <span>/* Display area (characters) */</span>
+    uint8_t <em>chr</em>      <span>/* User character */</span>
+);
+</pre>
+<pre>
+void lcd_put_point ( <span>/* Draw a point indicator */</span>
+    uint16_t <em>val</em>,    <span>/* Position */</span>
+    uint8_t <em>width</em>,   <span>/* Display area (characters) */</span>
+    uint8_t <em>chr</em>      <span>/* User character */</span>
+);
+</pre>
+</div>
+
+<div class="para">
+<h4>Arguments</h4>
+<dl class="par">
+<dt>val</dt>
+<dd>Specifies the bar length from left end in range from 0 to <tt>_MAX_BAR</tt>, or point position between left end and right end in range from 0 to <tt>_MAX_BAR</tt>.</dd>
+<dt>width</dt>
+<dd>Specifies the width of drawing area in unit of character.</dd>
+<dt>chr</dt>
+<dd>User character code to be used for this indicator.</dd>
+</dl>
+</div>
+
+<div class="para">
+<h4>Description</h4>
+<p>The bar/point indicator is displayed at the current cursor position and the cursor moves the width of indicator.</p>
+<p>Each indicator use two user characters from chr. The user character must not collide with the code being used by another functions. Additionally two user characters from <tt>_BASE_GRAPH</tt> are used in common by each indicator. Thus up to three indicators can be used simultaneously.</p>
+</div>
+
+<div class="para">
+<h4>QuickInfo</h4>
+<p>The lcd_put_bar function is available when <tt>_USE_CGRAM == 1</tt> and <tt>_USE_BAR == 1</tt>.</p>
+<p>The lcd_put_point function is available when <tt>_USE_CGRAM == 1</tt> and <tt>_USE_POINT == 1</tt>.</p>
+</div>
+
+<p class="foot"><a href="../00index_e.html">Return</a></p>
+</body>
+</html>

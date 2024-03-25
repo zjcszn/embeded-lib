@@ -1,0 +1,59 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="up" title="EZ-LCD" href="../00index_j.html">
+<link rel="alternate" hreflang="en" title="English" href="../en/bar.html">
+<link rel="stylesheet" href="../css_j.css" type="text/css" media="screen" title="ELM Default">
+<title>EZ-LCD - lcd_put_bar</title>
+</head>
+
+<body>
+
+<div class="para">
+<h2>lcd_put_bar</h2>
+<p>限られた桁数で分解能の高いバーグラフまたはポイントの表示を行います。</p>
+<pre>
+void lcd_put_bar (   <span>/* バーグラフ表示 */</span>
+    uint16_t <em>val</em>,    <span>/* バーの長さ */</span>
+    uint8_t <em>width</em>,   <span>/* 表示エリアの文字数 */</span>
+    uint8_t <em>chr</em>      <span>/* ユーザ文字コード */</span>
+);
+</pre>
+<pre>
+void lcd_put_point ( <span>/* ポイント表示 */</span>
+    uint16_t <em>val</em>,    <span>/* ポイントの位置 */</span>
+    uint8_t <em>width</em>,   <span>/* 表示エリアの文字数 */</span>
+    uint8_t <em>chr</em>      <span>/* ユーザ文字コード */</span>
+);
+</pre>
+</div>
+
+<div class="para">
+<h4>引数</h4>
+<dl class="par">
+<dt>val</dt>
+<dd>バーの長さを0から<tt>_MAX_BAR</tt>の範囲で指定します。値が大きくなるに従い、表示領域の左端から右に向かってバーが伸びていきます。ポイント表示の場合は、0で左端、<tt>_MAX_POINT</tt>で右端になります。</dd>
+<dt>width</dt>
+<dd>表示領域の幅を文字数で指定します。</dd>
+<dt>chr</dt>
+<dd>このバーグラフで使用するユーザ文字コードを指定します。</dd>
+</dl>
+</div>
+
+<div class="para">
+<h4>解説</h4>
+<p>バーグラフ/ポイント表示はカーソル位置に表示されます。カーソルは、width文字だけ進みます。</p>
+<p>各バーブラフ/ポイント表示には、それぞれchrから2文字分のユーザ文字が使用されるので、他の機能に重ならない値を指定しなければなりません。このほか、<tt>_BASE_GRAPH</tt>から2文字のユーザ文字が各バーグラフで使われるので、最大3本までのバーグラフ/ポイント表示を表示できることになります。</p>
+</div>
+
+<div class="para">
+<h4>対応情報</h4>
+<p>バーグラフは、<tt>_USE_CGRAM</tt>と<tt>_USE_BAR</tt>が共に1のとき使用可能です。</p>
+<p>ポイント表示は、<tt>_USE_CGRAM</tt>と<tt>_USE_POINT</tt>が共に1のとき使用可能です。</p>
+</div>
+
+<p class="foot"><a href="../00index_j.html">戻る</a></p>
+</body>
+</html>

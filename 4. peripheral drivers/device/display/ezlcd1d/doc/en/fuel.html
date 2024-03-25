@@ -1,0 +1,47 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="up" title="EZ-LCD" href="../00index_e.html">
+<link rel="alternate" hreflang="ja" title="Japanese" href="../ja/fuel.html">
+<link rel="stylesheet" href="../css_e.css" type="text/css" media="screen" title="ELM Default">
+<title>EZ-LCD - lcd_put_fuel</title>
+</head>
+
+<body>
+
+<div class="para">
+<h2>lcd_put_fuel</h2>
+<p>Puts a fuel level icon.</p>
+<pre>
+void lcd_put_fuel (
+    int8_t <em>val</em>,    <span>/* Icon type */</span>
+    uint8_t <em>chr</em>    <span>/* User character */</span>
+)
+</pre>
+</div>
+
+<div class="para">
+<h4>Arguments</h4>
+<dl class="par">
+<dt>val</dt>
+<dd>Specifies the icon type in range of -1 to 5. 0 represents empty cell, 5 represents full cell and -1 represents AC plug.</dd>
+<dt>chr</dt>
+<dd>Specifies the user character to be used for the icon.</dd>
+</dl>
+</div>
+
+<div class="para">
+<h4>Description</h4>
+<p>Puts a fuel level icon and moves cursor to next. The user character must not collide with a code that used by any other functions.</p>
+</div>
+
+<div class="para">
+<h4>QuickInfo</h4>
+<p>Available when <tt>_USE_CGRAM == 1</tt> and <tt>_USE_FUEL == 1</tt>.</p>
+</div>
+
+<p class="foot"><a href="../00index_e.html">Return</a></p>
+</body>
+</html>

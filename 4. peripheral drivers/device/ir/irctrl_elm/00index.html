@@ -1,0 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="start" title="Site Top" href="../../">
+<link rel="up" title="Freewares" href="../../fsw_e.html">
+<link rel="stylesheet" href="css_j.css" type="text/css" media="screen" title="ELM Default">
+<title>ELM - 赤外線リモコン制御モジュール</title>
+</head>
+
+<body>
+<div class="header">
+<h1>赤外線リモコン制御モジュール</h1>
+<p class="hdd">2008. 9. 1<br>更新:2015 .8. 1</p>
+</div>
+<hr class="hds">
+
+<div class="abst">
+<p>IR-CTRLは、赤外線リモコンの通信制御モジュールです。日本で使用されている<a href="http://elm-chan.org/docs/ir_format.html">赤外線リモコンの通信フォーマット</a>の殆どを占める<em>NEC</em>,<em>AEHA(家製協)</em>,<em>SONY</em>の3種類の通信フォーマットに対応してみました。送受信は割り込みで駆動されるので、リアルタイム・システムにも容易にポーティングが可能です。</p>
+</div>
+
+<div class="para">
+<h3>アプリケーション・インターフェース</h3>
+<p>アプリケーションから呼び出す関数は、次に示す通りです。</p>
+<pre>
+<span class="c">/* システム初期化 */</span>
+void IR_initialize (void);
+</pre>
+<pre>
+<span class="c">/* フレーム送信 */</span>
+int IR_transmit (
+    uint8_t <span class="arg">fmt</span>,        <span class="c">/* フレーム形式 (NEC,AEHA,SONY) */</span>
+    const void* <span class="arg">data</span>,   <span class="c">/* 送信するビット列(バイト配列)へのポインタ */</span>
+    uint8_t <span class="arg">len</span>         <span class="c">/* 送信するビット数 */</span>
+);
+</pre>
+</div>
+
+<div class="para">
+<h3>使い方</h3>
+<h4>送信</h4>
+<p><tt>IR_transmit()</tt>を呼び出します。関数からはすぐに戻り、バックグランドで送信を行います。戻り値が0以外の場合は送信が開始されています。不正なパラメータや通信がアイドル以外の状態だった場合、戻り値が0になり送信はされません。<tt class="arg">fmt</tt>に<tt>NEC</tt>を指定したときは、<tt class="arg">len</tt>には0または32を指定します。0を指定した場合はリピート・フレームが送信されます(NEC/AEHAのみ)。<tt class="arg">fmt</tt>に<tt>AEHA</tt>を指定したときは、<tt class="arg">len</tt>には0または48以上の8の倍数を指定します。0を指定した場合はリピート・フレームが送信されます。<tt class="arg">fmt</tt>に<tt>SONY</tt>を指定した場合、<tt class="arg">len</tt>には12,15,20を指定します。送信が完了すると、ワークエリア内のステータス<tt>IrCtrl.stat</tt>の値が<tt>IR_IDLE</tt>になります。<tt class="arg">data</tt>の内容は送信が完了するまで保持されなければなりません。<tt class="arg">len</tt>が0のときは、<tt class="arg">data</tt>は意味を持ちません。送信間隔のタイミング制御はアプリケーション側で行います。</p>
+<h4>受信</h4>
+<p>受信はバックグランドで行われます。フレームが正しく受信されると、ワークエリア内のステータス<tt>IrCtrl.stat</tt>の値が<tt>IR_RECVED</tt>に変わります。<tt>IrCtrl.fmt</tt>は到着したフレームの種類、<tt>IrCtrl.len</tt>はビット数、<tt>IrCtrl.rxdata[]</tt>は受信したデータのビット列を保持しています。フレームの正当性のチェック(種類、長さ、チェックサム等)はアプリケーション側によって行います。受信フレーム長が<tt>IR_MAX_RCVR</tt>より大きくても受信はされるので、未知のフレームが最大長で受信されたときは、尻切れになっている可能性があります。フレームを処理したら、<tt>IrCtrl.stat</tt>に<tt>IR_IDLE</tt>をセットしてバッファを解放し、次の送受信に備えます。なお、送信動作中は受信できません。</p>
+</div>
+
+<div class="para">
+<h3>ポーティングのしかた</h3>
+<p>対象システムには、</p>
+<ul>
+<li>コンペア機能付きカウンタ1個</li>
+<li>キャプチャ機能(任意の入力エッジ)付きカウンタ1個(受信時のみ)</li>
+<li>PWM出力1個(送信時のみ)</li>
+</ul>
+<p>が必要です。コンペア機能とキャプチャ機能が同じカウンタで同時に使える場合はそれ1個でOKです。カウンタの設定は、分解能10&mu;s以上、最大計測時間10ms以上とする必要があります。このため、8ビットカウンタでは十分な精度が得られません。ソースファイルの変更点は、<tt>ir_ctrl.h</tt>内のマクロで必要な機能を選択し、<tt>ir_ctrl.c</tt>内のマクロに制御のプラットフォーム依存機能を記述するようになっているので、それらに適切に書き加えるだけでOKです。割り込み処理ルーチン内にはさらに固有の処理を追加する必要があるかも知れません。具体的な例はアーカイブに同梱のサンプル・コードを参照してください。</p>
+</div>
+
+<hr>
+<p class="foot"><a href="../../fsw.html">戻る</a></p>
+</body>
+</html>

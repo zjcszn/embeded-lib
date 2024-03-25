@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="up" title="EZ-LCD" href="../00index_j.html">
+<link rel="alternate" hreflang="en" title="English" href="../en/locate.html">
+<link rel="stylesheet" href="../css_j.css" type="text/css" media="screen" title="ELM Default">
+<title>EZ-LCD - lcd_locate</title>
+</head>
+
+<body>
+
+<div class="para">
+<h2>lcd_locate</h2>
+<p>カーソルを移動します。</p>
+<pre>
+void lcd_locate (
+    uint8_t <em>row</em>,    <span>/* 行 */</span>
+    uint8_t <em>col</em>     <span>/* 桁 */</span>
+);
+</pre>
+</div>
+
+<div class="para">
+<h4>引数</h4>
+<dl class="par">
+<dt>row</dt>
+<dd>移動先の行位置を 0 から <tt>_LCD_ROWS - 1</tt> の範囲で指定します。</dd>
+<dt>col</dt>
+<dd>移動先の桁位置を 0 から <tt>_LCD_COLS - 1</tt> の範囲で指定します。</dd>
+</dl>
+</div>
+
+<p class="foot"><a href="../00index_j.html">戻る</a></p>
+</body>
+</html>

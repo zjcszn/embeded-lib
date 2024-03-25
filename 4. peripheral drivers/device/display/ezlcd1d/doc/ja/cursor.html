@@ -1,0 +1,46 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="up" title="EZ-LCD" href="../00index_j.html">
+<link rel="alternate" hreflang="en" title="English" href="../en/cursor.html">
+<link rel="stylesheet" href="../css_j.css" type="text/css" media="screen" title="ELM Default">
+<title>EZ-LCD - lcd_cursor</title>
+</head>
+
+<body>
+
+<div class="para">
+<h2>lcd_cursor</h2>
+<p>カーソルの形状を設定します。</p>
+<pre>
+void lcd_cursor (
+  uint8_t <em>mode</em>   <span>/* 表示モード */</span>
+);
+</pre>
+</div>
+
+<div class="para">
+<h4>引数</h4>
+<dl class="par">
+<dt>mode</dt>
+<dd>カーソルの形状を次の値で指定します。なお、カーソル位置が画面外になっているときは、設定にかかわらず画面には表示されません。
+<table class="lst">
+<tr><th>値</th><th>意味</th></tr>
+<tr><td>CSR_OFF</td><td>カーソルは表示されません(デフォルト)</td></tr>
+<tr><td>CSR_UNDER</td><td>アンダーライン・カーソルが表示されます</td></tr>
+<tr><td>CSR_BLOCK</td><td>ブリンクするブロック・カーソルが表示されます</td></tr>
+</table>
+</dd>
+</dl>
+</div>
+
+<div class="para">
+<h4>対応情報</h4>
+<p><tt>_USE_CURSOR</tt>が1のとき使用可能です。</p>
+</div>
+
+<p class="foot"><a href="../00index_j.html">戻る</a></p>
+</body>
+</html>

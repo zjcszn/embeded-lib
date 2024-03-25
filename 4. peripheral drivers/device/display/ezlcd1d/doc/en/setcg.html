@@ -1,0 +1,50 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="up" title="EZ-LCD" href="../00index_e.html">
+<link rel="alternate" hreflang="ja" title="Japanese" href="../ja/setcg.html">
+<link rel="stylesheet" href="../css_e.css" type="text/css" media="screen" title="ELM Default">
+<title>EZ-LCD - lcd_setcg</title>
+</head>
+
+<body>
+
+<div class="para">
+<h2>lcd_setcg</h2>
+<p>Registers user character pattern</p>
+<pre>
+void lcd_setcg (
+    uint8_t <em>chr</em>,       <span>/* User character code */</span>
+    uint8_t <em>n</em>,         <span>/* Number of characters to be changed */</span>
+    const uint8_t* <em>pat</em> <span>/* Pointer to the character pattern */</span>
+);
+</pre>
+</div>
+
+<div class="para">
+<h4>Arguments</h4>
+<dl class="par">
+<dt>chr</dt>
+<dd>Specifies the first user character code to be changed.</dd>
+<dt>n</dt>
+<dd>Specifies number of characters to be changed.</dd>
+<dt>pat</dt>
+<dd>Pointer to the character pattern as n by 8 byte array.</dd>
+</dl>
+</div>
+
+<div class="para">
+<h4>Description</h4>
+<p>Registers the pattern of user characters. The character pattern is written to the CGRAM of the LCDC and it reflects to the characters in display. When the LCD module has dual LCDC, the pattern data is registered into both LCDCs.</p>
+</div>
+
+<div class="para">
+<h4>QuickInfo</h4>
+<p>Available when <tt>_USE_CGRAM == 1</tt>.</p>
+</div>
+
+<p class="foot"><a href="../00index_e.html">Return</a></p>
+</body>
+</html>

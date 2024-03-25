@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="up" title="EZ-LCD" href="../00index_j.html">
+<link rel="alternate" hreflang="en" title="English" href="../en/putc.html">
+<link rel="stylesheet" href="../css_j.css" type="text/css" media="screen" title="ELM Default">
+<title>EZ-LCD - lcd_putc</title>
+</head>
+
+<body>
+
+<div class="para">
+<h2>lcd_putc</h2>
+<p>LCDに文字を表示します。</p>
+<pre>
+void lcd_putc (
+    uint8_t <em>chr</em>        <span>/* 表示する文字 */</span>
+);
+</pre>
+</div>
+
+<div class="para">
+<h4>引数</h4>
+<dl class="par">
+<dt>chr</dt>
+<dd>表示する文字コードを指定します。</dd>
+</dl>
+</div>
+
+<div class="para">
+<h4>解説</h4>
+<p>カーソルの位置に文字を表示し、カーソルを1カラム右に移動します。カーソルが行末にあったときは、次の行の先頭に移動します。カーソルが画面外にあったときは文字は表示されません。制御文字については、'\r' '\n' '\f' '\b' 以外はそのまま表示されます。</p>
+<p>'\r'は、カーソルをその行の先頭に移動します。'\n'は、カーソルを次の行の行頭に移動します。'\b'は、カーソルを1カラム左(既に行頭のときは何もしない)に移動します。'\f'は、画面をクリアしてカーソルを左上に移動します。</p>
+</div>
+
+<p class="foot"><a href="../00index_j.html">戻る</a></p>
+</body>
+</html>

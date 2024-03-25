@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="up" title="EZ-LCD" href="../00index_e.html">
+<link rel="alternate" hreflang="ja" title="Japanese" href="../ja/putc.html">
+<link rel="stylesheet" href="../css_e.css" type="text/css" media="screen" title="ELM Default">
+<title>EZ-LCD - lcd_putc</title>
+</head>
+
+<body>
+
+<div class="para">
+<h2>lcd_putc</h2>
+<p>Puts a character to the LCD</p>
+<pre>
+void lcd_putc (
+    uint8_t <em>chr</em>        <span>/* Character code */</span>
+);
+</pre>
+</div>
+
+<div class="para">
+<h4>Arguments</h4>
+<dl class="par">
+<dt>chr</dt>
+<dd>Specifies the character code to be put.</dd>
+</dl>
+</div>
+
+<div class="para">
+<h4>Description</h4>
+<p>The specified character is put on the current cursor position and then the cursor moves to next column. When the cursor is end of row, it moves top of next row. If the cursor is out of display area, the character will be discarded.</p>
+<p>Some control characters are processed internally. '\r' moves the cursor to the top of the current row, '\n' moves the cursor top of the next row, '\b' moves the cursor left, '\f' clears display and move the cursor home (left-top) and any ohter control codes are passed through.</p>
+</div>
+
+<p class="foot"><a href="../00index_e.html">Return</a></p>
+</body>
+</html>

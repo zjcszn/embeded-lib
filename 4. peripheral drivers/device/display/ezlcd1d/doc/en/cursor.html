@@ -1,0 +1,46 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="up" title="EZ-LCD" href="../00index_e.html">
+<link rel="alternate" hreflang="ja" title="Japanese" href="../ja/cursor.html">
+<link rel="stylesheet" href="../css_e.css" type="text/css" media="screen" title="ELM Default">
+<title>EZ-LCD - lcd_cursor</title>
+</head>
+
+<body>
+
+<div class="para">
+<h2>lcd_cursor</h2>
+<p>Sets cursor form.</p>
+<pre>
+void lcd_cursor (
+  uint8_t <em>mode</em>   <span>/* Cursor form */</span>
+);
+</pre>
+</div>
+
+<div class="para">
+<h4>Arguments</h4>
+<dl class="par">
+<dt>mode</dt>
+<dd>Specifies the cursor form listed below. When the current cursor position is out of the display area, the cursor is always hidden regardless of this setting.
+<table class="lst">
+<tr><th>Value</th><th>Description</th></tr>
+<tr><td>CSR_OFF</td><td>Hide cursor. (default)</td></tr>
+<tr><td>CSR_UNDER</td><td>Display underline cursor.</td></tr>
+<tr><td>CSR_BLOCK</td><td>Display blinking block cursor.</td></tr>
+</table>
+</dd>
+</dl>
+</div>
+
+<div class="para">
+<h4>QuickInfo</h4>
+<p>Available when <tt>_USE_CURSOR == 1</tt>.</p>
+</div>
+
+<p class="foot"><a href="../00index_e.html">Return</a></p>
+</body>
+</html>

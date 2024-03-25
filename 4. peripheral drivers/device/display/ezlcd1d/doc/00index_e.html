@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="alternate" hreflang="ja" title="Japanese" href="00index_j.html">
+<link rel="stylesheet" href="css_e.css" type="text/css" media="screen" title="ELM Default">
+<title>ELM - Conrrol Module for Character LCD</title>
+</head>
+
+<body>
+<h1>Control Module for Character LCD</h1>
+<hr>
+
+<div class="abst">
+<img src="layers.png" class="rset" width="180" height="220" alt="layer">
+<p>EZ-LCD is a generic control module for character LCD based on HD44780 or compatibles. It enables to use all character LCD modules without consideration of <a href="layout.txt">panel organization</a> and interface type. Because EZ-LCD is written in ANSI C, it can be easily ported to most microcontroller.</p>
+</div>
+
+<div class="para">
+<h3>Application Interface</h3>
+<p>EZ-LCD module provides the following functions to the application programs. Only three functions from top will sufficient for most applications but it has some useful functions in addition. When you wish to use formatted string output to the LCD like regular printf function, it can be added with <a href="../strf/xprintf.html">Embedded String Functions</a>.</p>
+<ul>
+<li><a href="en/init.html">lcd_init</a> - Initialize LCD</li>
+<li><a href="en/putc.html">lcd_putc</a> - Put a character</li>
+<li><a href="en/locate.html">lcd_locate</a> - Move cursor</li>
+<li><a href="en/cursor.html">lcd_cursor</a> - Set cursor form</li>
+<li><a href="en/setcg.html">lcd_setcg</a> - Register user character pattern</li>
+<li><a href="en/fuel.html">lcd_put_fuel</a> - Put a fuel level icon</li>
+<li><a href="en/bar.html">lcd_put_bar</a> - Put a high resolution bargraph</li>
+<li><a href="en/bar.html">lcd_put_point</a> - Put a high resolution point indicator</li>
+</ul>
+</div>
+
+
+<div class="para">
+<h3>How to Port</h3>
+<img src="lcd_sch.png" class="rset" width="310" height="185" alt="lcd sch">
+<p>Right image shows an example circuit and the following explains to port the EZ-LCD in three steps.</p>
+<h4>Step 1. Select Function</h4>
+<p>First of all configure the function of EZ-LCD module. It is defined in <tt>hd44780.h</tt>. At least the panel organization of the LCD module to be used must be set properly. The module size can be reduced by disabling unused functions.</p>
+<pre class="clr">
+#define _LCD_ROWS   2    <span>/* Number of rows */</span>
+#define _LCD_COLS   16   <span>/* Number of columns */</span>
+</pre>
+<h4>Step 2. Fill Hardware Control Macros</h4>
+<p>Fill hardware depndent bit-banging macros defined in <tt>hd44780.c</tt> and add control functions if needed. Note that the EZ-LCD module does not support R/W signal so that set the R/W signal low if it is wired to the port.</p>
+<pre>
+#include &lt;avr/io.h&gt;                     <span>/* Device specific include file */</span>
+
+#define	IF_BUS       4                  <span>/* Bus width */</span>
+#define	IF_INIT()    {PORTB &amp;= 0x03; DDRB |= 0xFC;} <span>/* Initialize control port (can be blanked if initialized by other code) */</span>
+#define E1_HIGH()    PORTB |= 0x08      <span>/* Set E high */</span>
+#define E1_LOW()     PORTB &amp;= 0xF7      <span>/* Set E low */</span>
+#define	RS_HIGH()    PORTB |= 0x04      <span>/* Set RS high */</span>
+#define	RS_LOW()     PORTB &amp;= 0xFB      <span>/* Set RS low */</span>
+#define	OUT_DATA(d)  PORTB = (PORTB &amp; 0x0F) | (d &amp; 0xF0)  <span>/* Put d on the data buf (upper 4 bits in 4-bit mode) */</span>
+#define	IF_DLY60()                      <span>/* Delay &gt;60ns for RS to E (can be blanked on most uC) */</span>
+#define	IF_DLY450()  {PINB; PINB;}      <span>/* Delay &gt;=450ns@3V, &gt;=250ns@5V for E pulse */</span>
+#define DELAY_US(n)  lcd_delay_us(n)    <span>/* Delay in unit of microsecond (defined below) */</span>
+
+static void lcd_delay_us (uint16_t n)
+{
+    do {   <span>/* 8 clocks per loop for Atmel AVR/8MHz */</span>
+        PINB; PINB; PINB; PINB;
+    } while (--n);
+}
+</pre>
+
+<h4>Step 3. Check Function</h4>
+<p>Finally, write a simple test program and check if it works or not. This code fills the LCD with characters from '0' in order of ASCII code.</p>
+<pre>
+#include "hd44780.h"  <span>/* EZ-LCD include file */</span>
+
+int main (void)
+{
+    uint8_t c;
+
+    lcd_init();                  <span>/* Initialize LCD */</span>
+
+    for (c = '0'; c != 128; c++) <span>/* Put characters to the LCD */</span>
+        lcd_putc(c);
+
+    return 0;
+}
+</pre>
+</div>
+
+
+<div class="para">
+<h3>Resource</h3>
+<ul>
+<li><a href="../strf/xprintf.html">Embedded printf and support functions</a></li>
+<li>High resolution bargraph demo [H.264/2.2MB]</li>
+</ul>
+</div>
+
+
+<hr>
+</body>
+</html>

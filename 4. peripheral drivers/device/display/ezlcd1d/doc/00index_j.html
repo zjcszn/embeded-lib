@@ -1,0 +1,100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="alternate" hreflang="en" title="English" href="00index_e.html">
+<link rel="stylesheet" href="css_j.css" type="text/css" media="screen" title="ELM Default">
+<title>ELM - キャラクタLCD制御モジュール</title>
+</head>
+
+<body>
+<h1>キャラクタLCD制御モジュール</h1>
+<hr>
+
+<div class="abst">
+<img src="layers.png" class="rset" width="180" height="220" alt="layer">
+<p>EZ-LCDは、キャラクタLCD(HD44780または互換LCDC)を簡単に使うための汎用モジュールで、文字数により異なる<a href="layout.txt">パネル構成</a>やバス幅による制御の違いを隠蔽し、全てのキャラクタLCDを共通のAPIで使用することができます。基本的にプラットフォーム非依存なので、ANSI Cの使えるマイコンであれば使用が可能です。移植作業はいくつかのハードウェア制御マクロを埋めるだけで、数分もあれば完了です。</p>
+</div>
+
+<div class="para">
+<h3>EZ-LCDのAPI</h3>
+<p>EZ-LCDモジュールは、次に示すAPIを提供します。多くの用途では先頭の3つの関数だけで足りますが、それ以外にも少し手の込んだ機能を持っています。LCDに対してprintfを使いたい場合は、<a href="../strf/xprintf_j.html">組み込み用printfモジュール</a>を組み合わせると簡単です。</p>
+<ul>
+<li><a href="ja/init.html">lcd_init</a> - LCDモジュールの初期化</li>
+<li><a href="ja/putc.html">lcd_putc</a> - 1文字出力</li>
+<li><a href="ja/locate.html">lcd_locate</a> - カーソルの移動</li>
+<li><a href="ja/cursor.html">lcd_cursor</a> - カーソル表示の設定</li>
+<li><a href="ja/setcg.html">lcd_setcg</a> - ユーザー・キャラクタの登録</li>
+<li><a href="ja/fuel.html">lcd_put_fuel</a> - 電池アイコンの描画</li>
+<li><a href="ja/bar.html">lcd_put_bar</a> - 高精細バーグラフの描画</li>
+<li><a href="ja/bar.html">lcd_put_point</a> - 高精細ポイント表示の描画</li>
+</ul>
+</div>
+
+
+<div class="para">
+<h3>EZ-LCDの移植手順</h3>
+<img src="lcd_sch.png" class="rset" width="310" height="185" alt="lcd sch">
+<p>例として、右の回路図に示すようにLCDモジュールを接続した場合の移植手順を示します。</p>
+<h4>Step 1. 機能の設定</h4>
+<p>まず、EZ-LCDの機能を設定します。これらの設定項目は、<tt>hd44780.h</tt>で定義されているので、それを編集します。少なくとも使用するLCDモジュールの文字数は設定する必要があります。また、使用しない機能を外すことにより、モジュール・サイズを減らすことができます。</p>
+<pre class="clr">
+#define _LCD_ROWS   2    <span>/* 行数 (1,2 or 4) */</span>
+#define _LCD_COLS   16   <span>/* 桁数 (8..40) */</span>
+</pre>
+<h4>Step 2. ハードウェア制御マクロの記述</h4>
+<p>次に、EZ-LCD本体(<tt>hd44780.c</tt>)の中のプラットフォーム依存部分のマクロを埋め、必要なら関数を追加します。なお、EZ-LCDはR/W信号をサポートしませんので、もしもポートに接続されているときは、Lレベルに初期化してください。</p>
+<pre>
+#include &lt;avr/io.h&gt;                     <span>/* デバイス固有定義ファイル */</span>
+
+#define	IF_BUS       4                  <span>/* バス幅 */</span>
+#define	IF_INIT()    {PORTB &amp;= 0x03; DDRB |= 0xFC;} <span>/* 制御ポートの初期化 (初期化済みの時は省略可) */</span>
+#define E1_HIGH()    PORTB |= 0x08      <span>/* E(E1)をHにする */</span>
+#define E1_LOW()     PORTB &amp;= 0xF7      <span>/* E(E1)をLにする */</span>
+#define	RS_HIGH()    PORTB |= 0x04      <span>/* RSをHにする */</span>
+#define	RS_LOW()     PORTB &amp;= 0xFB      <span>/* RSをLにする */</span>
+#define	OUT_DATA(d)  PORTB = (PORTB &amp; 0x0F) | (d &amp; 0xF0)  <span>/* データバスに d の値を出力 (4bitバスの時はdの上位4ビット) */</span>
+#define	IF_DLY60()                      <span>/* RS→Eで60ns確保するディレイ (多くのマイコンでは省略可) */</span>
+#define	IF_DLY450()  {PINB; PINB;}      <span>/* Eパルス幅を &gt;=450ns@3V, &gt;=250ns@5V 確保するディレイ*/</span>
+#define DELAY_US(n)  lcd_delay_us(n)    <span>/* us単位のディレイ (↓で定義) */</span>
+
+static void lcd_delay_us (uint16_t n)
+{
+    do {   <span>/* 8 clocks per loop for Atmel AVR/8MHz */</span>
+        PINB; PINB; PINB; PINB;
+    } while (--n);
+}
+</pre>
+
+<h4>Step 3. 動作の確認</h4>
+<p>簡単なテスト・プログラムを書いて、正しく表示されるかどうか確認します。この例では、LCDの左上からコード順で全体に文字が表示されれば成功です。</p>
+<pre>
+#include "hd44780.h"  <span>/* EZ-LCD include file */</span>
+
+int main (void)
+{
+    uint8_t c;
+
+    lcd_init();                  <span>/* LCDモジュールの初期化 */</span>
+
+    for (c = '0'; c != 128; c++) <span>/* LCDに文字を表示 */</span>
+        lcd_putc(c);
+
+    return 0;
+}
+</pre>
+</div>
+
+
+<div class="para">
+<h3>リソース</h3>
+<ul>
+<li><a href="../strf/xprintf_j.html">組み込み用printf</a></li>
+</ul>
+</div>
+
+
+<hr>
+</body>
+</html>
