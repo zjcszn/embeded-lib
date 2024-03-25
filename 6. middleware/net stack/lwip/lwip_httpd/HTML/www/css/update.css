@@ -1,0 +1,106 @@
+@charset "UTF-8";
+
+.content {
+    display: flex;
+}
+
+.content .intro-wrapper {
+    width: 300px;
+    height: 600px;
+    margin: 125px 50px;
+    vertical-align: middle;
+
+    & h3 {
+        text-align: center;
+    }
+
+    & ul {
+        padding: 0;
+        line-height: 25px;
+        overflow: hidden;
+
+        & li {
+            margin: 20px;
+            text-align: justify;
+        }
+    }
+}
+
+.content .upload-form-wrapper {
+    width: 800px;
+    height: 600px;
+    display: flex;
+}
+
+.upload-form-wrapper > form {
+    margin: auto;
+    display: inline-block;
+    width: 500px;
+    height: 300px;
+    text-align: center;
+}
+
+.upload-form-wrapper > form > input[type=file] {
+    width: 0;
+    height: 0;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
+
+.upload-form-wrapper > form > input[type=file] + label {
+    margin-left: 10px;
+    display: inline-table;
+    width: 300px;
+    height: 30px;
+    line-height: 30px;
+    text-indent: 10px;
+    text-align: left;
+    color: black;
+    background-color: white;
+    cursor: pointer;
+}
+
+.upload-form-wrapper > form #g-label {
+    display: inline-block;
+    width: 200px;
+    height: 20px;
+    visibility: hidden;
+}
+
+.upload-form-wrapper > form #g-container {
+    display: inline-flex;
+    width: 400px;
+    height: 10px;
+    border-radius: 25px;
+    background: #eee;
+    margin-top: 25px;
+    overflow: hidden;
+    visibility: hidden;
+}
+
+.upload-form-wrapper > form #g-container #g-progress {
+    width: 0;
+    height: inherit;
+    border-radius: 25px 0 0 25px;
+    background: rgb(0, 100, 255);
+}
+
+.upload-form-wrapper > form #g-progress:hover {
+    width: 100%;
+}
+
+.upload-form-wrapper > form > button {
+    background-color: rgb(0, 100, 255);
+    border: none;
+    width: 150px;
+    height: 35px;
+    color: white;
+    margin: 50px 25px;
+    cursor: pointer;
+}
+
+.upload-form-wrapper > form > button:active {
+    background-color: rgb(30, 90, 235);
+}

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>STM32F4 Control Panel</title>
+    <link href="./css/frame.css" rel="stylesheet"/>
+    <link href="./css/status.css" rel="stylesheet"/>
+    <script> history.replaceState({}, "", "./status.shtml")</script>
+</head>
+
+<body ondragstart="return false">
+<div class="outer-container">
+    <div class="top-header">
+        <h1>STM32F4 Control Panel</h1>
+    </div>
+    <div class="main-container">
+        <div class="nav">
+            <a href="./home.shtml" class="nav-inactive">Board Info</a>
+            <a href="./status.shtml" class="nav-active">Device Status</a>
+            <a href="./sensor.shtml" class="nav-inactive">Sensor & LED</a>
+            <a href="./sdcard.shtml" class="nav-inactive">SD Card</a>
+            <a href="./update.shtml" class="nav-inactive">Firmware Update</a>
+            <a href="./config.shtml" class="nav-inactive">Preferences</a>
+            <span class="nav-last-child">
+                        <input type="button" name="logout" value="Login Out" onclick="loginOut();">
+                    </span>
+        </div>
+        <div class="content">
+            <div id="status-container">
+                <div id="dev-info">
+                    <div id="info-wrapper">
+                        <h3>Device Info</h3>
+                        <label>Device No:</label><span id="no"></span><br>
+                        <label>Location:</label><span id="location"></span><br>
+                        <label>Run Hours:</label><span id="run-hours"></span><br>
+                    </div>
+                </div>
+
+                <div id="dev-status">
+                    <div class="status-wrapper">
+                        <div class="circle"></div>
+                        <br>
+                        <label>Service</label>
+                    </div>
+                    <div class="status-wrapper">
+                        <div class="circle"></div>
+                        <br>
+                        <label>Fire-Landing</label>
+                    </div>
+                    <div class="status-wrapper">
+                        <div class="circle"></div>
+                        <br>
+                        <label>Alarm Bell</label>
+                    </div>
+                    <div class="status-wrapper">
+                        <div class="circle"></div>
+                        <br>
+                        <label>Error</label>
+                    </div>
+                </div>
+
+
+            </div>
+            <div id="log-container">
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer">
+        <label>User: admin<!--#login_stat--></label>
+        <label>Server IP: <!--#ip--></label>
+        <label>Firmware Ver: <!--#ver--></label>
+        <label id="rtc">Time: <!--#rtc--></label>
+    </div>
+</div>
+<script type="text/javascript" src="./js/rtc.js"></script>
+<script type="text/javascript" charset="UTF-8" src="./js/status.js"></script>
+</body>
+</html>

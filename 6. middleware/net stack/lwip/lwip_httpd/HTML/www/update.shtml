@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>STM32F4 Control Panel</title>
+    <link href="./css/frame.css" rel="stylesheet"/>
+    <link href="./css/update.css" rel="stylesheet"/>
+    <script> history.replaceState({}, "", "./update.shtml")</script>
+</head>
+
+<body ondragstart="return false">
+<div class="outer-container">
+    <header class="top-header">
+        <h1>STM32F4 Control Panel</h1>
+    </header>
+    <div class="main-container">
+        <div class="nav">
+            <a href="./home.shtml" class="nav-inactive">Board Info</a>
+            <a href="./status.shtml" class="nav-inactive">Device Status</a>
+            <a href="./sensor.shtml" class="nav-inactive">Sensor & LED</a>
+            <a href="./sdcard.shtml" class="nav-inactive">SD Card</a>
+            <a href="./update.shtml" class="nav-active">Firmware Update</a>
+            <a href="./config.shtml" class="nav-inactive">Preferences</a>
+            <span class="nav-last-child">
+                <input type="button" name="logout" value="Login Out" onclick="loginOut();">
+            </span>
+        </div>
+        <div class="content">
+            <div class="intro-wrapper">
+                <h3>Update Introduction:</h3>
+                <ul>
+                    <li>First, select new firmware (*.bin or *.mbl) by file explorer.</li>
+                    <li>Second, click 'Upload Firmware' button to send firmware by web connection.</li>
+                    <li>Finally, if firmware upload success, click 'Update Firmware' button to start update.</li>
+                </ul>
+
+            </div>
+            <div class="upload-form-wrapper">
+                <form enctype="multipart/form-data" id="upload-form">
+                    <label>Select File: </label>
+                    <input type="file" id="input-file" accept=".bin, .mbl">
+                    <label for="input-file" id="input-label">No Firmware Selected</label>
+                    <button type="button" onclick="uploadFirmware();">Upload Firmware</button>
+                    <button type="button" onclick="updateFirmware();">Update Firmware</button>
+                    <br>
+                    <label id="g-label"></label>
+                    <br>
+                    <div id="g-container">
+                        <div id="g-progress"></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <footer class="footer">
+        <label>User: admin<!--#login_stat--></label>
+        <label>Server IP: <!--#ip--></label>
+        <label>Firmware Ver: <!--#ver--></label>
+        <label id="rtc">Time: <!--#rtc--></label>
+    </footer>
+</div>
+<script type="text/javascript" charset="UTF-8" src="./js/update.js"></script>
+<script type="text/javascript" charset="UTF-8" src="./js/rtc.js"></script>
+</body>
+</html>
