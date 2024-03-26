@@ -1,5 +1,0 @@
-[Unit]
-Description=LWS minimal example for socket activation
-
-[Service]
-ExecStart=/usr/local/bin/lws-minimal-http-server-systemd-socketact

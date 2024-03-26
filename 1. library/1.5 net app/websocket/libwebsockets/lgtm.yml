@@ -1,3 +1,0 @@
-queries:
-- exclude: cpp/short-global-name
-- exclude: cpp/useless-expression
