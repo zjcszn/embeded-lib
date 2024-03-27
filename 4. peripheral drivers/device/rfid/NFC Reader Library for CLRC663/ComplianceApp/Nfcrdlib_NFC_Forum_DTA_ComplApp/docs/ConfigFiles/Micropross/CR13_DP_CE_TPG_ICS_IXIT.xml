@@ -1,0 +1,464 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestPlan>
+  <TRVersion>13.1</TRVersion>
+  <TemplateVersion>1.0</TemplateVersion>
+  <ICSDocument>ICS 3.0.00</ICSDocument>
+  <IXITDocument>IXIT 3.0.00</IXITDocument>
+  <TCCLdocument>Test Case Category List (TCCL) 4.01</TCCLdocument>
+  <TCMTDocument>Test Case Mapping Table (TCMT) 6.0.00</TCMTDocument>
+  <InheritedSummaryTestReport></InheritedSummaryTestReport>
+  <TestSpecification Name="Test cases for Analog">
+    <Folder Name="Group 1: Listener Test Cases">
+      <Folder Name="Group 1.3: Signal Interface Listener to Poller">
+        <Folder Name="Subcarrier Modulation – NFC-A">
+          <TestCase TC__ID="TC_AN21_LIS_NFCA_08" Applicable="true" Category="A" ReferenceAntenna="P0" P0Supported="false" Frequency="13.56"/>
+        </Folder>
+        <Folder Name="Load Modulation amplitude for NFC-A">
+          <TestCase TC__ID="TC_AN21_LIS_NFCA_07" Applicable="true" Category="A" ReferenceAntenna="P0/P3/P6" P0Supported="false" Frequency="13.56"/>
+        </Folder>
+      </Folder>
+      <Folder Name="Group 1.1: Radio Frequency Power and Signal Interface">
+        <Folder Name="Power reception Test for NFC-A at Maximum Conditions">
+          <TestCase TC__ID="TC_AN21_LIS_NFCA_03" Applicable="true" Category="A" ReferenceAntenna="P0/P3/P6" P0Supported="false" Frequency="13.56"/>
+        </Folder>
+        <Folder Name="Carrier frequency Test">
+          <TestCase TC__ID="TC_AN21_LIS_UND_02" Applicable="true" Category="A" ReferenceAntenna="P0" P0Supported="false" Frequency="13.56"/>
+        </Folder>
+        <Folder Name="Power On and Off Test for NFC-A">
+          <TestCase TC__ID="TC_AN21_LIS_NFCA_04" Applicable="true" Category="A" ReferenceAntenna="P0" P0Supported="false" Frequency="13.56"/>
+        </Folder>
+        <Folder Name="Loading effect Measurement">
+          <TestCase TC__ID="TC_AN21_LIS_UND_01" Applicable="true" Category="A" ReferenceAntenna="P0/P3/P6" P0Supported="false" Frequency="13.56"/>
+        </Folder>
+        <Folder Name="Power reception Test for NFC-A at nominal Conditions">
+          <TestCase TC__ID="TC_AN21_LIS_NFCA_02" Applicable="true" Category="A" ReferenceAntenna="P0/P3/P6" P0Supported="false" Frequency="13.56"/>
+        </Folder>
+        <Folder Name="Power reception Test for NFC-A at Minimum Conditions ">
+          <TestCase TC__ID="TC_AN21_LIS_NFCA_01" Applicable="true" Category="A" ReferenceAntenna="P0/P3/P6" P0Supported="false" Frequency="13.56"/>
+        </Folder>
+        <Folder Name="Excessive Field exposure test">
+          <TestCase TC__ID="TC_AN21_LIS_UND_03" Applicable="true" Category="A" ReferenceAntenna="P0" P0Supported="false" Frequency="13.56"/>
+        </Folder>
+      </Folder>
+      <Folder Name="Group 1.2: Signal Interface Poller to Listener">
+        <Folder Name="Modulation Poller to Listener at Limit Conditions – NFC-A">
+          <TestCase TC__ID="TC_AN21_LIS_NFCA_06" Applicable="true" Category="A" ReferenceAntenna="P0/P3/P6" P0Supported="false" Frequency="13.56/16.00"/>
+        </Folder>
+      </Folder>
+    </Folder>
+  </TestSpecification>
+  <TestSpecification Name="Test Cases for Digital Protocol">
+    <Folder Name="Group 3: NFC Forum Device in Listen Mode">
+      <Folder Name="Group 3.1: Installation of NFC Forum Device with technology NFC-A">
+        <Folder Name="NFC-A Installation with error in the READY_A state (xy = 00 to 16)">
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BI_18_01" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BI_18_00" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BI_18_11" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BI_18_15" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BI_18_06" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BI_18_13" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BI_18_04" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BI_18_14" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BI_18_05" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BI_18_16" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BI_18_03" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BI_18_12" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BI_18_09" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BI_18_07" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BI_18_10" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BI_18_02" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BI_18_08" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Handling of RATS (NFCID1 size = 1) (xy = 00 to 19 and z = 0 or 1)">
+          <TestCase TC__ID="TC_DP21_LIS_NFCA_UND_BV_13_05_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCA_UND_BV_13_04_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCA_UND_BV_13_09_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCA_UND_BV_13_01_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCA_UND_BV_13_00_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCA_UND_BV_13_03_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCA_UND_BV_13_07_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCA_UND_BV_13_08_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCA_UND_BV_13_02_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCA_UND_BV_13_06_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Basic NFC-A Exchange with the minimum and longer Frame Delay Time (NFCID1 size = 1) (x = 0 to 1 and y = 0 to 1 and z = 0 or 1)">
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BV_05_0_0_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BV_05_0_1_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BV_05_1_0_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BV_05_1_1_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Installation with error in the ACTIVE_A state (NFCID1 size = 1) (xy = 00 to 11)">
+          <TestCase TC__ID="TC_DP21_LIS_NFCA_UND_BI_21_04" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCA_UND_BI_21_09" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCA_UND_BI_21_05" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCA_UND_BI_21_10" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCA_UND_BI_21_06" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCA_UND_BI_21_11" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCA_UND_BI_21_01" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCA_UND_BI_21_03" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCA_UND_BI_21_02" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCA_UND_BI_21_00" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCA_UND_BI_21_08" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCA_UND_BI_21_07" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Installation with polling and with Reset (x = 0 or 1 and y = 0 to 1)">
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BI_29_0_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BI_29_0_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Installation with error in the SLEEP_A state following Card Emulator 4A State (NFCID1 size = 1) (x = 0 or 1)">
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BI_30_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Correct Installation with respect to the anti-collision state machine (NFCID1 size = 1) (x = 0 or 1)">
+          <TestCase TC__ID="TC_DP21_LIS_NFCA_UND_BV_09_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Installation with error in the IDLE state (x = 0 to 1)">
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BI_17_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BI_17_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Basic NFC-A Exchange and Timing Measurement (NFCID1 size = 1) (x = 0, 1 or 2)">
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BV_01_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Installation with error in the SLEEP_A state following ACTIVE_A (NFCID1 size = 1) (x = 0 or 1 or 2)">
+          <TestCase TC__ID="TC_DP11_LIS_NFCA_UND_BI_25_0" Applicable="true" Category="A"/>
+        </Folder>
+      </Folder>
+      <Folder Name="Group 3.5: Type 4A Tag (T4AT) and Type 4B Tag (T4BT) Platform">
+        <Folder Name="Error at the beginning of the Block Protocol (x = 0 to 3, y = 0 or 1)">
+          <TestCase TC__ID="TC_DP21_LIS_NFCAB_UND_BI_09_0_0_A" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCAB_UND_BI_09_2_0_A" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCAB_UND_BI_09_1_0_A" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Error notification on an I-Block that does not indicate chaining (x = 0 to 1)">
+          <TestCase TC__ID="TC_DP11_LIS_NFCAB_UND_BI_02_0_A" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Error after reception of a non-chained I-Block (xy = 00 to 09 and z = 0 or 1)">
+          <TestCase TC__ID="TC_DP21_LIS_NFCAB_UND_BI_03_09_0_A" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCAB_UND_BI_03_07_0_A" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCAB_UND_BI_03_06_0_A" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCAB_UND_BI_03_05_0_A" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCAB_UND_BI_03_08_0_A" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCAB_UND_BI_03_03_0_A" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCAB_UND_BI_03_01_0_A" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCAB_UND_BI_03_04_0_A" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCAB_UND_BI_03_00_0_A" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCAB_UND_BI_03_02_0_A" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Block Protocol with Reset (x = 0 to 1 and y = 0 or 1)">
+          <TestCase TC__ID="TC_DP11_LIS_NFCAB_UND_BI_05_0_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Error notification and error after reception of a chained I-Block (x = 0 to 6 and y = 0 to 1 and z = 0 or 1)">
+          <TestCase TC__ID="TC_DP21_LIS_NFCAB_UND_BI_04_0_1_0_A" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_LIS_NFCAB_UND_BI_04_0_0_0_A" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Installation commands during Block Protocol (x = 0 to 1 and y = 0 or 1)">
+          <TestCase TC__ID="TC_DP21_LIS_NFCAB_UND_BI_06_0_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Exchange of chained I-Blocks in both directions (x = 0 to 10, y = 0 to 17 and z = 0 to 1)">
+          <TestCase TC__ID="TC_DP22_LIS_NFCAB_UND_BV_01_0_00_0_A" Applicable="true" Category="A"/>
+        </Folder>
+      </Folder>
+    </Folder>
+  </TestSpecification>
+  <NFCForumDevices>
+    <NFCUniversalDevice>
+      <Row Name="NFC Universal Device  - Card Emulation Mode - Type 4B Tag Platform" Value="No"/>
+      <Row Name="NFC Universal Device -  Initiator (ACM) - Target (ACM)" Value="No"/>
+      <Row Name="NFC Universal Device - Card Emulation Mode - Type 4A Tag Platform" Value="No"/>
+      <Row Name="NFC Universal Device - Type 4B Tag Module" Value="No"/>
+      <Row Name="NFC Universal Device - Card Emulation Mode - Type 3 Tag Platform" Value="No"/>
+      <Row Name="NFC Universal Device - Type 4A Tag Module" Value="No"/>
+      <Row Name="NFC Universal Device - Reader/Writer - Initiator (PCM) - Target (PCM)" Value="No"/>
+      <Row Name="NFC Universal Device - Type 3 Tag Module" Value="No"/>
+      <Row Name="NFC Universal Device - WLC Poller" Value="No"/>
+    </NFCUniversalDevice>
+    <NFCMobileDevice>
+      <Row Name="NFC Mobile Device - RF Collision Avoidance - Reader/Writer - Card Emulation Mode (Type 3 Tag Platform, Type 4A Tag Platform, Type 4B Tag Platform)" Value="No"/>
+      <Row Name="NFC Mobile Device - WLC Poller" Value="No"/>
+      <Row Name="NFC Mobile Device - Type 4B Tag Module" Value="No"/>
+      <Row Name="NFC Mobile Device - Type 4A Tag Module" Value="No"/>
+      <Row Name="NFC Mobile Device - Type 3 Tag Module" Value="No"/>
+    </NFCMobileDevice>
+    <NFCReaderDevice>
+      <Row Name="NFC Reader Device - WLC Poller" Value="No"/>
+      <Row Name="NFC Reader Device - RF Collision Avoidance" Value="No"/>
+      <Row Name="NFC Reader Device - Reader/Writer (2T OP, T3T OP, T4AT OP, T4BT OP, T5T OP)" Value="No"/>
+    </NFCReaderDevice>
+    <NFCTagDevice>
+      <Row Name="NFC Tag Device - NFC Type 2 Tag" Value="No"/>
+      <Row Name="NFC Tag Device - NFC Type 5 Tag" Value="No"/>
+      <Row Name="NFC Tag Device - NFC Type 4B Tag" Value="No"/>
+      <Row Name="NFC Tag Device - NFC Type 4A Tag" Value="No"/>
+      <Row Name="NFC Tag Device - NFC Type 3 Tag" Value="No"/>
+    </NFCTagDevice>
+  </NFCForumDevices>
+  <ICS>
+    <Row Name="RWM-RNDEF-T3T" Value="No"/>
+    <Row Name="PNFCB-NC-EXTRES" Value="No"/>
+    <Row Name="PNFCA-NC-NFCID1MDR" Value="No"/>
+    <Row Name="P-NFC-DEP-NC-424I" Value="No"/>
+    <Row Name="MOD-RWM-T5T" Value="No"/>
+    <Row Name="PWLC-PC0" Value="No"/>
+    <Row Name="PNFCF-NC-MDR" Value="No"/>
+    <Row Name="PD-ACMF-NC-BR424" Value="No"/>
+    <Row Name="PT-T4AT-NC-DID" Value="No"/>
+    <Row Name="PT-PP-T5T" Value="No"/>
+    <Row Name="T2T-MEM-STA" Value="No"/>
+    <Row Name="L-NFCB-NC-SENSB-RES" Value="No"/>
+    <Row Name="PM-PB" Value="No"/>
+    <Row Name="CO-NAME" Value="No"/>
+    <Row Name="VER_VER10" Value="No"/>
+    <Row Name="LTD-NFCF" Value="No"/>
+    <Row Name="LD-NFCF-NC-BR424" Value="No"/>
+    <Row Name="LT-T3T-NO-NDEF" Value="No"/>
+    <Row Name="T4T-AB-CAP" Value="No"/>
+    <Row Name="T5T-CAP" Value="No"/>
+    <Row Name="T5T-EWSB-CMD" Value="No"/>
+    <Row Name="NDEF-TRANS" Value="No"/>
+    <Row Name="PWLC-WPT_STOP" Value="No"/>
+    <Row Name="PNFCA-NC-NFCID1MDD" Value="No"/>
+    <Row Name="PNFCB-NC-SDR" Value="No"/>
+    <Row Name="PNFCF-NC-MDD" Value="No"/>
+    <Row Name="RWM-WNDEF-T4BT" Value="No"/>
+    <Row Name="MOD-RWM-T3T" Value="No"/>
+    <Row Name="P-NFC-DEP-NC-212I" Value="No"/>
+    <Row Name="PD-ACMF-NC-BR212" Value="No"/>
+    <Row Name="PT-PP-T4AT" Value="No"/>
+    <Row Name="PT-T4BT-NC-B8B7-DIFF" Value="No"/>
+    <Row Name="T2T-MEM-DYN" Value="No"/>
+    <Row Name="L-NFCB-NC-DID" Value="No"/>
+    <Row Name="LWLC-WPT_STOP " Value="No"/>
+    <Row Name="CO-SDR" Value="No"/>
+    <Row Name="VER_UNSUP" Value="No"/>
+    <Row Name="L-T3T-NC-BR-424" Value="No"/>
+    <Row Name="LD-NFCF-NC-BR212" Value="No"/>
+    <Row Name="LT-T3T" Value="No"/>
+    <Row Name="T4BT-CAP" Value="No"/>
+    <Row Name="T5T-MV-1.x" Value="No"/>
+    <Row Name="T5T-ERMB-CMD" Value="No"/>
+    <Row Name="NDEF-INIT" Value="No"/>
+    <Row Name="MOD-RWM-T4AT" Value="No"/>
+    <Row Name="PA-NFCF-NC-BR424" Value="No"/>
+    <Row Name="PNFCA-NFC-NFCID1-DET" Value="No"/>
+    <Row Name="MOD-PM-INI" Value="No"/>
+    <Row Name="RWM-WNDEF-T5T" Value="No"/>
+    <Row Name="PWLC-PC2" Value="No"/>
+    <Row Name="PTA-NFCV" Value="No"/>
+    <Row Name="PTD-ACM-F" Value="No"/>
+    <Row Name="PT-T4BT-NC-DID" Value="No"/>
+    <Row Name="P-NFC-DEP-NC-DSL-REQ" Value="No"/>
+    <Row Name="L-NFCA-NC-NFCID1-DS" Value="No"/>
+    <Row Name="LTD-NFCB" Value="No"/>
+    <Row Name="PM-LSC3" Value="No"/>
+    <Row Name="CO-CONNECT-PARAM" Value="No"/>
+    <Row Name="LTD-NFCV" Value="No"/>
+    <Row Name="PM-PLS-254" Value="No"/>
+    <Row Name="LT-T4BT" Value="No"/>
+    <Row Name="T2T-WRITE" Value="No"/>
+    <Row Name="T4T-MV-3.x" Value="No"/>
+    <Row Name="T5T-LSB-CMD" Value="No"/>
+    <Row Name="T5T-SELECT" Value="No"/>
+    <Row Name="LWLC-STAT-MOD" Value="No"/>
+    <Row Name="RWM-WNDEF-T3T" Value="No"/>
+    <Row Name="PA-NFCF-NC-BR212" Value="No"/>
+    <Row Name="PNFCA-NC-NFCID1SDR" Value="No"/>
+    <Row Name="PP-NFC-DEP" Value="No"/>
+    <Row Name="RWM-RNDEF-T5T" Value="No"/>
+    <Row Name="PWLC-PC1" Value="No"/>
+    <Row Name="PNFCF-NC-SDR" Value="No"/>
+    <Row Name="PTD-ACM-A" Value="No"/>
+    <Row Name="PT-PP-T4BT" Value="No"/>
+    <Row Name="P-NFC-DEP-NC-DID" Value="No"/>
+    <Row Name="L-NFCA-NC-NFCID1-DG" Value="No"/>
+    <Row Name="L-NFCB-NC-NFCID0-DG" Value="No"/>
+    <Row Name="PM-LLCP" Value="No"/>
+    <Row Name="CO-DIRECT" Value="No"/>
+    <Row Name="LTA-NFCV" Value="No"/>
+    <Row Name="LP-NFC-DEP" Value="No"/>
+    <Row Name="LT-T4AT" Value="Yes"/>
+    <Row Name="T2T-SEC-SEL" Value="No"/>
+    <Row Name="T4T-MV-2.x" Value="No"/>
+    <Row Name="T5T-ERS-CMD" Value="No"/>
+    <Row Name="T5T-SPECF-SUP" Value="No"/>
+    <Row Name="MOD-WLCL" Value="No"/>
+    <Row Name="MOD-RWM-T2T" Value="No"/>
+    <Row Name="IRF-COL-AVOID" Value="No"/>
+    <Row Name="PTD-NFCB" Value="No"/>
+    <Row Name="PD-NFCF-NC-BR212" Value="No"/>
+    <Row Name="RWM-WNDEF-T4AT" Value="No"/>
+    <Row Name="MOD-WLCP" Value="No"/>
+    <Row Name="LTA-NFCA" Value="Yes"/>
+    <Row Name="PNFCV-NC-MDD" Value="No"/>
+    <Row Name="PT-PP-T2T" Value="No"/>
+    <Row Name="PT-T4BT-NC-INF" Value="No"/>
+    <Row Name="P-NFC-DEP-NC-PSL-REQ-I-DID" Value="No"/>
+    <Row Name="L-NFCA-NC-NFCID1-TS" Value="No"/>
+    <Row Name="LA-NFCF-NC-BR424" Value="No"/>
+    <Row Name="LSC-CL" Value="No"/>
+    <Row Name="MIUX_SUPPORT" Value="No"/>
+    <Row Name="LTD-ACM-F" Value="No"/>
+    <Row Name="PMT-BRS" Value="No"/>
+    <Row Name="LP-ISO-DEP" Value="Yes"/>
+    <Row Name="T3T-CAP" Value="No"/>
+    <Row Name="T4T-UB-DDO" Value="No"/>
+    <Row Name="T5T-STF-SUP" Value="No"/>
+    <Row Name="TAG-PERF" Value="No"/>
+    <Row Name="LWLC-OV6" Value="No"/>
+    <Row Name="RWM-DTA" Value="No"/>
+    <Row Name="RWM-RNDEF-T4AT" Value="No"/>
+    <Row Name="PTA-NFCF" Value="No"/>
+    <Row Name="PTA-NFCB" Value="No"/>
+    <Row Name="PWLC-PC3" Value="No"/>
+    <Row Name="PP-ISO-DEP" Value="No"/>
+    <Row Name="PTD-NFCV" Value="No"/>
+    <Row Name="PTOV-COMM" Value="No"/>
+    <Row Name="PT-T4BT-NC-DID-ATTRIB-DIFF" Value="No"/>
+    <Row Name="P-NFC-DEP-NC-PSL-REQ-1" Value="No"/>
+    <Row Name="L-NFCA-NC-NFCID1-SS" Value="Yes"/>
+    <Row Name="LA-NFCF-NC-BR212" Value="No"/>
+    <Row Name="VER_VER12" Value="No"/>
+    <Row Name="PAX-NO-MIUX" Value="No"/>
+    <Row Name="LTD-ACM-A" Value="No"/>
+    <Row Name="MOD-PM-TAR" Value="No"/>
+    <Row Name="L-T4AT-NC-DID-1" Value="No"/>
+    <Row Name="T3T-MV-1.x" Value="No"/>
+    <Row Name="T4T-RB-ODO" Value="No"/>
+    <Row Name="T5T-RMB-CMD" Value="No"/>
+    <Row Name="TAG-P0" Value="No"/>
+    <Row Name="LWLC-NEGO-MOD" Value="No"/>
+    <Row Name="RWM-WNDEF-T2T" Value="No"/>
+    <Row Name="PTD-NFCA" Value="No"/>
+    <Row Name="PNFCB-NC-MDR" Value="No"/>
+    <Row Name="PTD-NFCF" Value="No"/>
+    <Row Name="RWM-RNDEF-T4BT" Value="No"/>
+    <Row Name="PWLC-OV7" Value="No"/>
+    <Row Name="PNFCV-NC-SDR" Value="No"/>
+    <Row Name="PT-PP-T3T-NO-NDEF" Value="No"/>
+    <Row Name="PT-T4BT-NC-B6B5-DIFF" Value="No"/>
+    <Row Name="P-NFC-DEP-NC-106I" Value="No"/>
+    <Row Name="LTA-NFCB" Value="No"/>
+    <Row Name="L-T3T-NC-BR-212" Value="No"/>
+    <Row Name="CO-CC-PARAM" Value="No"/>
+    <Row Name="P2P-SNEP" Value="No"/>
+    <Row Name="L-NFC-DEP-NC-RTOX" Value="No"/>
+    <Row Name="MOD-CEM" Value="Yes"/>
+    <Row Name="T2T-CAP" Value="No"/>
+    <Row Name="T4AT-CAP" Value="No"/>
+    <Row Name="T4T-EFC" Value="No"/>
+    <Row Name="T5T-ELSB-CMD" Value="No"/>
+    <Row Name="NDEF-RO" Value="No"/>
+    <Row Name="LWLC-NDEF_WR_TO_INT" Value="No"/>
+    <Row Name="RWM-RNDEF-T2T" Value="No"/>
+    <Row Name="PTA-NFCA" Value="No"/>
+    <Row Name="PNFCB-NC-MDD" Value="No"/>
+    <Row Name="PD-NFCF-NC-BR424" Value="No"/>
+    <Row Name="MOD-RWM-T4BT" Value="No"/>
+    <Row Name="PWLC-OV6" Value="No"/>
+    <Row Name="PNFCV-NC-MDR" Value="No"/>
+    <Row Name="PT-PP-T3T" Value="No"/>
+    <Row Name="PT-T4BT-NC-B4B3-DIFF" Value="No"/>
+    <Row Name="P-NFC-DEP-NC-RSL-REQ" Value="No"/>
+    <Row Name="LTD-NFCA" Value="Yes"/>
+    <Row Name="LTA-NFCF" Value="No"/>
+    <Row Name="LSC-CO" Value="No"/>
+    <Row Name="P2P-NDEF" Value="No"/>
+    <Row Name="LTOV-COMM" Value="Yes"/>
+    <Row Name="CEM-RPS" Value="No"/>
+    <Row Name="T2T-MV-1.x" Value="No"/>
+    <Row Name="T3T-UPDATE" Value="No"/>
+    <Row Name="T4T-UP-BIN" Value="No"/>
+    <Row Name="T5T-WSB-CMD" Value="No"/>
+    <Row Name="NDEF-R/W" Value="No"/>
+    <Row Name="LWLC-OV7" Value="No"/>
+  </ICS>
+  <IXIT>
+    <Row Name="PM-T4BT-PLATFORM-RETRY,ATTRIB" Value="" Unit="Integer"/>
+    <Row Name="PM-NFC-DEP-RETRY-ATN" Value="" Unit="Integer"/>
+    <Row Name="PM-RP-RESET-DELAY-TIME" Value="8000000" Unit="μs"/>
+    <Row Name="LM-T4AB-FSCI" Value="2" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-4" Value="9000" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-8" Value="0" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-12" Value="0" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-16" Value="0" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-20" Value="0" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-CAPDU-INIT" Value="00A4040007A000000004101000" Unit="Hexa"/>
+    <Row Name="T5T-EMNB" Value="" Unit="Integer"/>
+    <Row Name="LM-LMEWLC-WPTSTOP" Value="" Unit="Text"/>
+    <Row Name="GEN-WKS" Value="" Unit="Hexa"/>
+    <Row Name="LIS-MOD-ANT-CAT" Value="C" Unit="Text"/>
+    <Row Name="LM-NFC-DEP-RTOX" Value="" Unit="Integer"/>
+    <Row Name="LM-LME-LM" Value="" Unit="μs"/>
+    <Row Name="CL-SAP-OUTBOUND" Value="" Unit="Hexa"/>
+    <Row Name="CO-PARAM-CC" Value="" Unit="Hexa"/>
+    <Row Name="PM-ISODEP-RETRY,WTX" Value="" Unit="Integer"/>
+    <Row Name="PM-NFC-DEP-LR" Value="" Unit="Integer"/>
+    <Row Name="LM-NFCA-NFCID1-A" Value="0FA1A2A3" Unit="Hexa"/>
+    <Row Name="PM-NFCB-COLL-RES-SLOTS" Value="" Unit="Integer"/>
+    <Row Name="CO-SAP-DYNAMIC" Value="" Unit="Byte"/>
+    <Row Name="PM-T4T-PLATFORM-FSDI" Value="" Unit="Hexa"/>
+    <Row Name="PM-NFC-DEP-DID" Value="" Unit="Integer"/>
+    <Row Name="PM-RP-T4AT-NFC-DEP-PRIORITY" Value="" Unit="Byte"/>
+    <Row Name="LM-T4T-4K-EXT-APDU" Value="0b" Unit="Boolean"/>
+    <Row Name="LM-T4AB-PF-3" Value="00B2010C00" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-7" Value="0" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-11" Value="0" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-15" Value="0" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-19" Value="0" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-PAID" Value="325041592E5359532E4444463031" Unit="Hexa"/>
+    <Row Name="T5T-MNB" Value="" Unit="Integer"/>
+    <Row Name="Δthold,off,WLCPmax" Value="" Unit="μs"/>
+    <Row Name="GEN-LTO" Value="" Unit="Hexa"/>
+    <Row Name="8-SHAPED COIL POSITION" Value="" Unit="Text"/>
+    <Row Name="LM-NFC-DEP-WT" Value="" Unit="Integer"/>
+    <Row Name="GEN_MIUX" Value="" Unit="Hexa"/>
+    <Row Name="CL-SAP-INBOUND" Value="" Unit="Hexa"/>
+    <Row Name="CO-SAP-OUTBOUND" Value="" Unit="Hexa"/>
+    <Row Name="PM-ISODEP-RETRY,NAK" Value="" Unit="Integer"/>
+    <Row Name="PM-NFC-DEP-BS" Value="" Unit="Hexa"/>
+    <Row Name="IUT-REFERENCE-POINT(S)" Value="OK" Unit="Text"/>
+    <Row Name="LM-NFCB-NFCID0-SENSB" Value="00000000" Unit="Hexa"/>
+    <Row Name="CON_DEVICES_LIMIT_V" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-2" Value="9000" Unit="Hexa"/>
+    <Row Name="PM-RP-NO-COMMAND-TIME" Value="" Unit="μs"/>
+    <Row Name="GEN_EXTENDED_DTA_URN" Value="" Unit="Hexa"/>
+    <Row Name="PM-T4T-PLATFORM-DID" Value="" Unit="Integer"/>
+    <Row Name="LM-T4AB-PF-6" Value="0" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-10" Value="0" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-14" Value="0" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-18" Value="0" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-LE" Value="0" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-RAPDU-INIT" Value="9000" Unit="Hexa"/>
+    <Row Name="TDELAY,WLC" Value="" Unit="μs"/>
+    <Row Name="CL-SAP-DYNAMIC" Value="" Unit="Byte"/>
+    <Row Name="CON_DEVICES_LIMIT_F" Value="" Unit="Hexa"/>
+    <Row Name="PM-NFC-DEP-BR" Value="" Unit="Hexa"/>
+    <Row Name="LM-NFC-DEP-LR" Value="" Unit="Integer"/>
+    <Row Name="GEN-TECHNOLOGY" Value="" Unit="Text"/>
+    <Row Name="GEN-RW" Value="" Unit="Integer"/>
+    <Row Name="PM-ISODEP-RETRY,ACK" Value="" Unit="Integer"/>
+    <Row Name="IUT-PHI0_AXIS" Value="OK" Unit="Text"/>
+    <Row Name="CON_DEVICES_LIMIT_A" Value="" Unit="Hexa"/>
+    <Row Name="CO-SAP-INBOUND-NOSRV" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-1" Value="80A8000002830000" Unit="Hexa"/>
+    <Row Name="PM-NFC-DEP-RETRY-NACK" Value="" Unit="Integer"/>
+    <Row Name="PM-RP-DISCOVERY_DURATION" Value="" Unit="ms"/>
+    <Row Name="LM-T4AB-SFGI" Value="3" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-5" Value="0" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-9" Value="0" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-13" Value="0" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-17" Value="0" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-LC" Value="E" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-RAPDU" Value="6F2D840E325041592E5359532E4444463031A51BBF0C1861164F07A0000000031010500B56495341204352454449549000" Unit="Hexa"/>
+    <Row Name="PM-T5T-RETRY-ERROR" Value="" Unit="Integer"/>
+    <Row Name="LM-RPM" Value="" Unit="Text"/>
+    <Row Name="CO-PARAM-CONNECT" Value="" Unit="Hexa"/>
+    <Row Name="CON_DEVICES_LIMIT_B" Value="" Unit="Hexa"/>
+    <Row Name="PM-RP-REACTIVE" Value="" Unit="Integer"/>
+    <Row Name="LM-LME-TRANS" Value="" Unit="μs"/>
+    <Row Name="GEN-VERSION" Value="" Unit="Integer"/>
+    <Row Name="GEN- ATR_REQ-PARAM" Value="" Unit="Hexa"/>
+    <Row Name="PM-ISODEP-DID-0-OPTION" Value="No" Unit="Boolean"/>
+    <Row Name="PM-ISODEP-RETRY,DESELECT" Value="" Unit="Integer"/>
+    <Row Name="PM-NFCA-FIRST-COMMAND" Value="" Unit="Byte"/>
+    <Row Name="CO-SAP-INBOUND" Value="" Unit="Hexa"/>
+  </IXIT>
+</TestPlan>

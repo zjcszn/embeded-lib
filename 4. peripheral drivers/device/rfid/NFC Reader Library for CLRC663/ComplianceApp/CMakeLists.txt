@@ -1,0 +1,4 @@
+ADD_SUBDIRECTORY(Nfcrdlib_EMVCo_LoopBackComplApp)
+ADD_SUBDIRECTORY(Nfcrdlib_EMVCo_AnalogComplApp)
+ADD_SUBDIRECTORY(Nfcrdlib_EMVCo_InteropComplApp)
+ADD_SUBDIRECTORY(Nfcrdlib_ISO10373_6_PCD_ComplApp)

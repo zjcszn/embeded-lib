@@ -1,0 +1,2008 @@
+{"version": "1.0",
+"CrVersion": "12.0",
+"IcsReferences": "NFCForum_ICS_Proforma_Devices_v2.2.00.docx",
+"IxitReferences": "NFCForum_IXIT_Proforma_Devices_v2.2.00.docx",
+"OPTION": {"Parameters": {"DelayBetweenTc":0,"VerifyRapdu":false,"RATS_POL_NFCA_T4AT_BI_11":"E080","DeviceType":0,"T3TPollerSelection":0,"T3TPollerPriorityNotSupportedNdef":0,"EmbeddedApplicationPath":"","ReaderFrequency":13560000,"OptTarInitiator":0,"IsDigitalRawTraceHadToBeSaved":false,"IsLoadDigitalTrace":false,"DeltaLtTimeout":1000,"TestToolVersion":3,"CrVersion":5,"CrVersionChanged":false,"TimeoutInitiatorTestCases":10000,"TimeoutSwtx":300,"ExecuteTestCasesIfNotApplicable":false,"ShowInstructionPopUp":true,"Usecustomapplication":false,"SortTestPlanByTestCases":true,"SendPatternNumber":false,"SaveDTAAutomationTraces":false,"RandomizeMemory":false,"T3TVersion":"10","RestartTagOpTestWhenCrcErrorAppears":false,"UseNFcForumXmlTestPlan":true}},
+"ICSIXIT" : {"ICS": {"Version": "CR13","Parameters": [
+  {
+    "Id": "ICS_DATE_OF_STATEMENT",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "ICS_PRODUCT_NAME",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "ICS_PRODUCT_VERSION",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "ICS_PRODUCT_INFO_LINE1",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "ICS_PRODUCT_INFO_LINE2",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "ICS_HARDWARE_CONFIGURATION",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "ICS_HARDWARE_VERSION",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "ICS_SOFTWARE_VERSION",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "ICS_OPERATING_SYSTEM",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "ICS_ADDITIONAL_PRODUCT_INFORMATION",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "ICS_PS_NAME",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "ICS_PS_COMPANY",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "ICS_PS_ADDRESS",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "ICS_PS_PHONE",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "ICS_PS_FAX",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "ICS_PS_EMAIL",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "ICS_PS_ADDITIONAL_INFORMATION",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "ICS_CP_NAME",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "ICS_CP_COMPANY",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "ICS_CP_ADDRESS",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "ICS_CP_PHONE",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "ICS_CP_FAX",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "ICS_CP_EMAIL",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "ICS_CP_ADDITIONAL_INFORMATION",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  }
+,
+  {
+    "Id": "IRF-COL-AVOID",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PTD-NFCA",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PNFCA-NFC-NFCID1-DET",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PNFCA-NC-NFCID1MDD",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PNFCA-NC-NFCID1SDR",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PNFCA-NC-NFCID1MDR",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PTD-NFCB",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PNFCB-NC-MDD",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PNFCB-NC-SDR",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PNFCB-NC-MDR",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PNFCB-NC-EXTRES",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PTD-NFCF",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PNFCF-NC-MDD",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PNFCF-NC-SDR",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PNFCF-NC-MDR",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PD-NFCF-NC-BR212",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PD-NFCF-NC-BR424",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PTD-NFCV",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PNFCV-NC-MDD",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PNFCV-NC-SDR",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PNFCV-NC-MDR",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PTD-ACM-A",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PTD-ACM-F",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PD-ACMF-NC-BR212",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PD-ACMF-NC-BR424",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PT-PP-T2T",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PT-PP-T3T",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PT-PP-T3T-NO-NDEF",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PT-PP-T4AT",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PT-T4AT-NC-DID",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PT-PP-T4BT",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PT-T4BT-NC-B8B7-DIFF",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PT-T4BT-NC-B6B5-DIFF",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PT-T4BT-NC-B4B3-DIFF",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PT-T4BT-NC-INF",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PT-T4BT-NC-DID",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PT-T4BT-NC-DID-ATTRIB-DIFF",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PT-PP-T5T",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "MOD-PM-INI",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PP-NFC-DEP",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "P-NFC-DEP-NC-106I",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "P-NFC-DEP-NC-212I",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "P-NFC-DEP-NC-424I",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "P-NFC-DEP-NC-DID",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "P-NFC-DEP-NC-PSL-REQ-1",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "P-NFC-DEP-NC-DSL-REQ",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "P-NFC-DEP-NC-RLS-REQ",
+    "Comments": "",
+    "RawValue": true,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "P-NFC-DEP-NC-RLS-REQ-I-DID",
+    "Comments": "",
+    "RawValue": true,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PP-ISO-DEP",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "MOD-RWM-T2T",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "RWM-RNDEF-T2T",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "RWM-WNDEF-T2T",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "MOD-RWM-T3T",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "RWM-RNDEF-T3T",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "RWM-WNDEF-T3T",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "MOD-RWM-T4AT",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "RWM-RNDEF-T4AT",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "RWM-WNDEF-T4AT",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "MOD-RWM-T4BT",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "RWM-RNDEF-T4BT",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "RWM-WNDEF-T4BT",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "MOD-RWM-T5T",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "RWM-RNDEF-T5T",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "RWM-WNDEF-T5T",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "RWM-DTA",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "LTD-NFCA",
+    "Comments": "",
+    "RawValue": true,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "L-NFCA-NC-NFCID1-SS",
+    "Comments": "",
+    "RawValue": true,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "L-NFCA-NC-NFCID1-DS",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "L-NFCA-NC-NFCID1-TS",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "L-NFCA-NC-NFCID1-DG",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "LTD-NFCB",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "L-NFCB-NC-NFCID0-DG",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "L-NFCB-NC-DID",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "L-NFCB-NC-SENSB-RES",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "LTD-NFCF",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "L-T3T-NC-BR-212",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "L-T3T-NC-BR-424",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "LTD-NFCV",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "LTD-ACM-A",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "LTD-ACM-F",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "MOD-PM-TAR",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PMT-BRS",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "PM-PLS-254",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "LP-NFC-DEP",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "LD-NFCF-NC-BR212",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "LD-NFCF-NC-BR424",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "L-NFC-DEP-NC-RTOX",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "MOD-CEM",
+    "Comments": "",
+    "RawValue": true,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "LT-T3T",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "LT-T3T-NO-NDEF",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "LT-T4AT",
+    "Comments": "",
+    "RawValue": true,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "LT-T4BT",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "LP-ISO-DEP",
+    "Comments": "",
+    "RawValue": true,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "L-T4AT-NC-DID-1",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "T2T-CAP",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "T3T-CAP",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "T4AT-CAP",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "T4BT-CAP",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "T4T-AB-CAP",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "T5T-CAP",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "T5T-ERS-CMD",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "T5T-RMB-CMD",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "TAG-P0",
+    "Comments": "",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  }
+]},
+"IXIT": {"Version": "CR13","Parameters": [
+  {
+    "Id": "IXIT_DATE_OF_STATEMENT",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "IXIT_PRODUCT_NAME",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "IXIT_PRODUCT_VERSION",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "IXIT_HARDWARE_CONFIGURATION",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "IXIT_HARDWARE_VERSION",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "IXIT_SOFTWARE_VERSION",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "IXIT_OPERATING_SYSTEM",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "IXIT_ADDITIONAL_PRODUCT_INFORMATION",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "IXIT_PS_NAME",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "IXIT_PS_COMPANY",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "IXIT_PS_ADDRESS",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "IXIT_PS_PHONE",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "IXIT_PS_FAX",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "IXIT_PS_EMAIL",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "IXIT_PS_ADDITIONAL_INFORMATION",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "IXITS_CP_NAME",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "IXIT_CP_COMPANY",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "IXIT_CP_ADDRESS",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "IXIT_CP_PHONE",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "IXIT_CP_FAX",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "IXIT_CP_EMAIL",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  },
+  {
+    "Id": "IXIT_CP_ADDITIONAL_INFORMATION",
+    "Comments": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ]
+  }
+,
+  {
+    "Id": "PM-RP-T4AT-NFC-DEP-PRIORITY",
+    "ParameterAndDescription": "T4AT_NFC-DEP_PRIORITY",
+    "Allowed": "0: NFC-DEP priority \n1: T4AT priority",
+    "Reference": "[DTA] 4.2",
+    "RawValue": "1",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "PM-RP-NO-COMMAND-TIME",
+    "ParameterAndDescription": "tNO_COMMAND: Time when the IUT stops sending any further command.",
+    "Allowed": "Numerical value (µs)",
+    "Reference": "",
+    "RawValue": 0,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "PM-RP-RESET-DELAY-TIME",
+    "ParameterAndDescription": "tRESETDELAY: Time when the IUT stops sending the carrier.",
+    "Allowed": "Numerical value (µs)",
+    "Reference": "",
+    "RawValue": 8000000,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "PM-RP-DISCOVERY_DURATION",
+    "ParameterAndDescription": "Total duration of the IUT discovery loop.",
+    "Allowed": "0 - 2000 (ms)",
+    "Reference": "",
+    "RawValue": 0,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "PM-NFCA-FIRST-COMMAND",
+    "ParameterAndDescription": "First NFC-A command in Technology Detection Activity",
+    "Allowed": "0: ALL_REQ \n1: SENS_REQ",
+    "Reference": "[ACT] 9.2",
+    "RawValue": "1",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "CON_DEVICES_LIMIT_A",
+    "ParameterAndDescription": "Number of resolved NFCID1 device identifiers beyond which the collision resolution process can stop resolving when collisions are still pending. \nMandatory if the ICS_ID \"PNFCA-NC-NFCID1-MDR\" is supported.",
+    "Allowed": null,
+    "Reference": "[ACT] 9.3",
+    "RawValue": 2,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "PM-NFCB-COLL-RES-SLOTS",
+    "ParameterAndDescription": "N: Determines the number of slots available during Collision Resolution in NFC-B.",
+    "Allowed": null,
+    "Reference": "[DPS] 5.6.1",
+    "RawValue": "4",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "CON_DEVICES_LIMIT_B",
+    "ParameterAndDescription": "Number of resolved NFCID1 device identifiers beyond which the collision resolution process can stop resolving when collisions are still pending. \n Mandatory if the ICS_ID \"PNFCB-NC-NFCID1-MDR\" is supported.",
+    "Allowed": null,
+    "Reference": "[ACT] 9.3",
+    "RawValue": 2,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "CON_DEVICES_LIMIT_F",
+    "ParameterAndDescription": "Number of resolved NFCID1 device identifiers beyond which the collision resolution process can stop resolving when collisions are still pending. \n Mandatory if the ICS_ID \"PNFCF-NC-NFCID1-MDR\" is supported.",
+    "Allowed": null,
+    "Reference": "[ACT] 9.3",
+    "RawValue": 2,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "CON_DEVICES_LIMIT_V",
+    "ParameterAndDescription": "Number of resolved NFCID1 device identifiers beyond which the collision resolution process can stop resolving when collisions are still pending. \n Mandatory if the ICS_ID \"PNFCV-NC-MDR\" is supported.",
+    "Allowed": null,
+    "Reference": "[ACT] 9.3",
+    "RawValue": 2,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "PM-T4T-PLATFORM-DID",
+    "ParameterAndDescription": "DID value",
+    "Allowed": null,
+    "Reference": "[DPS] 14.6.1 15.6.1",
+    "RawValue": 0,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "PM-T4T-PLATFORM-FSDI",
+    "ParameterAndDescription": "FSDI: Frame Size for proximity coupling Device Integer",
+    "Allowed": null,
+    "Reference": "[DPS] 14.6.1 15.6.1",
+    "RawValue": 8,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "PM-T4T-PLATFORM-RETRY,ATTRIB",
+    "ParameterAndDescription": "nRETRY,ATTRIB: Used for Exception Processing in T4BT - consecutive # ATTRIB sent",
+    "Allowed": null,
+    "Reference": "[DPS] 15.7",
+    "RawValue": 1,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "PM-T5T-RETRY-ERROR",
+    "ParameterAndDescription": "nT5T_RETRY_ERROR: Maximum number of consecutive retries of the same frame",
+    "Allowed": null,
+    "Reference": "",
+    "RawValue": 0,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "PM-ISODEP-RETRY,NAK",
+    "ParameterAndDescription": "nRETRY,ACK: Used for Exception Processing in T4AT and T4BT - consecutive # R(NAK) blocks sent",
+    "Allowed": null,
+    "Reference": "[DPS] 16.2.6",
+    "RawValue": 0,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "PM-ISODEP-RETRY,ACK",
+    "ParameterAndDescription": "nRETRY,ACK: Used for Exception Processing in T4AT and T4BT - consecutive # R(ACK) blocks sent",
+    "Allowed": null,
+    "Reference": "[DPS] 16.2.6",
+    "RawValue": 0,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "PM-ISODEP-RETRY,WTX",
+    "ParameterAndDescription": "nRETRY,WTX: Used for Exception Processing in T4AT and T4BT - consecutive # S(WTX) blocks sent",
+    "Allowed": null,
+    "Reference": "[DPS] 16.2.6",
+    "RawValue": 0,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "PM-ISODEP-RETRY,DESELECT",
+    "ParameterAndDescription": "nRETRY,DESELECT: Used for Exception Processing in T4AT and T4BT - consecutive # S(DESELECT) blocks sent",
+    "Allowed": null,
+    "Reference": "[DPS] 16.2.7",
+    "RawValue": 0,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "PM-ISODEP-DID-0-OPTION",
+    "ParameterAndDescription": "DID negotiated equal to 0 is sent",
+    "Allowed": null,
+    "Reference": "[DPS] 15.1.2",
+    "RawValue": false,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "PM-NFC-DEP-DID",
+    "ParameterAndDescription": "DIDI: Initiator Device Identification Number",
+    "Allowed": null,
+    "Reference": "[DPS] 17.6.2",
+    "RawValue": 0,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "PM-NFC-DEP-LR",
+    "ParameterAndDescription": "LRI: Initiator Length Reduction",
+    "Allowed": null,
+    "Reference": "[DPS] 17.6.2",
+    "RawValue": 0,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "PM-NFC-DEP-RETRY,ATN",
+    "ParameterAndDescription": "nRETRY,ATN",
+    "Allowed": null,
+    "Reference": "[DPS] 17.12.5",
+    "RawValue": 1,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "PM-NFC-DEP-RETRY,NACK",
+    "ParameterAndDescription": "nRETRY,NACK",
+    "Allowed": null,
+    "Reference": "[DPS] 17.12.5",
+    "RawValue": 1,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "PM-NFC-DEP-BS",
+    "ParameterAndDescription": "BSI",
+    "Allowed": null,
+    "Reference": "[DPS] 14.6.2",
+    "RawValue": 0,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "PM-NFC-DEP-BR",
+    "ParameterAndDescription": "BRI",
+    "Allowed": null,
+    "Reference": "[DPS] 14.6.2",
+    "RawValue": 9,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "PM-RP-REACTIVE",
+    "ParameterAndDescription": "REACTIVATION",
+    "Allowed": null,
+    "Reference": "[DPS] 4.2",
+    "RawValue": 0,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-LME-TRANS",
+    "ParameterAndDescription": "tTRANSITION_PM->LM: Time period in which the NFC Forum device switches Operating Field Off state and enters Listen mode. ",
+    "Allowed": "Numerical value (µs)",
+    "Reference": "[DTA] 4.1",
+    "RawValue": 0,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-LME-LM",
+    "ParameterAndDescription": "tLM: Time period in the NO_REMOTE_FIELD state",
+    "Allowed": "Numerical value (µs)",
+    "Reference": "[DTA] 4.4",
+    "RawValue": 0,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-NFCA-NFCID1-A",
+    "ParameterAndDescription": "NFCID1: NFC-A identifier of the NFC Forum Device",
+    "Allowed": "4 or 7 or 10 bytes",
+    "Reference": "[DPS] 4.6.3",
+    "RawValue": "0FA1A2A3",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-NFCB-NFCID0-SENSB",
+    "ParameterAndDescription": "NFCID0 in SENSB_RES: NFC-B identifier of the NFC Forum Device",
+    "Allowed": "4 bytes value",
+    "Reference": "[DPS] 5.6.2",
+    "RawValue": "00000000",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-NFC-DEP-LR",
+    "ParameterAndDescription": "LRT: Target Length Reduction",
+    "Allowed": "",
+    "Reference": "[DPS] 17.6.3",
+    "RawValue": 0,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-NFC-DEP-WT",
+    "ParameterAndDescription": "WT: Waiting Time",
+    "Allowed": "",
+    "Reference": "[DPS] 17.6.3",
+    "RawValue": 0,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-NFC-DEP-RTOX",
+    "ParameterAndDescription": "RTOX field",
+    "Allowed": "",
+    "Reference": "[DPS] 17.8.4",
+    "RawValue": 0,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-FSCI",
+    "ParameterAndDescription": "LM-T4AB-FSCI FSCI: Frame Size for proximity Card Integer",
+    "Allowed": "2-Ch",
+    "Reference": "[DPS] 7.6.2 / 14.6.2",
+    "RawValue": 2,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-SFGI",
+    "ParameterAndDescription": "SFGI: Start-up Frame Guard time Integer",
+    "Allowed": "0-8h",
+    "Reference": "[DPS] 7.6.2 / 14.6.2",
+    "RawValue": 3,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4T-4K-EXT-APDU",
+    "ParameterAndDescription": "Listen Device 4K Bytes APDU support",
+    "Allowed": "0: 4k bytes APDU data not supported \n1: 4k bytes APDU data supported",
+    "Reference": "[DPS] 6.4",
+    "RawValue": "0",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-LC",
+    "ParameterAndDescription": "Lc: Data Field Length",
+    "Allowed": "00-F7",
+    "Reference": "[DTA] 6.4.3",
+    "RawValue": 14,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-LE",
+    "ParameterAndDescription": "Le: Expected Response Length",
+    "Allowed": "00-FB",
+    "Reference": "[DTA] 6.4.3",
+    "RawValue": 0,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-PAID",
+    "ParameterAndDescription": "P_AID: Proprietary Application Identifier",
+    "Allowed": "Each field in hexadecimal format",
+    "Reference": "[DTA] 6.4.3",
+    "RawValue": "325041592E5359532E4444463031",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-RAPDU",
+    "ParameterAndDescription": "R-APDU for Select Application command",
+    "Allowed": "Each field in hexadecimal format",
+    "Reference": "[DTA] 6.4.3",
+    "RawValue": "6F2D840E325041592E5359532E4444463031A51BBF0C1861164F07A0000000031010500B56495341204352454449549000",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-CAPDU-INIT",
+    "ParameterAndDescription": "C-APDU init",
+    "Allowed": "Each field in hexadecimal format",
+    "Reference": "[DTA] 6.4.3",
+    "RawValue": "00A4040007A000000004101000",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-RAPDU-INIT",
+    "ParameterAndDescription": "R-APDU init",
+    "Allowed": "Each field in hexadecimal format",
+    "Reference": "[DTA] 6.4.3",
+    "RawValue": "9000",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-1",
+    "ParameterAndDescription": "C-APDU 1",
+    "Allowed": "Each field in hexadecimal format",
+    "Reference": "[DTA] 6.4.3",
+    "RawValue": "80A8000002830000",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-2",
+    "ParameterAndDescription": "R-APDU 1",
+    "Allowed": "Each field in hexadecimal format",
+    "Reference": "[DTA] 6.4.3",
+    "RawValue": "9000",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-3",
+    "ParameterAndDescription": "C-APDU 2",
+    "Allowed": "Each field in hexadecimal format",
+    "Reference": "[DTA] 6.4.3",
+    "RawValue": "00B2010C00",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-4",
+    "ParameterAndDescription": "R-APDU 2",
+    "Allowed": "Each field in hexadecimal format",
+    "Reference": "[DTA] 6.4.3",
+    "RawValue": "9000",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "T5T-MNB",
+    "ParameterAndDescription": "Lc: Data Field Length",
+    "Allowed": "Min (MLEN*8, 254)/BLEN",
+    "Reference": "[T5T]",
+    "RawValue": 0,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "T5T-EMNB",
+    "ParameterAndDescription": "Lc: Data Field Length",
+    "Allowed": "Min (MLEN*8, 254)/BLEN",
+    "Reference": "[T5T]",
+    "RawValue": 0,
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": false,
+    "ParentName": null
+  },
+  {
+    "Id": "PM-NFC-DEP-RETRY-ATN",
+    "ParameterAndDescription": "",
+    "Allowed": "",
+    "Reference": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": true,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-8",
+    "ParameterAndDescription": "",
+    "Allowed": "",
+    "Reference": "",
+    "RawValue": "0",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": true,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-12",
+    "ParameterAndDescription": "",
+    "Allowed": "",
+    "Reference": "",
+    "RawValue": "0",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": true,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-16",
+    "ParameterAndDescription": "",
+    "Allowed": "",
+    "Reference": "",
+    "RawValue": "0",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": true,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-20",
+    "ParameterAndDescription": "",
+    "Allowed": "",
+    "Reference": "",
+    "RawValue": "0",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": true,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-7",
+    "ParameterAndDescription": "",
+    "Allowed": "",
+    "Reference": "",
+    "RawValue": "0",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": true,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-11",
+    "ParameterAndDescription": "",
+    "Allowed": "",
+    "Reference": "",
+    "RawValue": "0",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": true,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-15",
+    "ParameterAndDescription": "",
+    "Allowed": "",
+    "Reference": "",
+    "RawValue": "0",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": true,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-19",
+    "ParameterAndDescription": "",
+    "Allowed": "",
+    "Reference": "",
+    "RawValue": "0",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": true,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-6",
+    "ParameterAndDescription": "",
+    "Allowed": "",
+    "Reference": "",
+    "RawValue": "0",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": true,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-10",
+    "ParameterAndDescription": "",
+    "Allowed": "",
+    "Reference": "",
+    "RawValue": "0",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": true,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-14",
+    "ParameterAndDescription": "",
+    "Allowed": "",
+    "Reference": "",
+    "RawValue": "0",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": true,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-18",
+    "ParameterAndDescription": "",
+    "Allowed": "",
+    "Reference": "",
+    "RawValue": "0",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": true,
+    "ParentName": null
+  },
+  {
+    "Id": "PM-NFC-DEP-RETRY-NACK",
+    "ParameterAndDescription": "",
+    "Allowed": "",
+    "Reference": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": true,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-5",
+    "ParameterAndDescription": "",
+    "Allowed": "",
+    "Reference": "",
+    "RawValue": "0",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": true,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-9",
+    "ParameterAndDescription": "",
+    "Allowed": "",
+    "Reference": "",
+    "RawValue": "0",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": true,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-13",
+    "ParameterAndDescription": "",
+    "Allowed": "",
+    "Reference": "",
+    "RawValue": "0",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": true,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-T4AB-PF-17",
+    "ParameterAndDescription": "",
+    "Allowed": "",
+    "Reference": "",
+    "RawValue": "0",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": true,
+    "ParentName": null
+  },
+  {
+    "Id": "LM-RPM",
+    "ParameterAndDescription": "",
+    "Allowed": "",
+    "Reference": "",
+    "RawValue": "",
+    "Users": [
+      "NFCForumDigitalTestSuite"
+    ],
+    "IsAddedItem": true,
+    "ParentName": null
+  }
+]},
+},}

@@ -1,0 +1,1551 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestPlan>
+  <TRVersion>13.1</TRVersion>
+  <TemplateVersion>1.0</TemplateVersion>
+  <ICSDocument>ICS 3.0.00</ICSDocument>
+  <IXITDocument>IXIT 3.0.00</IXITDocument>
+  <TCCLdocument>Test Case Category List (TCCL) 4.01</TCCLdocument>
+  <TCMTDocument>Test Case Mapping Table (TCMT) 6.0.00</TCMTDocument>
+  <InheritedSummaryTestReport></InheritedSummaryTestReport>
+  <TestSpecification Name="Test Cases for Type 3 Tag and Type 3 Tag Operation">
+    <Folder Name="Test Cases for Type 3 Tag Operation">
+      <Folder Name="Group 5: NDEF Detection and Access">
+        <Folder Name="Verify Minor and Major Mapping Version Number (x = 1)">
+          <TestCase TC__ID="TC_T3T_NDA_BV_2_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write (x = 1)">
+          <TestCase TC__ID="TC_T3T_NDA_BV_4_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write (x = 0)">
+          <TestCase TC__ID="TC_T3T_NDA_BV_4_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Verify state change from READ/WRITE state to READ ONLY state">
+          <TestCase TC__ID="TC_T3T_NDA_BV_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Verify Minor and Major Mapping Version Number (x = 2)">
+          <TestCase TC__ID="TC_T3T_NDA_BV_2_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write (x = 3)">
+          <TestCase TC__ID="TC_T3T_NDA_BV_4_3" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Verification of behavior in unexpected case, depending on parameters in Attribute Information Block (x = 0)">
+          <TestCase TC__ID="TC_T3T_NDA_BI_3_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write (x = 2)">
+          <TestCase TC__ID="TC_T3T_NDA_BV_4_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Detection and Read (x = 2)">
+          <TestCase TC__ID="TC_T3T_NDA_BV_3_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Detection and Read (x = 1)">
+          <TestCase TC__ID="TC_T3T_NDA_BV_3_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Verification of behavior in unexpected case, depending on parameters in Attribute Information Block (x = 1)">
+          <TestCase TC__ID="TC_T3T_NDA_BI_3_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Detection and Read (x = 0)">
+          <TestCase TC__ID="TC_T3T_NDA_BV_3_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write (x = 5)">
+          <TestCase TC__ID="TC_T3T_NDA_BV_4_5" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write (x = 4)">
+          <TestCase TC__ID="TC_T3T_NDA_BV_4_4" Applicable="true" Category="A"/>
+        </Folder>
+      </Folder>
+      <Folder Name="Group 3: Memory Structure and Management">
+        <Folder Name="Verification of timing (x = 3)">
+          <TestCase TC__ID="TC_T3T_MEM_BV_1_3" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Verification of timing (x = 1)">
+          <TestCase TC__ID="TC_T3T_MEM_BV_1_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Verification of timing (x = 0)">
+          <TestCase TC__ID="TC_T3T_MEM_BV_1_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Verification of timing (x = 2)">
+          <TestCase TC__ID="TC_T3T_MEM_BV_1_2" Applicable="true" Category="A"/>
+        </Folder>
+      </Folder>
+      <Folder Name="Group 1: RF Interface">
+        <Folder Name="De-synchronization after receipt of the EoD (x = 0)">
+          <TestCase TC__ID="TC_T3T_RFI_BV_2_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="De-synchronization after receipt of the EoD (x = 1)">
+          <TestCase TC__ID="TC_T3T_RFI_BV_2_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Verification of behavior when responding with reverse polarity (x = 0)">
+          <TestCase TC__ID="TC_T3T_RFI_BV_1_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Verification of behavior when responding with reverse polarity (x = 1)">
+          <TestCase TC__ID="TC_T3T_RFI_BV_1_1" Applicable="true" Category="A"/>
+        </Folder>
+      </Folder>
+    </Folder>
+  </TestSpecification>
+  <TestSpecification Name="Test Cases for Type 5 Tag and Type 5 Tag Operation">
+    <Folder Name="Test Cases for Type 5 Tag Operation">
+      <Folder Name="Group 3: Memory Structure and Management">
+        <Folder Name="NDEF Read procedure from a Tag with Memory Block size 4, 8, 16 or 32 bytes (x = 2)">
+          <TestCase TC__ID="TC_T5T_MSM_READ_BV_1_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write procedure to a Tag with different TLV structures (x = 2)">
+          <TestCase TC__ID="TC_T5T_MSM_WRITE_BV_2_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write procedure to a Tag with different TLV structures (x = 6)">
+          <TestCase TC__ID="TC_T5T_MSM_WRITE_BV_2_6" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Read procedure from a Tag with Memory Block size 4, 8, 16 or 32 bytes (x = 3)">
+          <TestCase TC__ID="TC_T5T_MSM_READ_BV_1_3" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Read procedure from a Tag with Memory Block size 4, 8, 16 or 32 bytes (x = 1)">
+          <TestCase TC__ID="TC_T5T_MSM_READ_BV_1_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write procedure to a Tag with different TLV structures (x = 1)">
+          <TestCase TC__ID="TC_T5T_MSM_WRITE_BV_2_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write procedure to a Tag with Memory Block size 4, 8, 16 or 32 bytes (x = 1)">
+          <TestCase TC__ID="TC_T5T_MSM_WRITE_BV_1_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write procedure to a Tag with different TLV structures (x = 3)">
+          <TestCase TC__ID="TC_T5T_MSM_WRITE_BV_2_3" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write procedure to a Tag with Memory Block size 4, 8, 16 or 32 bytes (x = 0)">
+          <TestCase TC__ID="TC_T5T_MSM_WRITE_BV_1_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write procedure to a Tag with different TLV structures (x = 0)">
+          <TestCase TC__ID="TC_T5T_MSM_WRITE_BV_2_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write procedure to a Tag with Memory Block size 4, 8, 16 or 32 bytes (x = 2)">
+          <TestCase TC__ID="TC_T5T_MSM_WRITE_BV_1_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write procedure to a Tag with Memory Block size 4, 8, 16 or 32 bytes (x = 3)">
+          <TestCase TC__ID="TC_T5T_MSM_WRITE_BV_1_3" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write procedure to a Tag with different TLV structures (x = 5)">
+          <TestCase TC__ID="TC_T5T_MSM_WRITE_BV_2_5" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Read procedure from a Tag with Memory Block size 4, 8, 16 or 32 bytes (x = 0)">
+          <TestCase TC__ID="TC_T5T_MSM_READ_BV_1_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Read procedure from a Tag with different TLV structures (x = 1)">
+          <TestCase TC__ID="TC_T5T_MSM_READ_BV_2_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Read procedure from a Tag with different TLV structures (x = 2)">
+          <TestCase TC__ID="TC_T5T_MSM_READ_BV_2_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Read procedure from a Tag with different TLV structures (x = 0)">
+          <TestCase TC__ID="TC_T5T_MSM_READ_BV_2_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Read procedure from a Tag with different TLV structures (x = 5)">
+          <TestCase TC__ID="TC_T5T_MSM_READ_BV_2_5" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Read procedure from a Tag with different TLV structures (x = 3)">
+          <TestCase TC__ID="TC_T5T_MSM_READ_BV_2_3" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Read procedure from a Tag with different TLV structures (x = 4)">
+          <TestCase TC__ID="TC_T5T_MSM_READ_BV_2_4" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write procedure to a Tag with different TLV structures (x = 4)">
+          <TestCase TC__ID="TC_T5T_MSM_WRITE_BV_2_4" Applicable="true" Category="A"/>
+        </Folder>
+      </Folder>
+      <Folder Name="Group 5.4: Command Sequence">
+        <Folder Name="NDEF Read procedure in addressed mode (x = 0)">
+          <TestCase TC__ID="TC_T5T_NIA_READ_BV_3_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Transition from READ-WRITE to READ-ONLY Type 5 Tag (x = 0)">
+          <TestCase TC__ID="TC_T5T_NIA_TRANS_BV_1_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Read procedure with READ_MULTIPLE_BLOCK (x = 1)">
+          <TestCase TC__ID="TC_T5T_NIA_READ_BV_4_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Read procedure in addressed mode (x = 2)">
+          <TestCase TC__ID="TC_T5T_NIA_READ_BV_3_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Read procedure with READ_MULTIPLE_BLOCK (x = 0)">
+          <TestCase TC__ID="TC_T5T_NIA_READ_BV_4_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write procedure following the NDEF Read procedure with READ_MULTIPLE_BLOCK (x = 1)">
+          <TestCase TC__ID="TC_T5T_NIA_WRITE_BV_1_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write procedure following the NDEF Read procedure with READ_MULTIPLE_BLOCK (x = 0)">
+          <TestCase TC__ID="TC_T5T_NIA_WRITE_BV_1_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Transition from READ-WRITE to READ-ONLY Type 5 Tag (x = 1)">
+          <TestCase TC__ID="TC_T5T_NIA_TRANS_BV_1_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Read procedure in addressed mode (x = 1)">
+          <TestCase TC__ID="TC_T5T_NIA_READ_BV_3_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write on READ-ONLY Type 5 Tag">
+          <TestCase TC__ID="TC_T5T_NIA_WRITE_BV_2" Applicable="true" Category="A"/>
+        </Folder>
+      </Folder>
+      <Folder Name="Group 5.2: Versioning">
+        <Folder Name="Verify Minor Mapping Version Number (x = 0)">
+          <TestCase TC__ID="TC_T5T_NIA_READ_BV_1_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Verify Minor Mapping Version Number (x = 1)">
+          <TestCase TC__ID="TC_T5T_NIA_READ_BV_1_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Verify Major Mapping Version Number (x = 0)">
+          <TestCase TC__ID="TC_T5T_NIA_READ_BV_2_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Verify Major Mapping Version Number (x = 1)">
+          <TestCase TC__ID="TC_T5T_NIA_READ_BV_2_1" Applicable="true" Category="A"/>
+        </Folder>
+      </Folder>
+      <Folder Name="Group 4: Command Set">
+        <Folder Name="NDEF Read with 1 tag in QUIET state and 1 tag in SELECTED state">
+          <TestCase TC__ID="TC_T5T_CS_SLPSEL_BV_1" Applicable="true" Category="A"/>
+        </Folder>
+      </Folder>
+    </Folder>
+  </TestSpecification>
+  <TestSpecification Name="Test cases for Analog">
+    <Folder Name="Group 2: Poller Test Cases">
+      <Folder Name="Group 2.2: Signal Interface Poller to Listener">
+        <Folder Name="Modulation Poller to Listener – NFC-A">
+          <TestCase TC__ID="TC_AN21_POL_NFCA_01" Applicable="true" Category="A" ReferenceAntenna="L1/L3/L6" P0Supported="false" Frequency="13.56/16.00"/>
+        </Folder>
+        <Folder Name="Modulation Poller to Listener – NFC-V">
+          <TestCase TC__ID="TC_AN21_POL_NFCV_01" Applicable="true" Category="A" ReferenceAntenna="L1/L3/L6" P0Supported="false" Frequency="13.56/16.00"/>
+        </Folder>
+        <Folder Name="Modulation Poller to Listener – NFC-F">
+          <TestCase TC__ID="TC_AN21_POL_NFCF_01_1" Applicable="true" Category="A" ReferenceAntenna="L1/L3/L6" P0Supported="false" Frequency="13.56/16.00"/>
+          <TestCase TC__ID="TC_AN21_POL_NFCF_01_0" Applicable="true" Category="A" ReferenceAntenna="L1/L3/L6" P0Supported="false" Frequency="13.56/16.00"/>
+        </Folder>
+        <Folder Name="Modulation Poller to Listener – NFC-B">
+          <TestCase TC__ID="TC_AN21_POL_NFCB_01" Applicable="true" Category="A" ReferenceAntenna="L1/L3/L6" P0Supported="false" Frequency="13.56/16.00"/>
+        </Folder>
+      </Folder>
+      <Folder Name="Group 2.1: Radio Frequency Power and Signal Interface">
+        <Folder Name="Reset characteristics Measurement">
+          <TestCase TC__ID="TC_AN21_POL_UND_04" Applicable="true" Category="A" ReferenceAntenna="L6" P0Supported="false" Frequency="13.56"/>
+        </Folder>
+        <Folder Name="Minimum Power Emission Measurement">
+          <TestCase TC__ID="TC_AN21_POL_UND_01" Applicable="true" Category="A" ReferenceAntenna="L1/L3/L6" P0Supported="false" Frequency="13.56"/>
+        </Folder>
+        <Folder Name="Threshold Level Test">
+          <TestCase TC__ID="TC_AN21_POL_UND_05" Applicable="true" Category="A" ReferenceAntenna="P0/P3/P6" P0Supported="false" Frequency="13.56"/>
+        </Folder>
+        <Folder Name="Field Deactivation">
+          <TestCase TC__ID="TC_AN21_POL_UND_07" Applicable="true" Category="A" ReferenceAntenna="L1" P0Supported="false" Frequency="13.56"/>
+        </Folder>
+        <Folder Name="Carrier Frequency Measurement">
+          <TestCase TC__ID="TC_AN21_POL_UND_03" Applicable="true" Category="A" ReferenceAntenna="L1" P0Supported="false" Frequency="13.56"/>
+        </Folder>
+        <Folder Name="Maximum Power Emission Measurement">
+          <TestCase TC__ID="TC_AN21_POL_UND_02" Applicable="true" Category="A" ReferenceAntenna="L1/L3/L6" P0Supported="false" Frequency="13.56"/>
+        </Folder>
+      </Folder>
+      <Folder Name="Group 2.3: Signal Interface Listener to Poller">
+        <Folder Name="Load Modulation Sensitivity Test for NFC-V">
+          <TestCase TC__ID="TC_AN21_POL_NFCV_02" Applicable="true" Category="A" ReferenceAntenna="L1/L3/L6" P0Supported="false" Frequency="13.56"/>
+        </Folder>
+        <Folder Name="Load Modulation Sensitivity Test for NFC-A">
+          <TestCase TC__ID="TC_AN21_POL_NFCA_02" Applicable="true" Category="A" ReferenceAntenna="L1/L3/L6" P0Supported="false" Frequency="13.56"/>
+        </Folder>
+        <Folder Name="Load Modulation Sensitivity Test for NFC-F">
+          <TestCase TC__ID="TC_AN21_POL_NFCF_02_1" Applicable="true" Category="A" ReferenceAntenna="L1/L3/L6" P0Supported="false" Frequency="13.56"/>
+          <TestCase TC__ID="TC_AN21_POL_NFCF_02_0" Applicable="true" Category="A" ReferenceAntenna="L1/L3/L6" P0Supported="false" Frequency="13.56"/>
+        </Folder>
+        <Folder Name="Load Modulation Sensitivity Test for NFC-B">
+          <TestCase TC__ID="TC_AN21_POL_NFCB_02" Applicable="true" Category="A" ReferenceAntenna="L1/L3/L6" P0Supported="false" Frequency="13.56"/>
+        </Folder>
+      </Folder>
+    </Folder>
+  </TestSpecification>
+  <TestSpecification Name="Test Cases for Type 2 Tag and Type 2 Tag Operation">
+    <Folder Name="Test Cases for Type 2 Tag Operation">
+      <Folder Name="Group 5.5: NDEF Detection and Access">
+        <Folder Name="NDEF Detection and Write to INITIALIZED Static Memory Layout">
+          <TestCase TC__ID="TC_T2T_NDA_BV_5" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Transitions from READ/WRITE to READ-ONLY (x = 2)">
+          <TestCase TC__ID="TC_T2T_NDA_BV_12_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Transitions from READ/WRITE to READ-ONLY (x = 0)">
+          <TestCase TC__ID="TC_T2T_NDA_BV_12_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Detection and Read from Dynamic Memory Layout with Lock Control TLV">
+          <TestCase TC__ID="TC_T2T_NDA_BV_8" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write to Dynamic Memory Layout with Lock Control TLV">
+          <TestCase TC__ID="TC_T2T_NDA_BV_9" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Transitions from READ/WRITE to READ-ONLY (x = 1)">
+          <TestCase TC__ID="TC_T2T_NDA_BV_12_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write to INITIALIZED Dynamic Memory Layout with Lock Control TLV and T2T_Area that is too small">
+          <TestCase TC__ID="TC_T2T_NDA_BV_10" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Detection and Read from Dynamic Memory Layout">
+          <TestCase TC__ID="TC_T2T_NDA_BV_6" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Transitions from READ/WRITE to READ-ONLY (x = 3)">
+          <TestCase TC__ID="TC_T2T_NDA_BV_12_3" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Detection and Read from Static Memory Layout">
+          <TestCase TC__ID="TC_T2T_NDA_BV_4" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write to READ-ONLY">
+          <TestCase TC__ID="TC_T2T_NDA_BV_11" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Detection and Write to Dynamic Memory Layout">
+          <TestCase TC__ID="TC_T2T_NDA_BV_7" Applicable="true" Category="A"/>
+        </Folder>
+      </Folder>
+      <Folder Name="Group 2: Framing and Transmission Handling">
+        <Folder Name="WRITE Command/Response with the Minimum and the Maximum Frame Delay Time POLL =&gt; LISTEN (x = 1)">
+          <TestCase TC__ID="TC_T2T_FTH_BV_3_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="WRITE Command/Response with the Minimum and the Maximum Frame Delay Time POLL =&gt; LISTEN (x = 0)">
+          <TestCase TC__ID="TC_T2T_FTH_BV_3_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Exchange and Timing Measurement">
+          <TestCase TC__ID="TC_T2T_FTH_BV_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="READ Command/Response with the Minimum and the Maximum Frame Delay Time POLL =&gt; LISTEN (x = 0)">
+          <TestCase TC__ID="TC_T2T_FTH_BV_2_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="READ Command/Response with the Minimum and the Maximum Frame Delay Time POLL =&gt; LISTEN (x = 1)">
+          <TestCase TC__ID="TC_T2T_FTH_BV_2_1" Applicable="true" Category="A"/>
+        </Folder>
+      </Folder>
+      <Folder Name="Group 5.2: Versioning">
+        <Folder Name="Verify Minor Mapping Version Number">
+          <TestCase TC__ID="TC_T2T_MEM_BV_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Verify Major Mapping Version Number">
+          <TestCase TC__ID="TC_T2T_MEM_BV_2" Applicable="true" Category="A"/>
+        </Folder>
+      </Folder>
+    </Folder>
+  </TestSpecification>
+  <TestSpecification Name="Test Cases for Type 4 Tag and Type 4 Tag Operation">
+    <Folder Name="Test Cases for Type 4 Tag Operation">
+      <Folder Name="Group 5.4: Command Sequence">
+        <Folder Name="NDEF Detection and Read MV2.0 (x=0)">
+          <TestCase TC__ID="TC_T4T_NDA_BV_13_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Detection and Read MV3.0 (x=3)">
+          <TestCase TC__ID="TC_T4T_NDA_BV_15_3" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Detection and Read MV2.0 (x=3)">
+          <TestCase TC__ID="TC_T4T_NDA_BV_13_3" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Detection and Read MV2.0 (x=1)">
+          <TestCase TC__ID="TC_T4T_NDA_BV_13_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Detection and Read MV3.0 (x=1)">
+          <TestCase TC__ID="TC_T4T_NDA_BV_15_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write to Type 4 Tag that is in READ-ONLY State (x=0)">
+          <TestCase TC__ID="TC_T4T_NDA_BV_18_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Detection and Read MV2.0 using Extended Field coding">
+          <TestCase TC__ID="TC_T4T_NDA_BV_14" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write to Type 4 Tag (x=3)">
+          <TestCase TC__ID="TC_T4T_NDA_BV_16_3" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Detection and Read MV3.0 (x=4)">
+          <TestCase TC__ID="TC_T4T_NDA_BV_15_4" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write to Type 4 Tag (x=5)">
+          <TestCase TC__ID="TC_T4T_NDA_BV_16_5" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Detection and Read MV3.0 (x=2)">
+          <TestCase TC__ID="TC_T4T_NDA_BV_15_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write to Type 4 Tag with an NDEF-File that is too small (x=0)">
+          <TestCase TC__ID="TC_T4T_NDA_BV_17_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write to Type 4 Tag (x=4)">
+          <TestCase TC__ID="TC_T4T_NDA_BV_16_4" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write to Type 4 Tag (x=0)">
+          <TestCase TC__ID="TC_T4T_NDA_BV_16_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write to Type 4 Tag (x=2)">
+          <TestCase TC__ID="TC_T4T_NDA_BV_16_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write to Type 4 Tag that is in READ-ONLY State (x=1)">
+          <TestCase TC__ID="TC_T4T_NDA_BV_18_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Detection and Read MV3.0 (x=0)">
+          <TestCase TC__ID="TC_T4T_NDA_BV_15_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write to Type 4 Tag with an NDEF-File that is too small (x=1)">
+          <TestCase TC__ID="TC_T4T_NDA_BV_17_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Detection and Read MV2.0 (x=2)">
+          <TestCase TC__ID="TC_T4T_NDA_BV_13_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NDEF Write to Type 4 Tag (x=1)">
+          <TestCase TC__ID="TC_T4T_NDA_BV_16_1" Applicable="true" Category="A"/>
+        </Folder>
+      </Folder>
+      <Folder Name="Group 5.2: Versioning">
+        <Folder Name="Verify processing of T4T in invalid State">
+          <TestCase TC__ID="TC_T4T_MEM_BV_3" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Verify Minor Mapping Version Number (x = 0)">
+          <TestCase TC__ID="TC_T4T_MEM_BV_1_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Verify Major Mapping Version Number">
+          <TestCase TC__ID="TC_T4T_MEM_BV_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="Verify Minor Mapping Version Number (x = 1)">
+          <TestCase TC__ID="TC_T4T_MEM_BV_1_1" Applicable="true" Category="A"/>
+        </Folder>
+      </Folder>
+    </Folder>
+  </TestSpecification>
+  <TestSpecification Name="Test Cases for Digital Protocol">
+    <Folder Name="Group 2: NFC Forum Device in Poll Mode">
+      <Folder Name="Group 2.2: Installation of NFC Forum Device with technology NFC-B">
+        <Folder Name="NFC-B Installation with Supported Values of SENSB_RES (xy = 00 to 47)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_10" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_12" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_18" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_43" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_39" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_36" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_44" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_17" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_28" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_21" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_20" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_45" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_24" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_14" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_27" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_47" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_02" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_09" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_34" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_15" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_46" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_13" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_40" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_04" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_08" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_26" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_22" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_38" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_29" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_23" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_33" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_00" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_35" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_31" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_19" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_07" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_16" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_01" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_05" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_42" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_32" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_41" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_37" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_30" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_03" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_06" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_25" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_14_11" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-B Installation with Supported Values of TR2 coding in SENSB_RES (x = 0 to 3)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_15_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_15_3" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_15_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_15_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-B Installation with Timeout Error after SLPB_REQ">
+          <TestCase TC__ID="TC_DP11_POL_NFCB_UND_BI_21" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-B Installation with Transmission Error in SENSB_RES during Collision Detection (x = 0 or 1)">
+          <TestCase TC__ID="TC_DP11_POL_NFCB_UND_BI_11_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCB_UND_BI_11_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-B Exchange with the Minimum and Maximum Character to Character Delay (EGTB,LISTEN) LISTEN®POLL (x = 0 or 1)">
+          <TestCase TC__ID="TC_DP11_POL_NFCB_UND_BV_12_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCB_UND_BV_12_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-B Exchange and Timing Measurement during Installation">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-B Installation with Protocol Error during Collision Resolution (x = 0 or 1 and y = 0 or 1)">
+          <TestCase TC__ID="TC_DP11_POL_NFCB_UND_BI_51_1_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCB_UND_BI_51_0_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCB_UND_BI_51_1_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCB_UND_BI_51_0_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-B Installation with Protocol Error after SLPB_REQ">
+          <TestCase TC__ID="TC_DP11_POL_NFCB_UND_BI_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-B Exchange with the Minimum and Maximum Frame Delay Time LISTEN®POLL (x = 0 or 1)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_11_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BV_11_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-B Installation with Timeout Error during Collision Detection after ALLB_REQ or SENSB_REQ">
+          <TestCase TC__ID="TC_DP11_POL_NFCB_UND_BI_22" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-B Exchange with the Supported SoS and EoS LISTEN®POLL (x = 0 or 1)">
+          <TestCase TC__ID="TC_DP11_POL_NFCB_UND_BV_13_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCB_UND_BV_13_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-B Installation with Transmission Error in SLPB_RES during Collision Detection (x = 0 or 1)">
+          <TestCase TC__ID="TC_DP11_POL_NFCB_UND_BI_12_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCB_UND_BI_12_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-B Installation with Protocol Error after ALLB_REQ">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_UND_BI_1" Applicable="true" Category="A"/>
+        </Folder>
+      </Folder>
+      <Folder Name="Group 2.8: Type 4A Tag (T4AT) Platform">
+        <Folder Name="T4AT Single Timeout Error after an S(WTX) Response Block (Several Values of WTXM) (xy = 00 to 14)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_61_02" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_61_14" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_61_13" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_61_08" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_61_03" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_61_04" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_61_10" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_61_09" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_61_05" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_61_06" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_61_01" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_61_07" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_61_12" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_61_00" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_61_11" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Timeout Error after an R(ACK) Block (i.e., Error Notification) (xy = 00 to 15 and z = 0 to 3)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_52_09_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_52_10_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_52_01_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_52_08_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_52_07_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_52_04_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_52_02_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_52_00_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_52_06_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_52_11_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_52_14_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_52_05_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_52_15_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_52_13_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_52_03_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_52_12_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT End of Activation with Supported Values of the TA(1) Byte of the ATS (x = 0 to 6)">
+          <TestCase TC__ID="TC_DP11_POL_NFCA_T4AT_BV_12_6" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCA_T4AT_BV_12_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCA_T4AT_BV_12_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCA_T4AT_BV_12_4" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCA_T4AT_BV_12_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCA_T4AT_BV_12_5" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCA_T4AT_BV_12_3" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT End of Activation with Supported Values of the TL (and Historical Bytes) Byte of the ATS (xy = 00 to 21)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_13_03" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_13_10" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_13_20" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_13_12" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_13_05" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_13_06" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_13_07" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_13_16" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_13_15" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_13_19" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_13_08" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_13_14" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_13_01" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_13_17" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_13_21" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_13_00" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_13_13" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_13_18" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_13_04" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_13_11" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_13_02" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_13_09" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Error Notification on an I-Block that does not Indicate Chaining (xy = 00 to 14)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_31_12" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_31_00" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_31_06" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_31_09" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_31_11" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_31_08" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_31_03" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_31_02" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_31_01" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_31_10" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_31_13" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_31_05" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_31_14" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_31_07" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_31_04" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Protocol Error in Response to an R(ACK) Block (x = 0 to 6)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_54_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_54_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_54_4" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_54_3" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_54_5" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_54_6" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_54_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Protocol Error in Response to an R(NAK) Block Sent to Notify a Transmission Error (x = 0 to 4)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_74_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_74_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_74_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_74_3" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_74_4" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Error-free Non-chained I-Blocks Exchanges for all Possible Values of FWT (xy = 00 to 15)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_21_09" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_21_11" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_21_10" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_21_15" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_21_03" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_21_02" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_21_14" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_21_04" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_21_07" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_21_01" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_21_06" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_21_08" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_21_00" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_21_13" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_21_05" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_21_12" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Error-free Non-chained I-Blocks Transmission for FSC = 16 to 128 Bytes (x = 0 to 8)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_23_6" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_23_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_23_5" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_23_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_23_4" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_23_3" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_23_7" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_23_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_23_8" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Transmission Error in Response to an S(DESELECT) Command (x = 0 to 7 and y = 0 to 5)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_82_5_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_82_7_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_82_6_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_82_3_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_82_0_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_82_4_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_82_2_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_82_1_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Error-free (Non-)chained I-Blocks in Both Directions for FSC from 256 bytes to RFU values (x = 0 to 4, y = 0 to 7, z = 0 to 1)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_22_0_5_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_22_0_0_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_22_0_1_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_22_0_1_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_22_0_3_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_22_0_5_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_22_0_6_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_22_0_3_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_22_0_0_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_22_0_2_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_22_0_7_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_22_0_4_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_22_0_2_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_22_0_7_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_22_0_4_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_22_0_6_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Error Notification on an I-Block that indicates Chaining (xy = 00 to 14)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_41_02" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_41_05" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_41_14" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_41_01" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_41_07" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_41_06" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_41_04" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_41_13" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_41_12" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_41_11" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_41_03" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_41_08" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_41_10" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_41_09" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_41_00" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Protocol Error in Response to an I-Block that does not Indicate Chaining (x = 0 to 5)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_34_4" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_34_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_34_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_34_5" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_34_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_34_3" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT End of Activation with Supported Values of SFGI in the TB(1) Byte of the ATS (xy = 00 to 10)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_14_02" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_14_08" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_14_05" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_14_04" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_14_10" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_14_06" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_14_01" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_14_00" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_14_09" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_14_03" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_14_07" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Activation with an EMD Transmission Error after RATS (x = 0 to 2, y = 0 to 3)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_11_20" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_11_22" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_11_21" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_11_01" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_11_13" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_11_10" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_11_12" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_11_11" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_11_03" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_11_23" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_11_02" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_11_00" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT End of Activation with Supported Values the TC(1) Byte of the ATS (x = 1 to 4)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_15_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_15_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_15_3" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Timeout Error after an S(DESELECT) Command (x = 0 to 5)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_83_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Exchange and Timing Measurement">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Protocol Error in Response to an I-Block that Indicates Chaining (x = 0 to 4)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_44_4" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_44_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_44_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_44_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_44_3" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Transmission Error in Response to an R(ACK) Block (x = 0 to 2 and y = 0 to 3)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_53_1_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_53_2_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_53_0_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Transmission Error in Response to an I-Block that Indicates Chaining (x = 0 to 2 and y = 0 to 3)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_43_0_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_43_1_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_43_2_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Protocol Error in Response to an S(DESELECT) Command (x = 0 to 2)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_81_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_81_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_81_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Timeout Error After an I-Block that does not Indicate Chaining (x = 0 to 3)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_32_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Transmission Error in Response to an I-Block that does not Indicate Chaining (x = 0 to 2 and y = 0 to 3)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_33_1_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_33_0_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_33_2_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Repeated Use of an FWT Extension after a Single S(WTX) Request">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_62" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Exchange with the Minimum and the Default Maximum Frame Delay Time LISTEN®POLL (x = 0 or 1)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_11_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_11_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Error-free Request for Frame Waiting Time Extension during Chaining in Both Directions">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_32" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Error-free Request for Frame Waiting Time Extension on Non-chained I-Blocks">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_31" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Error-free Chained I-Blocks Reception with Rare Frame Sizes">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BV_33" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Timeout Error after an I-Block that Indicates Chaining (x = 0 to 3)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_42_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4AT Consecutive Timeout Errors after S(WTX) Response Blocks (x = 0 to 3)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_T4AT_BI_75_0" Applicable="true" Category="A"/>
+        </Folder>
+      </Folder>
+      <Folder Name="Group 2.9: Type 4B Tag (T4BT) Platform">
+        <Folder Name="T4BT Error-free (Non)chained I-Blocks in Both Directions for FSC from 256 to RFU values">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_22_0_7_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_22_0_0_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_22_0_1_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_22_0_0_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_22_0_4_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_22_0_1_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_22_0_6_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_22_0_3_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_22_0_3_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_22_0_7_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_22_0_5_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_22_0_4_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_22_0_2_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_22_0_2_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_22_0_5_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_22_0_6_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Error-free Non-chained I-Blocks Transmission for FSC = 32 to 128 bytes (x = 0 to 7)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_23_5" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_23_6" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_23_4" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_23_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_23_7" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_23_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_23_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_23_3" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Protocol Error in Response to an I-Block that does not Indicate Chaining (x = 0 to 5)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_34_5" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_34_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_34_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_34_4" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_34_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_34_3" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Error Notification on an I-Block that Indicates Chaining (xy = 00 to 14)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_41_09" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_41_05" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_41_00" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_41_07" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_41_06" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_41_11" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_41_01" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_41_02" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_41_08" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_41_04" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_41_14" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_41_13" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_41_10" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_41_03" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_41_12" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Transmission Error in Response to an S(DESELECT) Command (x = 0 to 4 and y = 0 to 5)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_82_4_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_82_3_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_82_1_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_82_2_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_82_0_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Activation with an Error after ATTRIB (x = 0 to 2)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_10_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_10_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_10_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Single Timeout Error after an S(WTX) Response Block (Several Values of WTXM) (xy = 00 to 14)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_61_11" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_61_12" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_61_14" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_61_02" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_61_05" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_61_07" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_61_04" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_61_09" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_61_01" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_61_00" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_61_03" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_61_10" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_61_06" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_61_13" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_61_08" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Error Notification on an I-Block that does not Indicate Chaining (xy = 00 to 14)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_31_08" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_31_14" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_31_03" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_31_02" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_31_12" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_31_01" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_31_09" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_31_11" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_31_00" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_31_05" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_31_07" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_31_13" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_31_10" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_31_04" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_31_06" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Protocol Error in Response to an R(ACK) Block (x = 0 to 6)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_54_5" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_54_4" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_54_3" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_54_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_54_6" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_54_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_54_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Error-free Non-chained I-Blocks Exchanges for all Possible Values of FWT (xy = 00 to 15)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_21_09" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_21_00" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_21_11" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_21_06" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_21_15" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_21_08" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_21_07" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_21_02" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_21_04" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_21_13" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_21_03" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_21_10" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_21_14" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_21_05" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_21_12" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_21_01" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Timeout Error after an R(ACK) Block (i.e., Error Notification) (xy = 00 to 15 and z = 0 to 3)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_52_09_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_52_08_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_52_03_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_52_15_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_52_04_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_52_02_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_52_06_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_52_00_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_52_12_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_52_10_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_52_13_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_52_14_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_52_01_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_52_07_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_52_11_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_52_05_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Exchange with Supported Values of MBLI (x = 0 to 4)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_17_4" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_17_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_17_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_17_3" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_17_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Exchange with the Minimum and the Default Maximum Frame Delay Time POLL ==&gt; LISTEN (x = 0 or 1)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_10_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_10_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Activation with an EMD Transmission Error after ATTRIB (x = 0 to 2, y = 0 to 3)">
+          <TestCase TC__ID="TC_DP11_POL_NFCB_T4BT_BI_11_1_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCB_T4BT_BI_11_0_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCB_T4BT_BI_11_2_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCB_T4BT_BI_11_1_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCB_T4BT_BI_11_2_3" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCB_T4BT_BI_11_2_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCB_T4BT_BI_11_2_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCB_T4BT_BI_11_0_3" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCB_T4BT_BI_11_1_3" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCB_T4BT_BI_11_0_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCB_T4BT_BI_11_1_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCB_T4BT_BI_11_0_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Transmission Error in Response to an I-Block that Indicates Chaining (x = 0 to 3)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_43_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Repeated Use of a FWTB,SENSB Extension after a Single S(WTX) Request">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_62" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Protocol Error in Response to an S(DESELECT) Command (x = 0 to 2)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_81_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_81_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_81_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Timeout Error after an I-Block that Indicates Chaining (x = 0 to 3)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_42_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Protocol Error in Response to an I-Block that Indicates Chaining (x = 0 to 4)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_44_4" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_44_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_44_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_44_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_44_3" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Exchange with the Minimum and the Maximum Character-to-Character delay (x = 0 or 1)">
+          <TestCase TC__ID="TC_DP11_POL_NFCB_T4BT_BV_12_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCB_T4BT_BV_12_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Error-free Request for Frame Waiting Time Extension during Chaining in Both Directions">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_32" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Protocol Error in Response to an R(NAK) Block Sent to Notify a Transmission Error (x = 0 to 4)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_74_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_74_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_74_3" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_74_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_74_4" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Exchange with Supported Values of TR2B in Protocol_Type (x = 0 to 3)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_16_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_16_3" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_16_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_16_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Timeout Error after an S(DESELECT) Command (x = 0 to 5)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_83_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Consecutive Timeout Errors after S(WTX) Response Blocks (x = 0 to 3)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_75_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Transmission Error in Response to an R(ACK) Block (x = 0 to 3)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_53_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Exchange and Timing Measurement ">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Timeout Error after an I-Block that does not Indicate Chaining (x = 0 to 3)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_32_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Error-free Chained I-Blocks Reception with Rare Frame Sizes">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_33" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Exchange with Supported SoS and EoS (x = 0 or 1)">
+          <TestCase TC__ID="TC_DP11_POL_NFCB_T4BT_BV_11_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCB_T4BT_BV_11_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Error-free Request for Frame Waiting Time Extension on Non-chained I-Blocks">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BV_31" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T4BT Transmission Error in Response to an I-Block that does not Indicate Chaining (x = 0 to 3)">
+          <TestCase TC__ID="TC_DP21_POL_NFCB_T4BT_BI_33_0" Applicable="true" Category="A"/>
+        </Folder>
+      </Folder>
+      <Folder Name="Group 2.1: Installation of NFC Forum Device with technology NFC-A">
+        <Folder Name="NFC-A Installation with Timeout Error during Collision Resolution (x = 0 to 1)">
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BI_54_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BI_54_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Installation with Timeout Error during Device Activation (x = 0 to 1)">
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BI_22_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BI_22_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Installation with Protocol Error in SDD_RES with Complete NFCID1 (x = 0 to 3)">
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BI_3_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BI_3_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BI_3_3" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BI_3_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Installation with Supported Values of SEL_RES (x = 0 to 3)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BV_12_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BV_12_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BV_12_3" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Installation with Transmission Error in SDD_RES during Collision Resolution (x = 0 or 1)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_52_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_52_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Installation with supported values of SENS_RES (xy=00 to 06 and 08 to 11)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BV_11_09" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BV_11_03" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BV_11_05" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BV_11_06" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BV_11_02" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BV_11_04" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BV_11_11" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BV_11_01" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BV_11_10" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BV_11_00" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BV_11_08" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Installation with Transmission Error during Device Activation (x = 0 to 6)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_13_3" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_13_6" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_13_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_13_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_13_4" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Installation with Protocol Error after ALL_REQ (x = 0 to 3)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_2_3" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_2_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_2_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_2_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Installation with Protocol Error after SEL_REQ during Collision Detection (x = 0 or 1)">
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BI_1_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BI_1_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Installation with a Collision during Collision Resolution (x = 0 or 1)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BV_52_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BV_52_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Installation with Protocol Error in SDD_RES with Incomplete NFCID1 during Collision Resolution (x = 0 to 2)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_51_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_51_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_51_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Installation with Timeout Error during Collision (x = 0 or 1)">
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BI_21_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BI_21_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Installation with Transmission Error in SDD_RES during Collision Detection (x = 0 to 2)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_11_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_11_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_11_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Installation with any value of NFCID10 (xy = 0 to 10)">
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BV_13_05" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BV_13_10" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BV_13_06" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BV_13_01" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BV_13_04" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BV_13_08" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BV_13_09" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BV_13_07" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BV_13_02" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BV_13_03" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BV_13_00" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Exchange and Timing Measurement During Installation">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BV_1" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Installation with Transmission Error in SEL_RES during Collision Resolution (x = 0 to 3)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_53_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_53_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_53_3" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_53_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Installation with Transmission Error in SEL_RES during Collision Detection (x = 0 to 3)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_12_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_12_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_12_3" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BI_12_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Installation with Single, Double, and Triple Size NFCID1 (x = 0 to 2)">
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BV_10_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BV_10_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCA_UND_BV_10_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-A Installation with Protocol Error after SEL_REQ during Collision Resolution (x = 0 to 1)">
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BI_50_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP11_POL_NFCA_UND_BI_50_1" Applicable="true" Category="A"/>
+        </Folder>
+      </Folder>
+      <Folder Name="Group 2.10: Type 5 Tag (T5T) Platform">
+        <Folder Name="T5T Write Exchange with the Minimum and the Maximum Frame Delay Time POLLàLISTEN (x = 0 to 3)">
+          <TestCase TC__ID="TC_DP22_POL_NFCV_T5T_BV_2_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCV_T5T_BV_2_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCV_T5T_BV_2_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCV_T5T_BV_2_3" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-V Timeout Error on Read Alike command">
+          <TestCase TC__ID="TC_DP22_POL_NFCV_T5T_BI_4" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="T5T Read Exchange with the Minimum and the Maximum Frame Delay Time POLLàLISTEN (x = 0 and 1)">
+          <TestCase TC__ID="TC_DP22_POL_NFCV_T5T_BV_1_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCV_T5T_BV_1_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC- V Transmission Error on a Read Alike command">
+          <TestCase TC__ID="TC_DP22_POL_NFCV_T5T_BI_5" Applicable="true" Category="A"/>
+        </Folder>
+      </Folder>
+      <Folder Name="Group 2.3: Installation of NFC Forum Device with technology NFC-F">
+        <Folder Name="T3T Exchange with reverse polarity (x = 0 to 1 and y = 0 or 1)">
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_4_0_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_4_0_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="De-synchronization for the NFC-F Technology (x = 0 to 6 and y = 0 or 1)">
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BI_1_0_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BI_1_2_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BI_1_2_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BI_1_0_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BI_1_3_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BI_1_3_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-F Installation with TSN in CON_DEVICES_LIMIT_F &gt;= 1  (x = 1 to 3 and y = 0 or 1 and z = 0 to 5) ">
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_3_2_0_3" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_3_2_0_5" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_3_2_0_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_3_2_0_4" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_3_2_1_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_3_2_0_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_3_2_1_5" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_3_2_1_3" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_3_2_1_4" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_3_2_1_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_3_2_0_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_3_2_1_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-F Exchange Frame Format and Timings measurement during Collision Resolution, (x = 2 to 4 and y = 0 or 1 and z = 0 to 5)">
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_51_2_1_4" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_51_2_0_5" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_51_2_0_3" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_51_2_1_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_51_2_0_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_51_2_0_4" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_51_2_1_5" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_51_2_1_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_51_2_0_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_51_2_1_3" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_51_2_0_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_51_2_1_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-F Exchange Frame Format and Timing Measurement during Installation, (x = 0 to 1 and y = 0 or 1)">
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_1_1_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_1_0_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_1_1_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_UND_BV_1_0_0" Applicable="true" Category="A"/>
+        </Folder>
+      </Folder>
+      <Folder Name="Group 2.4: Installation of NFC Forum Device with technology NFC-V">
+        <Folder Name="NFC-V Installation with Timeout Error during Collision Resolution Activity">
+          <TestCase TC__ID="TC_DP21_POL_NFCV_UND_BI_3" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC- V Installation with Protocol Error during collision detection">
+          <TestCase TC__ID="TC_DP21_POL_NFCV_UND_BI_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-V Installation with collisions and five NFC-V listening devices in the field">
+          <TestCase TC__ID="TC_DP21_POL_NFCV_UND_BV_5" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-V Installation with a collision on various bit positions (x = 0 to 2)">
+          <TestCase TC__ID="TC_DP21_POL_NFCV_UND_BV_3_2" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCV_UND_BV_3_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCV_UND_BV_3_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-V Installation with a collision and resolution on different slots (x = 0 to 7)">
+          <TestCase TC__ID="TC_DP21_POL_NFCV_UND_BV_4_7" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCV_UND_BV_4_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCV_UND_BV_4_5" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCV_UND_BV_4_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCV_UND_BV_4_3" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCV_UND_BV_4_4" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCV_UND_BV_4_6" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCV_UND_BV_4_2" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-V Exchange and Timings Measurement During Installation &#xa;(x = 0 and 1)">
+          <TestCase TC__ID="TC_DP21_POL_NFCV_UND_BV_1_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP21_POL_NFCV_UND_BV_1_0" Applicable="true" Category="A"/>
+        </Folder>
+        <Folder Name="NFC-V Installation with a Protocol Error from one listening device during Collision Resolution">
+          <TestCase TC__ID="TC_DP21_POL_NFCV_UND_BI_1" Applicable="true" Category="A"/>
+        </Folder>
+      </Folder>
+      <Folder Name="Group 2.7: Type 3 Tag (T3T) Platform">
+        <Folder Name="T3T Installation Timing measurement">
+          <TestCase TC__ID="TC_DP22_POL_NFCF_T3T_BI_1_0_0" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_NFCF_T3T_BI_1_0_1" Applicable="true" Category="A"/>
+        </Folder>
+      </Folder>
+    </Folder>
+    <Folder Name="Group 1: Installation of NFC Forum Device">
+      <Folder Name=" Group 1.1: Installation of NFC Forum Device with technology NFC-ACM, NFC-A, NFC-B, NFC-F and NFC-V">
+        <Folder Name="NFC-ACM, A, B , F and V Guard Time timing measurement during technology detection activity (am = 0, 1 or 2, b = 0 to 1, f = 1 to 2 and v = 0 or 1) ">
+          <TestCase TC__ID="TC_DP22_POL_ALL_UND_BV_1_0_1_1_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_ALL_UND_BV_1_0_0_1_1" Applicable="true" Category="A"/>
+          <TestCase TC__ID="TC_DP22_POL_ALL_UND_BV_1_0_1_2_1" Applicable="true" Category="A"/>
+        </Folder>
+      </Folder>
+    </Folder>
+  </TestSpecification>
+  <NFCForumDevices>
+    <NFCUniversalDevice>
+      <Row Name="NFC Universal Device  - Card Emulation Mode - Type 4B Tag Platform" Value="No"/>
+      <Row Name="NFC Universal Device -  Initiator (ACM) - Target (ACM)" Value="No"/>
+      <Row Name="NFC Universal Device - Card Emulation Mode - Type 4A Tag Platform" Value="No"/>
+      <Row Name="NFC Universal Device - Type 4B Tag Module" Value="No"/>
+      <Row Name="NFC Universal Device - Card Emulation Mode - Type 3 Tag Platform" Value="No"/>
+      <Row Name="NFC Universal Device - Type 4A Tag Module" Value="No"/>
+      <Row Name="NFC Universal Device - Reader/Writer - Initiator (PCM) - Target (PCM)" Value="No"/>
+      <Row Name="NFC Universal Device - Type 3 Tag Module" Value="No"/>
+      <Row Name="NFC Universal Device - WLC Poller" Value="No"/>
+    </NFCUniversalDevice>
+    <NFCMobileDevice>
+      <Row Name="NFC Mobile Device - RF Collision Avoidance - Reader/Writer - Card Emulation Mode (Type 3 Tag Platform, Type 4A Tag Platform, Type 4B Tag Platform)" Value="No"/>
+      <Row Name="NFC Mobile Device - WLC Poller" Value="No"/>
+      <Row Name="NFC Mobile Device - Type 4B Tag Module" Value="No"/>
+      <Row Name="NFC Mobile Device - Type 4A Tag Module" Value="No"/>
+      <Row Name="NFC Mobile Device - Type 3 Tag Module" Value="No"/>
+    </NFCMobileDevice>
+    <NFCReaderDevice>
+      <Row Name="NFC Reader Device - WLC Poller" Value="No"/>
+      <Row Name="NFC Reader Device - RF Collision Avoidance" Value="Yes"/>
+      <Row Name="NFC Reader Device - Reader/Writer (2T OP, T3T OP, T4AT OP, T4BT OP, T5T OP)" Value="Yes"/>
+    </NFCReaderDevice>
+    <NFCTagDevice>
+      <Row Name="NFC Tag Device - NFC Type 2 Tag" Value="No"/>
+      <Row Name="NFC Tag Device - NFC Type 5 Tag" Value="No"/>
+      <Row Name="NFC Tag Device - NFC Type 4B Tag" Value="No"/>
+      <Row Name="NFC Tag Device - NFC Type 4A Tag" Value="No"/>
+      <Row Name="NFC Tag Device - NFC Type 3 Tag" Value="No"/>
+    </NFCTagDevice>
+  </NFCForumDevices>
+  <ICS>
+    <Row Name="PNFCV-NC-MDD" Value="Yes"/>
+    <Row Name="IRF-COL-AVOID" Value="Yes"/>
+    <Row Name="PTD-NFCB" Value="Yes"/>
+    <Row Name="PD-NFCF-NC-BR212" Value="Yes"/>
+    <Row Name="PT-PP-T2T" Value="Yes"/>
+    <Row Name="LTA-NFCA" Value="No"/>
+    <Row Name="MOD-WLCP" Value="No"/>
+    <Row Name="RWM-WNDEF-T4AT" Value="Yes"/>
+    <Row Name="PT-T4BT-NC-INF" Value="No"/>
+    <Row Name="P-NFC-DEP-NC-PSL-REQ-I-DID" Value="No"/>
+    <Row Name="MOD-RWM-T2T" Value="Yes"/>
+    <Row Name="LA-NFCF-NC-BR424" Value="No"/>
+    <Row Name="L-NFCA-NC-NFCID1-TS" Value="No"/>
+    <Row Name="LTD-ACM-F" Value="No"/>
+    <Row Name="MIUX_SUPPORT" Value="No"/>
+    <Row Name="PMT-BRS" Value="No"/>
+    <Row Name="LP-ISO-DEP" Value="No"/>
+    <Row Name="T3T-CAP" Value="No"/>
+    <Row Name="T4T-UB-DDO" Value="No"/>
+    <Row Name="T5T-STF-SUP" Value="No"/>
+    <Row Name="TAG-PERF" Value="No"/>
+    <Row Name="LWLC-OV6" Value="No"/>
+    <Row Name="LSC-CL" Value="No"/>
+    <Row Name="RWM-RNDEF-T4AT" Value="Yes"/>
+    <Row Name="PTA-NFCF" Value="Yes"/>
+    <Row Name="PTA-NFCB" Value="Yes"/>
+    <Row Name="PTD-NFCV" Value="Yes"/>
+    <Row Name="RWM-DTA" Value="Yes"/>
+    <Row Name="PWLC-PC3" Value="No"/>
+    <Row Name="PTOV-COMM" Value="Yes"/>
+    <Row Name="PT-T4BT-NC-DID-ATTRIB-DIFF" Value="No"/>
+    <Row Name="P-NFC-DEP-NC-PSL-REQ-1" Value="No"/>
+    <Row Name="PP-ISO-DEP" Value="Yes"/>
+    <Row Name="LA-NFCF-NC-BR212" Value="No"/>
+    <Row Name="L-NFCA-NC-NFCID1-SS" Value="No"/>
+    <Row Name="LTD-ACM-A" Value="No"/>
+    <Row Name="PAX-NO-MIUX" Value="No"/>
+    <Row Name="MOD-PM-TAR" Value="No"/>
+    <Row Name="L-T4AT-NC-DID-1" Value="No"/>
+    <Row Name="T3T-MV-1.x" Value="No"/>
+    <Row Name="T4T-RB-ODO" Value="No"/>
+    <Row Name="T5T-RMB-CMD" Value="No"/>
+    <Row Name="TAG-P0" Value="No"/>
+    <Row Name="LWLC-NEGO-MOD" Value="No"/>
+    <Row Name="VER_VER12" Value="No"/>
+    <Row Name="PNFCV-NC-SDR" Value="No"/>
+    <Row Name="PTD-NFCA" Value="Yes"/>
+    <Row Name="PNFCB-NC-MDR" Value="Yes"/>
+    <Row Name="PTD-NFCF" Value="Yes"/>
+    <Row Name="PT-PP-T3T-NO-NDEF" Value="No"/>
+    <Row Name="PWLC-OV7" Value="No"/>
+    <Row Name="RWM-RNDEF-T4BT" Value="Yes"/>
+    <Row Name="PT-T4BT-NC-B6B5-DIFF" Value="No"/>
+    <Row Name="P-NFC-DEP-NC-106I" Value="No"/>
+    <Row Name="RWM-WNDEF-T2T" Value="Yes"/>
+    <Row Name="L-T3T-NC-BR-212" Value="No"/>
+    <Row Name="LTA-NFCB" Value="No"/>
+    <Row Name="L-NFC-DEP-NC-RTOX" Value="No"/>
+    <Row Name="P2P-SNEP" Value="No"/>
+    <Row Name="MOD-CEM" Value="No"/>
+    <Row Name="T2T-CAP" Value="No"/>
+    <Row Name="T4AT-CAP" Value="No"/>
+    <Row Name="T4T-EFC" Value="No"/>
+    <Row Name="T5T-ELSB-CMD" Value="No"/>
+    <Row Name="NDEF-RO" Value="No"/>
+    <Row Name="LWLC-NDEF_WR_TO_INT" Value="No"/>
+    <Row Name="CO-CC-PARAM" Value="No"/>
+    <Row Name="PNFCV-NC-MDR" Value="Yes"/>
+    <Row Name="PTA-NFCA" Value="Yes"/>
+    <Row Name="PNFCB-NC-MDD" Value="Yes"/>
+    <Row Name="PD-NFCF-NC-BR424" Value="Yes"/>
+    <Row Name="PT-PP-T3T" Value="Yes"/>
+    <Row Name="PWLC-OV6" Value="No"/>
+    <Row Name="MOD-RWM-T4BT" Value="Yes"/>
+    <Row Name="PT-T4BT-NC-B4B3-DIFF" Value="No"/>
+    <Row Name="P-NFC-DEP-NC-RSL-REQ" Value="No"/>
+    <Row Name="RWM-RNDEF-T2T" Value="Yes"/>
+    <Row Name="LTA-NFCF" Value="No"/>
+    <Row Name="LTD-NFCA" Value="No"/>
+    <Row Name="LTOV-COMM" Value="No"/>
+    <Row Name="P2P-NDEF" Value="No"/>
+    <Row Name="CEM-RPS" Value="No"/>
+    <Row Name="T2T-MV-1.x" Value="No"/>
+    <Row Name="T3T-UPDATE" Value="No"/>
+    <Row Name="T4T-UP-BIN" Value="No"/>
+    <Row Name="T5T-WSB-CMD" Value="No"/>
+    <Row Name="NDEF-R/W" Value="No"/>
+    <Row Name="LWLC-OV7" Value="No"/>
+    <Row Name="LSC-CO" Value="No"/>
+    <Row Name="PD-ACMF-NC-BR424" Value="No"/>
+    <Row Name="PNFCB-NC-EXTRES" Value="No"/>
+    <Row Name="PNFCA-NC-NFCID1MDR" Value="Yes"/>
+    <Row Name="PNFCF-NC-MDR" Value="Yes"/>
+    <Row Name="PWLC-PC0" Value="No"/>
+    <Row Name="MOD-RWM-T5T" Value="Yes"/>
+    <Row Name="PT-T4AT-NC-DID" Value="No"/>
+    <Row Name="PT-PP-T5T" Value="Yes"/>
+    <Row Name="P-NFC-DEP-NC-424I" Value="No"/>
+    <Row Name="RWM-RNDEF-T3T" Value="Yes"/>
+    <Row Name="LTD-NFCF" Value="No"/>
+    <Row Name="L-NFCB-NC-SENSB-RES" Value="No"/>
+    <Row Name="LD-NFCF-NC-BR424" Value="No"/>
+    <Row Name="VER_VER10" Value="No"/>
+    <Row Name="LT-T3T-NO-NDEF" Value="No"/>
+    <Row Name="T2T-MEM-STA" Value="No"/>
+    <Row Name="T4T-AB-CAP" Value="No"/>
+    <Row Name="T5T-CAP" Value="No"/>
+    <Row Name="T5T-EWSB-CMD" Value="No"/>
+    <Row Name="NDEF-TRANS" Value="No"/>
+    <Row Name="PM-PB" Value="No"/>
+    <Row Name="CO-NAME" Value="No"/>
+    <Row Name="PD-ACMF-NC-BR212" Value="No"/>
+    <Row Name="PNFCA-NC-NFCID1MDD" Value="Yes"/>
+    <Row Name="PNFCB-NC-SDR" Value="No"/>
+    <Row Name="PNFCF-NC-MDD" Value="Yes"/>
+    <Row Name="RWM-WNDEF-T4BT" Value="Yes"/>
+    <Row Name="PWLC-WPT_STOP" Value="No"/>
+    <Row Name="PT-PP-T4AT" Value="Yes"/>
+    <Row Name="PT-T4BT-NC-B8B7-DIFF" Value="No"/>
+    <Row Name="P-NFC-DEP-NC-212I" Value="No"/>
+    <Row Name="MOD-RWM-T3T" Value="Yes"/>
+    <Row Name="L-T3T-NC-BR-424" Value="No"/>
+    <Row Name="L-NFCB-NC-DID" Value="No"/>
+    <Row Name="LD-NFCF-NC-BR212" Value="No"/>
+    <Row Name="VER_UNSUP" Value="No"/>
+    <Row Name="LT-T3T" Value="No"/>
+    <Row Name="T2T-MEM-DYN" Value="No"/>
+    <Row Name="T4BT-CAP" Value="No"/>
+    <Row Name="T5T-MV-1.x" Value="No"/>
+    <Row Name="T5T-ERMB-CMD" Value="No"/>
+    <Row Name="NDEF-INIT" Value="No"/>
+    <Row Name="LWLC-WPT_STOP " Value="No"/>
+    <Row Name="CO-SDR" Value="No"/>
+    <Row Name="PTD-ACM-F" Value="No"/>
+    <Row Name="PA-NFCF-NC-BR424" Value="Yes"/>
+    <Row Name="PNFCA-NFC-NFCID1-DET" Value="Yes"/>
+    <Row Name="PTA-NFCV" Value="Yes"/>
+    <Row Name="PWLC-PC2" Value="No"/>
+    <Row Name="RWM-WNDEF-T5T" Value="Yes"/>
+    <Row Name="PT-T4BT-NC-DID" Value="No"/>
+    <Row Name="P-NFC-DEP-NC-DSL-REQ" Value="No"/>
+    <Row Name="MOD-PM-INI" Value="No"/>
+    <Row Name="MOD-RWM-T4AT" Value="Yes"/>
+    <Row Name="LTD-NFCB" Value="No"/>
+    <Row Name="L-NFCA-NC-NFCID1-DS" Value="No"/>
+    <Row Name="LTD-NFCV" Value="No"/>
+    <Row Name="PM-PLS-254" Value="No"/>
+    <Row Name="LT-T4BT" Value="No"/>
+    <Row Name="T2T-WRITE" Value="No"/>
+    <Row Name="T4T-MV-3.x" Value="No"/>
+    <Row Name="T5T-LSB-CMD" Value="No"/>
+    <Row Name="T5T-SELECT" Value="No"/>
+    <Row Name="LWLC-STAT-MOD" Value="No"/>
+    <Row Name="PM-LSC3" Value="No"/>
+    <Row Name="CO-CONNECT-PARAM" Value="No"/>
+    <Row Name="PTD-ACM-A" Value="No"/>
+    <Row Name="PA-NFCF-NC-BR212" Value="Yes"/>
+    <Row Name="PNFCA-NC-NFCID1SDR" Value="No"/>
+    <Row Name="PNFCF-NC-SDR" Value="No"/>
+    <Row Name="PWLC-PC1" Value="No"/>
+    <Row Name="RWM-RNDEF-T5T" Value="Yes"/>
+    <Row Name="PT-PP-T4BT" Value="Yes"/>
+    <Row Name="P-NFC-DEP-NC-DID" Value="No"/>
+    <Row Name="PP-NFC-DEP" Value="No"/>
+    <Row Name="RWM-WNDEF-T3T" Value="Yes"/>
+    <Row Name="L-NFCB-NC-NFCID0-DG" Value="No"/>
+    <Row Name="L-NFCA-NC-NFCID1-DG" Value="No"/>
+    <Row Name="LTA-NFCV" Value="No"/>
+    <Row Name="LP-NFC-DEP" Value="No"/>
+    <Row Name="LT-T4AT" Value="No"/>
+    <Row Name="T2T-SEC-SEL" Value="No"/>
+    <Row Name="T4T-MV-2.x" Value="No"/>
+    <Row Name="T5T-ERS-CMD" Value="No"/>
+    <Row Name="T5T-SPECF-SUP" Value="No"/>
+    <Row Name="MOD-WLCL" Value="No"/>
+    <Row Name="PM-LLCP" Value="No"/>
+    <Row Name="CO-DIRECT" Value="No"/>
+  </ICS>
+  <IXIT>
+    <Row Name="PM-NFC-DEP-LR" Value="" Unit="Integer"/>
+    <Row Name="LIS-MOD-ANT-CAT" Value="" Unit="Text"/>
+    <Row Name="LM-NFC-DEP-RTOX" Value="" Unit="Integer"/>
+    <Row Name="LM-LME-LM" Value="" Unit="μs"/>
+    <Row Name="GEN-WKS" Value="" Unit="Hexa"/>
+    <Row Name="CL-SAP-OUTBOUND" Value="" Unit="Hexa"/>
+    <Row Name="CO-PARAM-CC" Value="" Unit="Hexa"/>
+    <Row Name="PM-ISODEP-RETRY,WTX" Value="2" Unit="Integer"/>
+    <Row Name="LM-NFCA-NFCID1-A" Value="0FA1A2A3" Unit="Hexa"/>
+    <Row Name="PM-NFCB-COLL-RES-SLOTS" Value="2" Unit="Integer"/>
+    <Row Name="CO-SAP-DYNAMIC" Value="" Unit="Byte"/>
+    <Row Name="PM-T4BT-PLATFORM-RETRY,ATTRIB" Value="0" Unit="Integer"/>
+    <Row Name="PM-NFC-DEP-RETRY-ATN" Value="" Unit="Integer"/>
+    <Row Name="PM-RP-RESET-DELAY-TIME" Value="1000000" Unit="μs"/>
+    <Row Name="LM-T4AB-FSCI" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-4" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-8" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-12" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-16" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-20" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-CAPDU-INIT" Value="" Unit="Hexa"/>
+    <Row Name="T5T-EMNB" Value="" Unit="Integer"/>
+    <Row Name="LM-LMEWLC-WPTSTOP" Value="" Unit="Text"/>
+    <Row Name="PM-NFC-DEP-BS" Value="" Unit="Hexa"/>
+    <Row Name="8-SHAPED COIL POSITION" Value="OK" Unit="Text"/>
+    <Row Name="LM-NFC-DEP-WT" Value="" Unit="Integer"/>
+    <Row Name="GEN_MIUX" Value="" Unit="Hexa"/>
+    <Row Name="GEN-LTO" Value="" Unit="Hexa"/>
+    <Row Name="CL-SAP-INBOUND" Value="" Unit="Hexa"/>
+    <Row Name="CO-SAP-OUTBOUND" Value="" Unit="Hexa"/>
+    <Row Name="PM-ISODEP-RETRY,NAK" Value="2" Unit="Integer"/>
+    <Row Name="IUT-REFERENCE-POINT(S)" Value="OK" Unit="Text"/>
+    <Row Name="LM-NFCB-NFCID0-SENSB" Value="00000000" Unit="Hexa"/>
+    <Row Name="CON_DEVICES_LIMIT_V" Value="2" Unit="Hexa"/>
+    <Row Name="PM-T4T-PLATFORM-FSDI" Value="8" Unit="Hexa"/>
+    <Row Name="PM-NFC-DEP-DID" Value="" Unit="Integer"/>
+    <Row Name="PM-RP-T4AT-NFC-DEP-PRIORITY" Value="" Unit="Byte"/>
+    <Row Name="LM-T4T-4K-EXT-APDU" Value="" Unit="Boolean"/>
+    <Row Name="LM-T4AB-PF-3" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-7" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-11" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-15" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-19" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-PAID" Value="" Unit="Hexa"/>
+    <Row Name="T5T-MNB" Value="" Unit="Integer"/>
+    <Row Name="Δthold,off,WLCPmax" Value="" Unit="μs"/>
+    <Row Name="PM-NFC-DEP-BR" Value="" Unit="Hexa"/>
+    <Row Name="LM-NFC-DEP-LR" Value="" Unit="Integer"/>
+    <Row Name="IUT-PHI0_AXIS" Value="OK" Unit="Text"/>
+    <Row Name="GEN-TECHNOLOGY" Value="" Unit="Text"/>
+    <Row Name="GEN-RW" Value="" Unit="Integer"/>
+    <Row Name="CL-SAP-DYNAMIC" Value="" Unit="Byte"/>
+    <Row Name="PM-ISODEP-RETRY,ACK" Value="2" Unit="Integer"/>
+    <Row Name="CON_DEVICES_LIMIT_A" Value="2" Unit="Hexa"/>
+    <Row Name="CON_DEVICES_LIMIT_F" Value="2" Unit="Hexa"/>
+    <Row Name="CO-SAP-INBOUND-NOSRV" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-2" Value="" Unit="Hexa"/>
+    <Row Name="PM-RP-NO-COMMAND-TIME" Value="15000000" Unit="μs"/>
+    <Row Name="GEN_EXTENDED_DTA_URN" Value="" Unit="Hexa"/>
+    <Row Name="PM-T4T-PLATFORM-DID" Value="" Unit="Integer"/>
+    <Row Name="LM-T4AB-PF-6" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-10" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-14" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-18" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-LE" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-RAPDU-INIT" Value="" Unit="Hexa"/>
+    <Row Name="TDELAY,WLC" Value="" Unit="μs"/>
+    <Row Name="PM-RP-REACTIVE" Value="" Unit="Integer"/>
+    <Row Name="LM-LME-TRANS" Value="" Unit="μs"/>
+    <Row Name="PM-ISODEP-RETRY,DESELECT" Value="2" Unit="Integer"/>
+    <Row Name="GEN-VERSION" Value="" Unit="Integer"/>
+    <Row Name="GEN- ATR_REQ-PARAM" Value="" Unit="Hexa"/>
+    <Row Name="CO-PARAM-CONNECT" Value="" Unit="Hexa"/>
+    <Row Name="PM-ISODEP-DID-0-OPTION" Value="No" Unit="Boolean"/>
+    <Row Name="PM-NFCA-FIRST-COMMAND" Value="0b" Unit="Byte"/>
+    <Row Name="CON_DEVICES_LIMIT_B" Value="2" Unit="Hexa"/>
+    <Row Name="CO-SAP-INBOUND" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-1" Value="" Unit="Hexa"/>
+    <Row Name="PM-NFC-DEP-RETRY-NACK" Value="" Unit="Integer"/>
+    <Row Name="PM-RP-DISCOVERY_DURATION" Value="1000" Unit="ms"/>
+    <Row Name="LM-T4AB-SFGI" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-5" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-9" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-13" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-17" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-LC" Value="" Unit="Hexa"/>
+    <Row Name="LM-T4AB-PF-RAPDU" Value="" Unit="Hexa"/>
+    <Row Name="PM-T5T-RETRY-ERROR" Value="2" Unit="Integer"/>
+    <Row Name="LM-RPM" Value="" Unit="Text"/>
+  </IXIT>
+</TestPlan>

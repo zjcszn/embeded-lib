@@ -1,0 +1,1 @@
+***** IMPORTANT : Please unzip API Guide compressed folder and double click on index.html to view API Guide documentation. *****
