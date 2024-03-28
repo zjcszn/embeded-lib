@@ -1,0 +1,11 @@
+menuconfig COMPONENT3
+    bool "component3"
+    default y
+
+if COMPONENT3
+
+    config XXX3
+        bool
+        default y
+
+endif
