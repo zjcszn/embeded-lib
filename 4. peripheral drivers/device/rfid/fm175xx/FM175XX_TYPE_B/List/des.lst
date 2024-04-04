@@ -1,0 +1,827 @@
+C51 COMPILER V9.01   DES                                                                   07/15/2014 20:44:39 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE DES
+OBJECT MODULE PLACED IN .\Output\des.obj
+COMPILER INVOKED BY: D:\Program Files\Keil4\C51\BIN\C51.EXE des.c LARGE OMF2 BROWSE INCDIR(.\Inc) DEBUG PRINT(.\List\des
+                    -.lst) OBJECT(.\Output\des.obj)
+
+line level    source
+
+   1          //2012年4月23日修改，增加MAC运算函数
+   2          
+   3          #include <string.h>
+   4          #include "des.h"
+   5          #include "main.h"
+   6           
+   7          /*****************************************************************************************************/
+   8          //函 数 名：Tdes
+   9          //功    能：对一个8字节的字符串进行3DES加解密计算
+  10          //输    入：
+  11          //                  Mode=0:加密 ，Mode=1：解密
+  12          //                      MsgIn ：8字节输入数组，明文（加密）或密文（解密）
+  13          //                      Key :16字节密钥数组
+  14          //                              
+  15          //输      出：MsgOut：8字节输出数组，密文（加密）或明文（解密）
+  16          //返 回 值：OK
+  17          /**************************************************************************************/
+  18          unsigned char Tdes( unsigned char Mode,unsigned char *MsgIn, unsigned char *Key, unsigned char *MsgOut)
+  19          //Mode=0:加密 Mode=1：解密
+  20          {
+  21   1      unsigned char des_key_temp[8];
+  22   1      unsigned char Min[8];
+  23   1      unsigned char Mout[8];
+  24   1      
+  25   1      if(Mode ==ENCRY)//加密
+  26   1      {
+  27   2              memcpy(des_key_temp,Key,8);
+  28   2              memcpy(Min,MsgIn,8);
+  29   2              
+  30   2              Des(ENCRY,Min,des_key_temp,Mout);
+  31   2              
+  32   2              memcpy(des_key_temp,Key+8,8);
+  33   2              memcpy(Min,Mout,8);
+  34   2              
+  35   2              Des(DECRY,Min,des_key_temp,Mout);
+  36   2              
+  37   2              memcpy(des_key_temp,Key,8);
+  38   2              memcpy(Min,Mout,8);
+  39   2              
+  40   2              Des(ENCRY,Min,des_key_temp,Mout);
+  41   2      }
+  42   1      if(Mode==DECRY)
+  43   1      {
+  44   2              memcpy(des_key_temp,Key,8);
+  45   2              memcpy(Min,MsgIn,8);
+  46   2              
+  47   2              Des(DECRY,Min,des_key_temp,Mout);
+  48   2              
+  49   2              memcpy( des_key_temp,Key+8,8);
+  50   2              memcpy( Min,Mout,8);
+  51   2              
+  52   2              Des(ENCRY,Min,des_key_temp,Mout);
+  53   2              
+  54   2              memcpy(des_key_temp,Key,8);
+C51 COMPILER V9.01   DES                                                                   07/15/2014 20:44:39 PAGE 2   
+
+  55   2              memcpy(Min,Mout,8);
+  56   2                      
+  57   2              Des(DECRY,Min,des_key_temp,Mout);
+  58   2      }
+  59   1              memcpy( MsgOut,Mout,8);
+  60   1              return OK;
+  61   1      }
+  62          /**************************************************************************************/
+  63          //TripleMAC 计算
+  64          //输入：
+  65          //init_data: 8字节数组，初始化数据
+  66          //mac_key: 16字节密钥数组
+  67          //data_len: 数据长度
+  68          //in_data: 输入数据数组，长度由data_len指定
+  69          //输出：
+  70          //mac_data: 8字节数组，MAC计算结果
+  71          //返 回 值：OK
+  72          /**************************************************************************************/
+  73          unsigned char TripleMAC(unsigned char *init_data,unsigned char *mac_key,unsigned char data_len,unsigned ch
+             -ar *in_data,unsigned char *mac_data)
+  74          
+  75          {
+  76   1              unsigned char mac_data0[8],mac_data1[8];
+  77   1          unsigned char data len;
+  78   1          unsigned char data i,j;    
+  79   1              unsigned char L[8],R[8];
+  80   1      
+  81   1              memcpy( L,mac_key,8);
+  82   1              memcpy( R,mac_key+8,8);
+  83   1              memcpy( mac_data0,init_data,8);
+  84   1                       
+  85   1              len=data_len/8;
+  86   1              for (i=0;i<     (8*(len+1)-data_len);i++)
+  87   1                      {
+  88   2                      if (i==0)
+  89   2                              in_data[data_len+i]=0x80;
+  90   2                      if (i>0)
+  91   2                              in_data[data_len+i]=0x00;
+  92   2                      }
+  93   1              data_len=data_len+i;
+  94   1                                             
+  95   1              len=data_len/8;
+  96   1              for(j=0;j<len;j++)
+  97   1      
+  98   1          {
+  99   2              for(i=0;i<8;i++)      
+ 100   2                              mac_data0[i] ^= in_data[i+j*8];
+ 101   2                      Des(ENCRY,mac_data0,L,mac_data1);     
+ 102   2                  memcpy(mac_data0,mac_data1,8);
+ 103   2              }
+ 104   1                                              
+ 105   1              Des(DECRY,mac_data0,R,mac_data1);
+ 106   1          memcpy(mac_data0,mac_data1,8);
+ 107   1              Des(ENCRY,mac_data0,L,mac_data1);
+ 108   1              
+ 109   1              memcpy( mac_data,mac_data1,8);
+ 110   1          return OK;    
+ 111   1      }
+ 112          /**************************************************************************************/
+ 113          //MAC 计算
+ 114          //输入：
+ 115          //init_data: 8字节数组，初始化数据
+C51 COMPILER V9.01   DES                                                                   07/15/2014 20:44:39 PAGE 3   
+
+ 116          //mac_key: 16字节密钥数组
+ 117          //data_len: 数据长度
+ 118          //in_data: 输入数组，长度由data_len指定
+ 119          //输出：
+ 120          //mac_data: 8字节数组，MAC计算结果
+ 121          //返 回 值：OK
+ 122          /**************************************************************************************/
+ 123          unsigned char MAC(unsigned char *init_data,unsigned char *mac_key,unsigned char data_len,unsigned char *in
+             -_data,unsigned char *mac_data)
+ 124          {
+ 125   1              unsigned char mac_data0[8],mac_data1[8];
+ 126   1          unsigned char data len;
+ 127   1          unsigned char data i,j;    
+ 128   1      
+ 129   1              memcpy( mac_data0,init_data,8);
+ 130   1                                                                                
+ 131   1              len=data_len/8;
+ 132   1              for (i=0;i<     (8*(len+1)-data_len);i++)
+ 133   1                      {
+ 134   2                      if (i==0)
+ 135   2                              in_data[data_len+i]=0x80;
+ 136   2                      if (i>0)
+ 137   2                              in_data[data_len+i]=0x00;
+ 138   2                      }
+ 139   1              data_len=data_len+i;
+ 140   1                                             
+ 141   1              len=data_len/8;
+ 142   1              for(j=0;j<len;j++)
+ 143   1      
+ 144   1          {
+ 145   2              for(i=0;i<8;i++)      
+ 146   2                              mac_data0[i] ^= in_data[i+j*8];
+ 147   2                      Des(ENCRY,mac_data0,mac_key,mac_data1);     
+ 148   2                  memcpy(mac_data0,mac_data1,8);
+ 149   2              }
+ 150   1                                      
+ 151   1              memcpy(mac_data,mac_data1,8);
+ 152   1          return OK;  
+ 153   1         
+ 154   1      }
+ 155          /***************************************************************************************/
+ 156          //函 数 名：Des
+ 157          //功    能：对一个8字节的字符串进行单DES加解密计算
+ 158          //输    入：
+ 159          //                  Mode=0:加密 ，Mode=1：解密
+ 160          //                      MsgIn ：输入8字节数组 ，明文（加密）或密文（解密）
+ 161          //                      Key：8字节密钥数组
+ 162          //输      出：MsgOut：输出8字节数组 ，密文（加密）或明文（解密）
+ 163          //返 回 值：OK
+ 164          /**************************************************************************************/
+ 165          unsigned char Des( unsigned char Mode,unsigned char *MsgIn, unsigned char *Key, unsigned char *MsgOut)
+ 166          {
+ 167   1              
+ 168   1              unsigned char data i;
+ 169   1              unsigned char data temp1,temp2,temp3,temp4;
+ 170   1              unsigned char data C0[4], D0[4];
+ 171   1              unsigned char data Ki[8];
+ 172   1      
+ 173   1      
+ 174   1      const unsigned char SBox1[64]=
+ 175   1      {
+ 176   1              14,  4, 13,  1,  2,  15, 11,  8,  3,  10,  6,  12,  5,  9,  0,  7, 
+C51 COMPILER V9.01   DES                                                                   07/15/2014 20:44:39 PAGE 4   
+
+ 177   1               0, 15,  7,  4,  14, 2,  13,  1,  10, 6 ,  12, 11,  9,  5,  3,  8,       
+ 178   1              4,  1,  14,  8,  13, 6,  2,  11, 15,  12, 9,   7,  3,  10, 5,  0,
+ 179   1              15, 12, 8,   2,  4,  9,  1,   7,  5,  11,  3,  14, 10, 0,  6,  13 
+ 180   1      };
+ 181   1      const unsigned char SBox2[64]=
+ 182   1      {
+ 183   1              15,  1,   8,  14,  6, 11,   3,  4,  9,  7,  2, 13, 12,  0,  5, 10,
+ 184   1              3,  13,   4,   7, 15,  2,   8, 14, 12,  0,  1, 10,  6,  9, 11,  5,
+ 185   1              0,  14,   7,  11, 10,  4,  13,  1,  5,  8, 12,  6,  9,  3,  2, 15,
+ 186   1              13,  8,  10,   1,  3, 15,   4,  2, 11,  6,  7, 12,  0,  5, 14,  9
+ 187   1      };
+ 188   1      const unsigned char SBox3[64]=
+ 189   1      {
+ 190   1              10,  0,   9,  14,  6,  3,  15,  5,  1, 13, 12,  7, 11,  4,  2,  8, 
+ 191   1              13,  7,   0,   9,  3,  4,   6, 10,  2,  8,  5, 14, 12, 11, 15,  1, 
+ 192   1              13,  6,   4 ,  9,  8, 15,   3,  0, 11,  1,  2, 12,  5, 10, 14,  7, 
+ 193   1               1, 10,  13,   0,  6,  9,   8,  7,  4, 15, 14,  3, 11,  5,  2, 12
+ 194   1      };
+ 195   1      const unsigned char SBox4[64]=
+ 196   1      {
+ 197   1               7, 13,  14,   3,  0,  6,   9, 10,  1,  2,  8,  5, 11, 12,  4, 15, 
+ 198   1          13,  8,  11,   5,  6, 15,   0,  3,  4,  7,  2, 12,  1, 10, 14,  9, 
+ 199   1          10,  6,   9,   0, 12, 11,   7, 13, 15,  1,  3, 14,  5,  2,  8,  4, 
+ 200   1           3, 15,   0,   6, 10,  1,  13,  8,  9,  4,  5, 11, 12,  7,  2, 14 
+ 201   1      };
+ 202   1      const unsigned char SBox5[64]=
+ 203   1      {
+ 204   1               2, 12,  4,  1,  7, 10, 11,  6,  8,  5,  3, 15, 13,  0, 14,  9, 
+ 205   1          14, 11,  2, 12,  4,  7, 13,  1,  5,  0, 15, 10,  3,  9,  8,  6, 
+ 206   1           4,  2,  1, 11, 10, 13,  7,  8, 15,  9, 12,  5,  6,  3,  0, 14, 
+ 207   1          11,  8, 12,  7,  1, 14,  2, 13,  6, 15,  0,  9, 10,  4,  5,  3 
+ 208   1      };
+ 209   1      const unsigned char SBox6[64]=
+ 210   1      {
+ 211   1              12,  1, 10, 15, 9,  2,  6,  8,  0, 13,  3,  4, 14,  7,  5, 11, 
+ 212   1          10, 15,  4,  2, 7, 12,  9,  5,  6,  1, 13, 14,  0, 11,  3,  8, 
+ 213   1           9, 14, 15,  5, 2,  8, 12,  3,  7,  0,  4, 10,  1, 13, 11,  6, 
+ 214   1           4,  3,  2, 12, 9,  5, 15, 10, 11, 14,  1,  7,  6,  0,  8, 13 
+ 215   1      };
+ 216   1      const unsigned char SBox7[64]=
+ 217   1      {
+ 218   1               4, 11,  2, 14, 15,  0,  8, 13,  3, 12,  9,  7,  5, 10,  6,  1, 
+ 219   1          13,  0, 11,  7,  4,  9,  1, 10, 14,  3,  5, 12,  2, 15,  8,  6, 
+ 220   1           1,  4, 11, 13, 12,  3,  7, 14, 10, 15,  6,  8,  0,  5,  9,  2, 
+ 221   1           6, 11, 13,  8,  1,  4, 10,  7,  9,  5,  0, 15, 14,  2,  3, 12 
+ 222   1      };
+ 223   1      const unsigned char SBox8[64]=
+ 224   1      {
+ 225   1              13,  2,  8, 4,  6, 15, 11,  1, 10,  9,  3, 14,  5,  0, 12,  7, 
+ 226   1           1, 15, 13, 8, 10,  3,  7,  4, 12,  5,  6, 11,  0, 14,  9,  2, 
+ 227   1           7, 11,  4, 1,  9, 12, 14,  2,  0,  6, 10, 13, 15,  3,  5,  8, 
+ 228   1           2,  1, 14, 7,  4, 10,  8, 13, 15, 12,  9,  0,  3,  5,  6, 11
+ 229   1      };
+ 230   1              
+ 231   1      const unsigned char ShiftValue[16]={1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1 };                                           
+ 232   1                      
+ 233   1              for(i=0; i<8; i++)
+ 234   1              {
+ 235   2                      MsgOut[0]>>=1;
+ 236   2                      MsgOut[1]>>=1;
+ 237   2                      MsgOut[2]>>=1;
+ 238   2                      MsgOut[3]>>=1;
+C51 COMPILER V9.01   DES                                                                   07/15/2014 20:44:39 PAGE 5   
+
+ 239   2                      MsgOut[4]>>=1;
+ 240   2                      MsgOut[5]>>=1;
+ 241   2                      MsgOut[6]>>=1;
+ 242   2                      MsgOut[7]>>=1;
+ 243   2                      
+ 244   2                      temp1=MsgIn[i];
+ 245   2      
+ 246   2                      MsgOut[4] |= (temp1&0x80);
+ 247   2                      temp1<<=1;
+ 248   2                      MsgOut[0] |= (temp1&0x80);
+ 249   2                      temp1<<=1;
+ 250   2                      MsgOut[5] |= (temp1&0x80);
+ 251   2                      temp1<<=1;
+ 252   2                      MsgOut[1] |= (temp1&0x80);
+ 253   2                      temp1<<=1;
+ 254   2                      MsgOut[6] |= (temp1&0x80);
+ 255   2                      temp1<<=1;
+ 256   2                      MsgOut[2] |= (temp1&0x80);
+ 257   2                      temp1<<=1;
+ 258   2                      MsgOut[7] |= (temp1&0x80);
+ 259   2                      temp1<<=1;
+ 260   2                      MsgOut[3] |= (temp1&0x80);
+ 261   2              }
+ 262   1              //密钥处理
+ 263   1              //序列变换１（PC-1）
+ 264   1              //输出：C0, D0,各28bit
+ 265   1              for(i=0; i<8; i++)
+ 266   1              {
+ 267   2                      C0[0]>>=1;
+ 268   2                      C0[1]>>=1;
+ 269   2                      C0[2]>>=1;
+ 270   2                      C0[3]>>=1;
+ 271   2                      D0[0]>>=1;
+ 272   2                      D0[1]>>=1;
+ 273   2                      D0[2]>>=1;
+ 274   2      
+ 275   2                      temp1=Key[i];
+ 276   2                      C0[0] |= (temp1&0x80);
+ 277   2                      temp1<<=1;
+ 278   2                      C0[1] |= (temp1&0x80);
+ 279   2                      temp1<<=1;
+ 280   2                      C0[2] |= (temp1&0x80);
+ 281   2                      temp1<<=1;
+ 282   2                      C0[3] |= (temp1&0x80);
+ 283   2                      temp1<<=1;
+ 284   2                      D0[2] |= (temp1&0x80);
+ 285   2                      temp1<<=1;
+ 286   2                      D0[1] |= (temp1&0x80);
+ 287   2                      temp1<<=1;
+ 288   2                      D0[0] |= (temp1&0x80);
+ 289   2                              
+ 290   2              }
+ 291   1              
+ 292   1              D0[3]=(C0[3]&0x0f)|(D0[2]<<4);
+ 293   1              D0[2]=(D0[2]>>4)|(D0[1]<<4);
+ 294   1              D0[1]=(D0[1]>>4)|(D0[0]<<4);
+ 295   1              D0[0]=(D0[0]>>4)&0x0F;
+ 296   1              C0[3]&=0xf0;
+ 297   1              ////////////////////////////////////////
+ 298   1              
+ 299   1              for(i=0; i<16; i++)
+ 300   1              {
+C51 COMPILER V9.01   DES                                                                   07/15/2014 20:44:39 PAGE 6   
+
+ 301   2                      //计算子密钥,输出Ki
+ 302   2                      if(Mode == ENCRY)
+ 303   2                      {
+ 304   3                      
+ 305   3                              for(temp1=0; temp1<ShiftValue[i]; temp1++)
+ 306   3                              {
+ 307   4                                      
+ 308   4                                      if((C0[0]&bit1)!=0) C0[3]|=bit5;
+ 309   4                                      C0[0]<<=1;
+ 310   4                                      if((C0[1]&bit1)!=0) C0[0]|=bit8;
+ 311   4                                      C0[1]<<=1;
+ 312   4                                      if((C0[2]&bit1)!=0) C0[1]|=bit8;
+ 313   4                                      C0[2]<<=1;
+ 314   4                                      if((C0[3]&bit1)!=0) C0[2]|=bit8;
+ 315   4                                      C0[3]<<=1;
+ 316   4                                      
+ 317   4                              //      D0
+ 318   4                                      D0[0]<<=1;
+ 319   4                                      if((D0[1]&bit1)!=0) D0[0]|=bit8;
+ 320   4                                      D0[1]<<=1;
+ 321   4                                      if((D0[2]&bit1)!=0) D0[1]|=bit8;
+ 322   4                                      D0[2]<<=1;
+ 323   4                                      if((D0[3]&bit1)!=0) D0[2]|=bit8;
+ 324   4                                      D0[3]<<=1;
+ 325   4                                      if((D0[0]&bit4)!=0)
+ 326   4                                      {
+ 327   5                                               D0[3]|=bit8;
+ 328   5                                               D0[0]&=0x0f;//(~bit4);
+ 329   5                                      }
+ 330   4                                                      
+ 331   4                              }
+ 332   3                      }
+ 333   2                      //把C[i]D[i]串联起来，变成Ki,共有56bit
+ 334   2                      
+ 335   2                      Ki[0]=C0[0]; 
+ 336   2                      Ki[1]=C0[1]; 
+ 337   2                      Ki[2]=C0[2]; 
+ 338   2                      Ki[3]=C0[3]|D0[0]; 
+ 339   2                      Ki[4]=D0[1]; 
+ 340   2                      Ki[5]=D0[2]; 
+ 341   2                      Ki[6]=D0[3]; 
+ 342   2                      
+ 343   2                      //序列变换２(PC-2)，变换后存入Ki中，共有48bit
+ 344   2                      temp1=0;
+ 345   2                      temp2=0;
+ 346   2                      temp3=0;
+ 347   2                      
+ 348   2                      if((Ki[0]&bit1)!=0) temp1|=bit5;  //1
+ 349   2                      if((Ki[0]&bit2)!=0) temp3|=bit8;  //2
+ 350   2                      if((Ki[0]&bit3)!=0) temp1|=bit7;  //3
+ 351   2                      if((Ki[0]&bit4)!=0) temp2|=bit8;  //4
+ 352   2                      if((Ki[0]&bit5)!=0) temp1|=bit6;  //5
+ 353   2                      if((Ki[0]&bit6)!=0) temp2|=bit2;  //6
+ 354   2                      if((Ki[0]&bit7)!=0) temp3|=bit4;  //7
+ 355   2                      if((Ki[0]&bit8)!=0) temp3|=bit2;  //8
+ 356   2                                                        
+ 357   2      //              if((Ki[1]&bit1)!=0) temp1|=bit5;  // 9
+ 358   2                      if((Ki[1]&bit2)!=0) temp2|=bit4;  //10
+ 359   2                      if((Ki[1]&bit3)!=0) temp1|=bit3;  //11
+ 360   2                      if((Ki[1]&bit4)!=0) temp2|=bit7;  //12
+ 361   2                      if((Ki[1]&bit5)!=0) temp3|=bit7;  //13
+ 362   2                      if((Ki[1]&bit6)!=0) temp1|=bit1;  //14
+C51 COMPILER V9.01   DES                                                                   07/15/2014 20:44:39 PAGE 7   
+
+ 363   2                      if((Ki[1]&bit7)!=0) temp2|=bit1;  //15
+ 364   2                      if((Ki[1]&bit8)!=0) temp3|=bit3;  //16
+ 365   2                                                    //
+ 366   2                      if((Ki[2]&bit1)!=0) temp1|=bit2;  //17
+ 367   2      //              if((Ki[2]&bit2)!=0) temp3|=bit8;  //18
+ 368   2                      if((Ki[2]&bit3)!=0) temp2|=bit6;  //19
+ 369   2                      if((Ki[2]&bit4)!=0) temp3|=bit6;  //20
+ 370   2                      if((Ki[2]&bit5)!=0) temp2|=bit3;  //21
+ 371   2      //              if((Ki[2]&bit6)!=0) temp2|=bit2;  //22
+ 372   2                      if((Ki[2]&bit7)!=0) temp2|=bit5;  //23
+ 373   2                      if((Ki[2]&bit8)!=0) temp1|=bit4;  //24
+ 374   2                      
+ 375   2      //              if((Ki[3]&bit1)!=0) temp1|=bit5;  //25
+ 376   2                      if((Ki[3]&bit2)!=0) temp3|=bit1;  //26
+ 377   2                      if((Ki[3]&bit3)!=0) temp3|=bit5;  //27
+ 378   2                      if((Ki[3]&bit4)!=0) temp1|=bit8;  //28
+ 379   2              
+ 380   2                      Ki[0]=temp1;
+ 381   2                      Ki[1]=temp2;
+ 382   2                      Ki[2]=temp3;
+ 383   2              
+ 384   2                      temp1=0;
+ 385   2                      temp2=0;
+ 386   2                      temp3=0;
+ 387   2                      
+ 388   2                      if((Ki[3]&bit5)!=0) temp3|=bit7;
+ 389   2                      if((Ki[3]&bit6)!=0) temp1|=bit7;
+ 390   2                      if((Ki[3]&bit7)!=0) temp1|=bit3;
+ 391   2                      if((Ki[3]&bit8)!=0) temp3|=bit8;
+ 392   2                      
+ 393   2                      if((Ki[4]&bit1)!=0) temp2|=bit3;
+ 394   2                      if((Ki[4]&bit2)!=0) temp3|=bit1;
+ 395   2      //              if((Ki[4]&bit3)!=0) temp1|=bit7;
+ 396   2                      if((Ki[4]&bit4)!=0) temp3|=bit6;
+ 397   2                      if((Ki[4]&bit5)!=0) temp1|=bit4;
+ 398   2      //              if((Ki[4]&bit6)!=0) temp2|=bit2;
+ 399   2                      if((Ki[4]&bit7)!=0) temp2|=bit7;
+ 400   2                      if((Ki[4]&bit8)!=0) temp1|=bit8;
+ 401   2              
+ 402   2                      if((Ki[5]&bit1)!=0) temp1|=bit1;
+ 403   2                      if((Ki[5]&bit2)!=0) temp3|=bit4;
+ 404   2      //              if((Ki[5]&bit3)!=0) temp1|=bit7;
+ 405   2                      if((Ki[5]&bit4)!=0) temp2|=bit5;
+ 406   2                      if((Ki[5]&bit5)!=0) temp2|=bit2;
+ 407   2                      if((Ki[5]&bit6)!=0) temp3|=bit3;
+ 408   2                      if((Ki[5]&bit7)!=0) temp1|=bit5;
+ 409   2                      if((Ki[5]&bit8)!=0) temp2|=bit4;
+ 410   2                      
+ 411   2                      if((Ki[6]&bit1)!=0) temp2|=bit6;
+ 412   2                      if((Ki[6]&bit2)!=0) temp3|=bit5;
+ 413   2                      if((Ki[6]&bit3)!=0) temp2|=bit1;
+ 414   2                      if((Ki[6]&bit4)!=0) temp1|=bit2;
+ 415   2                      if((Ki[6]&bit5)!=0) temp3|=bit2;
+ 416   2      //              if((Ki[6]&bit6)!=0) temp2|=bit2;
+ 417   2                      if((Ki[6]&bit7)!=0) temp1|=bit6;
+ 418   2                      if((Ki[6]&bit8)!=0) temp2|=bit8;
+ 419   2                      
+ 420   2                      Ki[3]=temp1;
+ 421   2                      Ki[4]=temp2;
+ 422   2                      Ki[5]=temp3;
+ 423   2                      
+ 424   2                      //此时已计算出Ki
+C51 COMPILER V9.01   DES                                                                   07/15/2014 20:44:39 PAGE 8   
+
+ 425   2                      //把32位R扩展成48位,即把MsgOut[4]、MsgOut[５]、
+ 426   2                      //MsgOut[６]、MsgOut[７]扩展,取得然后与Ki异或
+ 427   2                           
+ 428   2                      //1
+ 429   2                      temp1=((MsgOut[4]>>1)&0x7c);
+ 430   2                      if((MsgOut[7]&bit8)!=0) temp1|=bit1;
+ 431   2                      if((MsgOut[4]&bit4)!=0) temp1|=bit7;
+ 432   2                      if((MsgOut[4]&bit5)!=0) temp1|=bit8;
+ 433   2                              
+ 434   2                      //扩展后R与Ki异或
+ 435   2                      Ki[0]^=temp1;
+ 436   2                      
+ 437   2                      //2
+ 438   2                      temp1=((MsgOut[4]<<5)&0xE0);
+ 439   2                      if((MsgOut[5]&bit1)!=0) temp1|=bit4;
+ 440   2                      if((MsgOut[4]&bit8)!=0) temp1|=bit5;
+ 441   2                      temp1|=((MsgOut[5]>>5)&0x07);   
+ 442   2                      
+ 443   2                      //扩展后R与Ki异或
+ 444   2                      Ki[1]^=temp1;
+ 445   2                      
+ 446   2                      //3
+ 447   2                      temp1=((MsgOut[5]<<3)&0xc0)|((MsgOut[5]<<1)&0x3e);      
+ 448   2                      if((MsgOut[6]&bit1)!=0) temp1|=bit8;
+ 449   2                      Ki[2]^=temp1;
+ 450   2                      
+ 451   2                      //4
+ 452   2                      temp1=((MsgOut[6]>>1)&0x7c);
+ 453   2                      if((MsgOut[5]&bit8)!=0) temp1|=bit1;
+ 454   2                      temp1|=((MsgOut[6]>>3)&0x03);   
+ 455   2                      Ki[3]^=temp1;
+ 456   2                      
+ 457   2                      //5
+ 458   2                      temp1=((MsgOut[6]<<5)&0xE0);
+ 459   2                      if((MsgOut[7]&bit1)!=0) temp1|=bit4;
+ 460   2                      if((MsgOut[6]&bit8)!=0) temp1|=bit5;
+ 461   2                      temp1|=((MsgOut[7]>>5)&0x07);   
+ 462   2                      
+ 463   2                      Ki[4]^=temp1;
+ 464   2                      
+ 465   2                      //6
+ 466   2                      temp1=((MsgOut[7]<<1)&0x3E);
+ 467   2                      if((MsgOut[7]&bit4)!=0) temp1|=(bit1);
+ 468   2                      if((MsgOut[7]&bit5)!=0) temp1|=(bit2);
+ 469   2                      if((MsgOut[4]&bit1)!=0) temp1|=bit8;
+ 470   2                      //扩展后R与Ki异或
+ 471   2                      Ki[5]^=temp1;
+ 472   2                                      
+ 473   2      //              for(i=0; i<6; i++)
+ 474   2      //                      Ki[i]^=tempR[i];
+ 475   2                      //准备S盒的行列坐标
+ 476   2      /*              Ki[7]= Ki[5]&0x3F;
+ 477   2                      Ki[6]= ((Ki[5]>>6))|((Ki[4]<<2)&0x3C);
+ 478   2                      Ki[5]= (Ki[4]>>4)|((Ki[3]<<4)&0x30);
+ 479   2                      Ki[4]= (Ki[3]>>2);
+ 480   2                      Ki[3]= Ki[2]&0x3F;
+ 481   2                      Ki[2]= ((Ki[2]>>6))|((Ki[1]<<2)&0x3C);
+ 482   2                      Ki[1]= (Ki[1]>>4)|((Ki[0]<<4)&0x30);
+ 483   2                      Ki[0]= (Ki[0]>>2);*/
+ 484   2                      
+ 485   2                      //选择SBox的值来替代，替代后的值存入Ki
+ 486   2                      
+C51 COMPILER V9.01   DES                                                                   07/15/2014 20:44:39 PAGE 9   
+
+ 487   2      /*              i=((Ki[0]&0x20)>>4)|(Ki[0]&0x01);
+ 488   2                      j=(Ki[0]&0x1E)>>1;
+ 489   2                      Ki[0]=SBox1[i][j];
+ 490   2                      
+ 491   2                      i=((Ki[1]&0x20)>>4)|(Ki[1]&0x01);
+ 492   2                      j=(Ki[1]&0x1E)>>1;
+ 493   2                      Ki[1]=SBox2[i][j];
+ 494   2                      
+ 495   2                      i=((Ki[2]&0x20)>>4)|(Ki[2]&0x01);
+ 496   2                      j=(Ki[2]&0x1E)>>1;
+ 497   2                      Ki[2]=SBox3[i][j];
+ 498   2                      
+ 499   2                      i=((Ki[3]&0x20)>>4)|(Ki[3]&0x01);
+ 500   2                      j=(Ki[3]&0x1E)>>1;
+ 501   2                      Ki[3]=SBox4[i][j];
+ 502   2                                      
+ 503   2                      i=((Ki[4]&0x20)>>4)|(Ki[4]&0x01);
+ 504   2                      j=(Ki[4]&0x1E)>>1;
+ 505   2                      Ki[4]=SBox5[i][j];
+ 506   2                      
+ 507   2                      i=((Ki[5]&0x20)>>4)|(Ki[5]&0x01);
+ 508   2                      j=(Ki[5]&0x1E)>>1;
+ 509   2                      Ki[5]=SBox6[i][j];
+ 510   2              
+ 511   2                      i=((Ki[6]&0x20)>>4)|(Ki[6]&0x01);
+ 512   2                      j=(Ki[6]&0x1E)>>1;
+ 513   2                      Ki[6]=SBox7[i][j];
+ 514   2                      
+ 515   2                      i=((Ki[7]&0x20)>>4)|(Ki[7]&0x01);
+ 516   2                      j=(Ki[7]&0x1E)>>1;
+ 517   2                      Ki[7]=SBox8[i][j];*/
+ 518   2                      
+ 519   2                      temp1=0;
+ 520   2                      
+ 521   2                      if((Ki[5]&bit8)!=0) temp1|=bit4;
+ 522   2                      if((Ki[5]&bit7)!=0) temp1|=bit8;
+ 523   2                      if((Ki[5]&bit6)!=0) temp1|=bit7;
+ 524   2                      if((Ki[5]&bit5)!=0) temp1|=bit6;
+ 525   2                      if((Ki[5]&bit4)!=0) temp1|=bit5;
+ 526   2                      if((Ki[5]&bit3)!=0) temp1|=bit3;
+ 527   2                      Ki[7]=SBox8[temp1]; 
+ 528   2      
+ 529   2                      temp1=0;
+ 530   2                      if((Ki[5]&bit2)!=0) temp1|=bit4;
+ 531   2                      if((Ki[5]&bit1)!=0) temp1|=bit8;
+ 532   2                      if((Ki[4]&bit8)!=0) temp1|=bit7;
+ 533   2                      if((Ki[4]&bit7)!=0) temp1|=bit6;
+ 534   2                      if((Ki[4]&bit6)!=0) temp1|=bit5;
+ 535   2                      if((Ki[4]&bit5)!=0) temp1|=bit3;
+ 536   2                      Ki[6]=SBox7[temp1];
+ 537   2                      
+ 538   2                      temp1=0;
+ 539   2                      if((Ki[4]&bit4)!=0) temp1|=bit4;
+ 540   2                      if((Ki[4]&bit3)!=0) temp1|=bit8;
+ 541   2                      if((Ki[4]&bit2)!=0) temp1|=bit7;
+ 542   2                      if((Ki[4]&bit1)!=0) temp1|=bit6;
+ 543   2                      if((Ki[3]&bit8)!=0) temp1|=bit5;
+ 544   2                      if((Ki[3]&bit7)!=0) temp1|=bit3;
+ 545   2                      Ki[5]=SBox6[temp1];
+ 546   2                      
+ 547   2                      temp1=0;
+ 548   2                      if((Ki[3]&bit6)!=0) temp1|=bit4;
+C51 COMPILER V9.01   DES                                                                   07/15/2014 20:44:39 PAGE 10  
+
+ 549   2                      if((Ki[3]&bit5)!=0) temp1|=bit8;
+ 550   2                      if((Ki[3]&bit4)!=0) temp1|=bit7;
+ 551   2                      if((Ki[3]&bit3)!=0) temp1|=bit6;
+ 552   2                      if((Ki[3]&bit2)!=0) temp1|=bit5;
+ 553   2                      if((Ki[3]&bit1)!=0) temp1|=bit3;
+ 554   2                      Ki[4]=SBox5[temp1];
+ 555   2                      
+ 556   2                      temp1=0;
+ 557   2                      if((Ki[2]&bit8)!=0) temp1|=bit4;
+ 558   2                      if((Ki[2]&bit7)!=0) temp1|=bit8;
+ 559   2                      if((Ki[2]&bit6)!=0) temp1|=bit7;
+ 560   2                      if((Ki[2]&bit5)!=0) temp1|=bit6;
+ 561   2                      if((Ki[2]&bit4)!=0) temp1|=bit5;
+ 562   2                      if((Ki[2]&bit3)!=0) temp1|=bit3;
+ 563   2                      Ki[3]=SBox4[temp1];
+ 564   2                      
+ 565   2                      temp1=0;
+ 566   2                      if((Ki[2]&bit2)!=0) temp1|=bit4;
+ 567   2                      if((Ki[2]&bit1)!=0) temp1|=bit8;
+ 568   2                      if((Ki[1]&bit8)!=0) temp1|=bit7;
+ 569   2                      if((Ki[1]&bit7)!=0) temp1|=bit6;
+ 570   2                      if((Ki[1]&bit6)!=0) temp1|=bit5;
+ 571   2                      if((Ki[1]&bit5)!=0) temp1|=bit3;
+ 572   2                      Ki[2]=SBox3[temp1];
+ 573   2                      
+ 574   2                      temp1=0;
+ 575   2                      if((Ki[1]&bit4)!=0) temp1|=bit4;
+ 576   2                      if((Ki[1]&bit3)!=0) temp1|=bit8;
+ 577   2                      if((Ki[1]&bit2)!=0) temp1|=bit7;
+ 578   2                      if((Ki[1]&bit1)!=0) temp1|=bit6;
+ 579   2                      if((Ki[0]&bit8)!=0) temp1|=bit5;
+ 580   2                      if((Ki[0]&bit7)!=0) temp1|=bit3;
+ 581   2                      Ki[1]=SBox2[temp1];
+ 582   2                      
+ 583   2                      temp1=0;
+ 584   2                      if((Ki[0]&bit6)!=0) temp1|=bit4;
+ 585   2                      if((Ki[0]&bit5)!=0) temp1|=bit8;
+ 586   2                      if((Ki[0]&bit4)!=0) temp1|=bit7;
+ 587   2                      if((Ki[0]&bit3)!=0) temp1|=bit6;
+ 588   2                      if((Ki[0]&bit2)!=0) temp1|=bit5;
+ 589   2                      if((Ki[0]&bit1)!=0) temp1|=bit3;
+ 590   2                      Ki[0]=SBox1[temp1];
+ 591   2                      
+ 592   2                      //把上面的结果进行P置换
+ 593   2                      temp1=0;
+ 594   2                      temp2=0;
+ 595   2                      temp3=0;
+ 596   2                      temp4=0;
+ 597   2                      
+ 598   2                      if(Ki[0]&bit5)        //1
+ 599   2                              temp2|=bit1;      //
+ 600   2                      if(Ki[0]&bit6)        //2
+ 601   2                              temp3|=bit1;      //
+ 602   2                      if(Ki[0]&bit7)        //3
+ 603   2                              temp3|=bit7;      //
+ 604   2                      if(Ki[0]&bit8)        //4
+ 605   2                              temp4|=bit7;      //
+ 606   2                                                //
+ 607   2                      if(Ki[1]&bit5)        //5
+ 608   2                              temp2|=bit5;      //
+ 609   2                      if(Ki[1]&bit6)        //6
+ 610   2                              temp4|=bit4;      //
+C51 COMPILER V9.01   DES                                                                   07/15/2014 20:44:39 PAGE 11  
+
+ 611   2                      if(Ki[1]&bit7)        //7
+ 612   2                              temp1|=bit2;      //
+ 613   2                      if(Ki[1]&bit8)        //8
+ 614   2                              temp3|=bit2;      //
+ 615   2                                                //
+ 616   2                      if(Ki[2]&bit5)        //9
+ 617   2                              temp3|=bit8;      //
+ 618   2                      if(Ki[2]&bit6)        //10
+ 619   2                              temp2|=bit8;      //
+ 620   2                      if(Ki[2]&bit7)        //11
+ 621   2                              temp4|=bit6;      //
+ 622   2                      if(Ki[2]&bit8)        //12
+ 623   2                              temp1|=bit6;      //
+ 624   2                                                //
+ 625   2                      if(Ki[3]&bit5)        //13
+ 626   2                              temp4|=bit2;      //
+ 627   2                      if(Ki[3]&bit6)        //14
+ 628   2                              temp3|=bit4;      //
+ 629   2                      if(Ki[3]&bit7)        //15
+ 630   2                              temp2|=bit2;      //
+ 631   2                      if(Ki[3]&bit8)        //16
+ 632   2                              temp1|=bit1;      //
+ 633   2                                            //
+ 634   2                      if(Ki[4]&bit5)        //17
+ 635   2                              temp1|=bit8;      //
+ 636   2                      if(Ki[4]&bit6)        //18
+ 637   2                              temp2|=bit6;      //
+ 638   2                      if(Ki[4]&bit7)        //19
+ 639   2                              temp4|=bit1;      //
+ 640   2                      if(Ki[4]&bit8)        //20
+ 641   2                              temp1|=bit3;      //
+ 642   2                                                //
+ 643   2                      if(Ki[5]&bit5)        //21
+ 644   2                              temp1|=bit4;      //
+ 645   2                      if(Ki[5]&bit6)        //22
+ 646   2                              temp4|=bit5;      //
+ 647   2                      if(Ki[5]&bit7)        //23
+ 648   2                              temp2|=bit3;      //
+ 649   2                      if(Ki[5]&bit8)        //24
+ 650   2                      temp3|=bit3;          //
+ 651   2                                            //
+ 652   2                      if(Ki[6]&bit5)        //25
+ 653   2                              temp4|=bit8;      //
+ 654   2                      if(Ki[6]&bit6)        //26
+ 655   2                              temp2|=bit4;      //
+ 656   2                      if(Ki[6]&bit7)        //27
+ 657   2                              temp3|=bit6;      //
+ 658   2                      if(Ki[6]&bit8)        //28
+ 659   2                              temp1|=bit7;      //
+ 660   2                                                //
+ 661   2                      if(Ki[7]&bit5)        //29
+ 662   2                              temp1|=bit5;      //
+ 663   2                      if(Ki[7]&bit6)        //30
+ 664   2                              temp4|=bit3;      //
+ 665   2                      if(Ki[7]&bit7)        //31
+ 666   2                              temp2|=bit7;      //
+ 667   2                      if(Ki[7]&bit8)        //32
+ 668   2                              temp3|=bit5;      //
+ 669   2                                            //
+ 670   2                      //保存R               //
+ 671   2                      Ki[0]=MsgOut[4];      //
+ 672   2                      Ki[1]=MsgOut[5];      //
+C51 COMPILER V9.01   DES                                                                   07/15/2014 20:44:39 PAGE 12  
+
+ 673   2                      Ki[2]=MsgOut[6];      //
+ 674   2                      Ki[3]=MsgOut[7];      //
+ 675   2                              
+ 676   2                      //计算新的R     
+ 677   2                      MsgOut[4]=temp1^MsgOut[0];      
+ 678   2                      MsgOut[5]=temp2^MsgOut[1];      
+ 679   2                      MsgOut[6]=temp3^MsgOut[2];      
+ 680   2                      MsgOut[7]=temp4^MsgOut[3];
+ 681   2                      //用上一次的R作为这一次的L
+ 682   2                      
+ 683   2                      MsgOut[0]=Ki[0];
+ 684   2                      MsgOut[1]=Ki[1];
+ 685   2                      MsgOut[2]=Ki[2];
+ 686   2                      MsgOut[3]=Ki[3];
+ 687   2                      
+ 688   2                      if(Mode != ENCRY)
+ 689   2                      {
+ 690   3                       
+ 691   3                              for(temp1=0; temp1<ShiftValue[15-i]; temp1++)
+ 692   3                              {
+ 693   4      
+ 694   4                                      C0[3]>>=1;
+ 695   4                                      if((C0[2]&bit8)!=0) C0[3]|=bit1;
+ 696   4                                      C0[2]>>=1;
+ 697   4                                      if((C0[1]&bit8)!=0) C0[2]|=bit1;
+ 698   4                                      C0[1]>>=1;
+ 699   4                                      if((C0[0]&bit8)!=0) C0[1]|=bit1;
+ 700   4                                      C0[0]>>=1;
+ 701   4                                      if((C0[3]&bit5)!=0)
+ 702   4                                      {
+ 703   5                                              C0[3]&=0xF0;//(~bit5);
+ 704   5                                              C0[0]|=bit1;
+ 705   5                                              
+ 706   5                                      }
+ 707   4                                      
+ 708   4                                      if((D0[3]&bit8)!=0) D0[0]|=bit4;
+ 709   4                                      D0[3]>>=1;
+ 710   4                                      if((D0[2]&bit8)!=0) D0[3]|=bit1;
+ 711   4                                      D0[2]>>=1;
+ 712   4                                      if((D0[1]&bit8)!=0) D0[2]|=bit1;
+ 713   4                                      D0[1]>>=1;
+ 714   4                                      if((D0[0]&bit8)!=0) D0[1]|=bit1;
+ 715   4                                      D0[0]>>=1;
+ 716   4                                              
+ 717   4                              }
+ 718   3              
+ 719   3                      }
+ 720   2                                      
+ 721   2              }       
+ 722   1              //对R[16]L[16]进行置换，Final Permutation (IP**-1)
+ 723   1              Ki[0]=MsgOut[0];
+ 724   1              Ki[1]=MsgOut[4];
+ 725   1              Ki[2]=MsgOut[1];
+ 726   1              Ki[3]=MsgOut[5];
+ 727   1                      
+ 728   1              Ki[4]=MsgOut[2];
+ 729   1              Ki[5]=MsgOut[6];
+ 730   1              Ki[6]=MsgOut[3];
+ 731   1              Ki[7]=MsgOut[7];
+ 732   1                      
+ 733   1              for(i=0; i<8; i++)
+ 734   1              {
+C51 COMPILER V9.01   DES                                                                   07/15/2014 20:44:39 PAGE 13  
+
+ 735   2                      MsgOut[0]<<=1;
+ 736   2                      MsgOut[1]<<=1;
+ 737   2                      MsgOut[2]<<=1;
+ 738   2                      MsgOut[3]<<=1;
+ 739   2                      MsgOut[4]<<=1;
+ 740   2                      MsgOut[5]<<=1;
+ 741   2                      MsgOut[6]<<=1;
+ 742   2                      MsgOut[7]<<=1;
+ 743   2                      
+ 744   2                      MsgOut[0] |= (Ki[i]&0x01);
+ 745   2                      Ki[i]>>=1;
+ 746   2                      MsgOut[1] |= (Ki[i]&0x01);
+ 747   2                      Ki[i]>>=1;
+ 748   2                      MsgOut[2] |= (Ki[i]&0x01);
+ 749   2                      Ki[i]>>=1;
+ 750   2                      MsgOut[3] |= (Ki[i]&0x01);
+ 751   2                      Ki[i]>>=1;
+ 752   2                      MsgOut[4] |= (Ki[i]&0x01);
+ 753   2                      Ki[i]>>=1;
+ 754   2                      MsgOut[5] |= (Ki[i]&0x01);
+ 755   2                      Ki[i]>>=1;
+ 756   2                      MsgOut[6] |= (Ki[i]&0x01);
+ 757   2                      Ki[i]>>=1;
+ 758   2                      MsgOut[7] |= (Ki[i]&0x01);
+ 759   2              }
+ 760   1               return OK;
+ 761   1              /*
+ 762   1              40 8 48 16 56 24 64 32 
+ 763   1              39 7 47 15 55 23 63 31 
+ 764   1              38 6 46 14 54 22 62 30 
+ 765   1              37 5 45 13 53 21 61 29 
+ 766   1              36 4 44 12 52 20 60 28 
+ 767   1              35 3 43 11 51 19 59 27 
+ 768   1              34 2 42 10 50 18 58 26 
+ 769   1              33 1 41 9  49 17 57 25 
+ 770   1              */
+ 771   1      }
+ 772           
+ 773          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   4722    ----
+   CONSTANT SIZE    =    528    ----
+   XDATA SIZE       =   ----     646
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      27
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

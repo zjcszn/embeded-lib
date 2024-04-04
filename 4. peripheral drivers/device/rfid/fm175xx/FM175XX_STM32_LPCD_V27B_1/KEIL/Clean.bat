@@ -1,0 +1,10 @@
+del *.o
+del *.d
+del *.__i
+del *.~*
+del *.obj
+del *.ddp
+del *.tds
+del *.bak
+del *.lst
+del *.crf

@@ -1,0 +1,184 @@
+C51 COMPILER V9.54   UART                                                                  09/05/2017 11:31:03 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE UART
+OBJECT MODULE PLACED IN .\Output\uart.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE Code\uart.c LARGE OMF2 BROWSE INCDIR(.\Inc) DEBUG PRINT(.\List\uart.lst)
+                    - TABS(2) OBJECT(.\Output\uart.obj)
+
+line level    source
+
+   1          /*************************************************************/
+   2          //2014.03.06修改版
+   3          /*************************************************************/
+   4          //串口收发程序
+   5          
+   6          #include "STC15F2K60S2.h"
+   7          #include "pin.h"
+   8          #include "uart.h"
+   9          #include <string.h>
+  10          #define UART_BAUD 115200  //115200bps
+  11          #define SYS_CLK 33177600  //33.1776Mhz
+  12          
+  13          struct status data uart_status;
+  14          unsigned char uart_buffer[255];
+  15          unsigned char data uart_point;    //数据指针
+  16          
+  17          /*********************************************/
+  18          /*函数名：      timer_uart_init
+  19          /*功能：      时钟与串口初始化
+  20                  初始化串口0为1152000BPS
+  21                  1个停止位，8个数据位，无校验位
+  22                  接收中断允许
+  23          /*输入参数：  无
+  24          /*返回值：      无
+  25          /*********************************************/
+  26          void Timer_Uart_Init()
+  27          {
+  28   1        SCON=0x50;      //SM0:0 SM1:1 SM2:0 REN:1 TB8:0 RB8:0 TI:0 RI:0
+  29   1        PCON=0x00;      //SMOD=0  
+  30   1        AUXR |= 0x40;   //定时器1时钟为Fosc,即1T
+  31   1        AUXR &= 0xFE;   //串口1选择定时器1为波特率发生器
+  32   1        TMOD &= 0x0F;   //设定定时器1为16位自动重装方式
+  33   1      
+  34   1        TL1=(65536-((long)SYS_CLK/4/(long)UART_BAUD));    
+  35   1        TH1=(65536-((long)SYS_CLK/4/(long)UART_BAUD))>>8;
+  36   1      
+  37   1        ET1 = 0;    //禁止定时器1中断
+  38   1        TR1 = 1;    //启动定时器1
+  39   1      
+  40   1        INT1=1;     //配置中断脚为高电平
+  41   1        IT1=1;      //仅触发下降沿
+  42   1        EX1=0;      //中断使能
+  43   1      
+  44   1        ES=1;     //开串口0中断
+  45   1        EA=1;     //开总中断
+  46   1        return;
+  47   1      }
+  48          
+  49          /********************************/
+  50          /*函数名：      uart_int
+  51          /*功能：      串口中断程序
+  52          /*输入参数：  无
+  53          /*返回值：      无
+  54          /*******************************/
+C51 COMPILER V9.54   UART                                                                  09/05/2017 11:31:03 PAGE 2   
+
+  55          void Uart_Int() interrupt 4
+  56          {
+  57   1        if(RI==1)                                               //串口接收中断
+  58   1          { 
+  59   2            if (SBUF != '#')
+  60   2            {
+  61   3              uart_buffer[uart_point]=SBUF;
+  62   3              uart_point++;
+  63   3            }
+  64   2            else
+  65   2            {
+  66   3              uart_status.rece_finish=1;
+  67   3            }
+  68   2            RI=0;
+  69   2          }
+  70   1      
+  71   1        if(TI==1)                                               //串口发送中断
+  72   1          {
+  73   2            TI=0;
+  74   2            uart_status.send_finish =1;
+  75   2          }
+  76   1        return;
+  77   1      }
+  78          
+  79          //void Timer0_Int(void) interrupt 1
+  80          //{
+  81          //  TH0=timer_H;
+  82          //  TL0=timer_L;
+  83          //  return;
+  84          //}
+  85          
+  86          void Uart_Send_Msg(unsigned char *msg)
+  87          { 
+  88   1        unsigned int data i;
+  89   1        unsigned int data msg_len;
+  90   1        msg_len= strlen(msg);
+  91   1      //  REN=0;
+  92   1        for (i=0;i<msg_len;i++)
+  93   1        {
+  94   2          SBUF=msg[i];//
+  95   2          while(uart_status.send_finish==0);
+  96   2            uart_status.send_finish=0;
+  97   2        }
+  98   1      //  REN=1;
+  99   1        return;
+ 100   1      }
+ 101          
+ 102          void Uart_Rece_Msg(unsigned char recr_len)
+ 103          {
+ 104   1        uart_point=0;
+ 105   1        while(uart_point!=recr_len);
+ 106   1          uart_point=0;
+ 107   1        return;
+ 108   1      }
+ 109          
+ 110          void Uart_Send_Hex(unsigned char *input_byte,unsigned int input_len)
+ 111          {
+ 112   1      unsigned char data temp_byte;
+ 113   1      unsigned int data i;
+ 114   1      
+ 115   1        for(i=0;i<input_len;i++)
+ 116   1        {
+C51 COMPILER V9.54   UART                                                                  09/05/2017 11:31:03 PAGE 3   
+
+ 117   2          temp_byte=(*(input_byte+i) & 0xF0)>>4;
+ 118   2          if (temp_byte<0x0A)
+ 119   2            SBUF=0x30+temp_byte;
+ 120   2          else
+ 121   2            SBUF=0x37+temp_byte;
+ 122   2      
+ 123   2          while(uart_status.send_finish==0);
+ 124   2            uart_status.send_finish =0;
+ 125   2        
+ 126   2          temp_byte=(*(input_byte+i) & 0x0F);
+ 127   2          if (temp_byte<0x0A)
+ 128   2            SBUF=0x30+temp_byte;
+ 129   2          else
+ 130   2              SBUF=0x37+temp_byte;
+ 131   2          while(uart_status.send_finish==0);
+ 132   2            uart_status.send_finish =0;
+ 133   2        }
+ 134   1        return;
+ 135   1      }
+ 136          
+ 137          
+ 138          //void Hex_to_BCD(unsigned long hex_input,unsigned char *BCD_output)
+ 139          //{
+ 140          //    BCD_output[0] = hex_input / (long)100000;
+ 141          //    hex_input = hex_input - (BCD_output[0]* (long)100000);
+ 142          //    BCD_output[1] = hex_input / (long)10000;
+ 143          //    hex_input = hex_input - (BCD_output[1]* (long)10000);
+ 144          //    BCD_output[2] = hex_input / (long)1000;
+ 145          //    hex_input = hex_input -(BCD_output[2] *(long) 1000);
+ 146          //    BCD_output[3] = hex_input / 100;
+ 147          //    hex_input = hex_input - (BCD_output[3] * 100);
+ 148          //    BCD_output[4] = hex_input / 10;
+ 149          //    hex_input = hex_input - (BCD_output[4] * 10);
+ 150          //    BCD_output[5] = hex_input / 1;
+ 151          //    return;
+ 152          //}
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    317    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =    255       6
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      5       7
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

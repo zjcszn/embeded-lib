@@ -1,0 +1,20 @@
+.\list\uart.o: ..\CODE\UART.C
+.\list\uart.o: ..\INC\DEVICE_CFG.h
+.\list\uart.o: ..\INC\DEFINE.h
+.\list\uart.o: ..\LIB\INC\stm32f10x_map.h
+.\list\uart.o: ..\LIB\INC\stm32f10x_conf.h
+.\list\uart.o: ..\LIB\INC\stm32f10x_type.h
+.\list\uart.o: ..\LIB\INC\cortexm3_macro.h
+.\list\uart.o: ..\LIB\INC\stm32f10x_lib.h
+.\list\uart.o: ..\LIB\INC\stm32f10x_exti.h
+.\list\uart.o: ..\LIB\INC\stm32f10x_flash.h
+.\list\uart.o: ..\LIB\INC\stm32f10x_gpio.h
+.\list\uart.o: ..\LIB\INC\stm32f10x_nvic.h
+.\list\uart.o: ..\LIB\INC\stm32f10x_pwr.h
+.\list\uart.o: ..\LIB\INC\stm32f10x_rcc.h
+.\list\uart.o: ..\LIB\INC\stm32f10x_spi.h
+.\list\uart.o: ..\LIB\INC\stm32f10x_systick.h
+.\list\uart.o: ..\LIB\INC\stm32f10x_tim1.h
+.\list\uart.o: ..\LIB\INC\stm32f10x_tim.h
+.\list\uart.o: ..\LIB\INC\stm32f10x_usart.h
+.\list\uart.o: D:\Program Files (x86)\ARM\ARM\ARMCC\bin\..\include\string.h

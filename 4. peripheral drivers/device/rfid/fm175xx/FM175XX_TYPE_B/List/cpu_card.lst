@@ -1,0 +1,302 @@
+C51 COMPILER V9.01   CPU_CARD                                                              07/15/2014 20:44:01 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE CPU_CARD
+OBJECT MODULE PLACED IN .\Output\cpu_card.obj
+COMPILER INVOKED BY: D:\Program Files\Keil4\C51\BIN\C51.EXE cpu_card.c LARGE OMF2 BROWSE INCDIR(.\Inc) DEBUG PRINT(.\Lis
+                    -t\cpu_card.lst) OBJECT(.\Output\cpu_card.obj)
+
+line level    source
+
+   1          /*************************************************************/
+   2          //2014.03.06修改版
+   3          /*************************************************************/
+   4          #include "fm175xx.h"
+   5          #include "cpu_card.h"
+   6          #include "main.h" 
+   7          unsigned char CPU_PCB,CPU_CID;
+   8          /****************************************************************/
+   9          /*名称: Rats                                                                                                    */
+  10          /*功能: 该函数实现转入APDU命令格式处理  CPU card reset                  */
+  11          /*输入: param1 byte :PCB                                                                            */
+  12          /*              param2 byte bit8-bit5：FSDI, bit4-bit0 ：CID                    */
+  13          /*              param2 通常取值为0x51，即FSDI=5,缓冲区64字节，CID=0x01  */                                              
+  14          /*输出:                                                                                                                 */
+  15          /*              rece_len：接收的数据长度                                                                */
+  16          /*              buff：接收的数据指针                                                                    */
+  17          /* OK: 应答正确                                                                                                 */
+  18          /* ERROR: 应答错误                                                                                              */
+  19          /****************************************************************/
+  20          unsigned char CPU_Rats(unsigned char param1,unsigned char param2,unsigned char *rece_len,unsigned char *bu
+             -ff)
+  21          {
+  22   1              unsigned char ret,send_byte[2];
+  23   1              unsigned int rece_bitlen;
+  24   1              Pcd_SetTimer(100);
+  25   1              send_byte[0] = 0xE0;//Start byte
+  26   1              send_byte[1] = param2;//default=0x51
+  27   1              CPU_CID = param2 & 0x0f;
+  28   1          CPU_PCB = param1;//default=0x0A
+  29   1      
+  30   1              ret=Pcd_Comm(Transceive,send_byte,2,buff,&rece_bitlen);
+  31   1              if (ret==OK)
+  32   1                      *rece_len=rece_bitlen/8;
+  33   1              else
+  34   1                      *rece_len=0;
+  35   1              return ret;     
+  36   1      }
+  37          /****************************************************************/
+  38          /*名称: PPS                                                                                                     */
+  39          /*功能:                                                                                                                 */
+  40          /*输入: PPSS byte, PPS0 byte, PPS1 byte                                                 */
+  41          /*输出:                                                                                                                 */
+  42          /*              rece_len：接收的数据长度                                                                */
+  43          /*              rece_buff：接收的数据指针                                                               */
+  44          /* OK: 应答正确                                                                                                 */
+  45          /* ERROR: 应答错误                                                                                              */
+  46          /****************************************************************/
+  47          unsigned char CPU_PPS(unsigned char cid,unsigned char mode,unsigned char *rece_len,unsigned char *rece_buf
+             -f)
+  48          //mode=0:106Kbps;1:212Kpbs;2:424Kpbs
+  49          {
+  50   1              unsigned char  result,send_buff[3];
+  51   1              unsigned int  rece_bitlen;
+  52   1              Pcd_SetTimer(50);
+C51 COMPILER V9.01   CPU_CARD                                                              07/15/2014 20:44:01 PAGE 2   
+
+  53   1              send_buff[0] = 0xD0+cid;//ppss byte
+  54   1              send_buff[1] = 0x11;    //pps0 byte
+  55   1              send_buff[2]= (mode*4)+mode; //pps1 byte
+  56   1              result=Pcd_Comm(Transceive,send_buff,3,rece_buff,&rece_bitlen);
+  57   1              if (result==OK)
+  58   1                              {
+  59   2                              *rece_len=rece_bitlen/8;
+  60   2                              }
+  61   1              return result;  
+  62   1      }
+  63          
+  64          
+  65          /****************************************************************/
+  66          /*名称: 随机数                                                                                                  */
+  67          /*功能:                                                                                                                 */
+  68          /*输入: N/A                                                                                                     */
+  69          /*输出:                                                                                                                 */
+  70          /*              rece_len：接收的数据长度                                                                */
+  71          /*              buff：接收的数据指针                                                                    */
+  72          /*              OK: 应答正确                                                                                    */
+  73          /*              ERROR: 应答错误                                                                                 */
+  74          /****************************************************************/
+  75          //unsigned char CPU_Random(unsigned char *rece_len,unsigned char *buff)
+  76          //{
+  77          //      unsigned char data result,send_byte[7];
+  78          //
+  79          //      send_byte[0] = 0x00;
+  80          //      send_byte[1] = 0x84;
+  81          //      send_byte[2] = 0x00;
+  82          //      send_byte[3] = 0x00;
+  83          //      send_byte[4] = 0x08;
+  84          //      result=CPU_I_block(5,send_byte,&(*rece_len),buff);
+  85          //
+  86          //      return result;  
+  87          //}
+  88          
+  89          /****************************************************************/
+  90          /*名称: CPU_TPDU        cpu card operation                                                      */
+  91          /*功能: CPU命令操作                                                                                             */
+  92          /*输入:                                                                                                                 */
+  93          /*              APDU模式                                                                                                */
+  94          /*              send_len:发送的指令长度 command_length                                  */
+  95          /*              send_buff:发送的指令数据指针                                                    */
+  96          /*                                                                                                                              */
+  97          /*输出:响应长度                                                                                                 */
+  98          /*              rece_len：接收的数据长度                                                                */
+  99          /*              rece_buff：接收的数据指针                                                               */
+ 100          /*              OK: 应答正确                                                                                    */
+ 101          /*              ERROR: 应答错误                                                                                 */
+ 102          /****************************************************************/
+ 103          unsigned char CPU_TPDU(unsigned char send_len,unsigned char *send_buff,unsigned char *rece_len,unsigned ch
+             -ar *rece_buff)
+ 104          {       unsigned char data result;
+ 105   1              unsigned int data rece_bitlen;
+ 106   1              Pcd_SetTimer(100);
+ 107   1              result=Pcd_Comm(Transceive,send_buff,send_len,rece_buff,&rece_bitlen);
+ 108   1              if (result==OK)
+ 109   1                              {
+ 110   2                              *rece_len=rece_bitlen/8;
+ 111   2                              }
+ 112   1              return result;
+ 113   1      }
+C51 COMPILER V9.01   CPU_CARD                                                              07/15/2014 20:44:01 PAGE 3   
+
+ 114          
+ 115          // unsigned char CPU_I_Block(unsigned char send_len,unsigned char *send_buff,unsigned char *rece_len,unsig
+             -ned char *rece_buff)
+ 116          // {
+ 117          //              unsigned char data result;
+ 118          //
+ 119          //              unsigned int data rece_bitlen;
+ 120          //              Pcd_SetTimer(500);
+ 121          //              if(CPU_PCB&0x08)
+ 122          //              {               
+ 123          //                      
+ 124          //              *(send_buff-2) = CPU_PCB;
+ 125          //              *(send_buff-1) = CPU_CID;
+ 126          //              
+ 127          //              result=Pcd_Comm(Transceive,send_buff-2,send_len+2,rece_buff,&rece_bitlen);
+ 128          //              }
+ 129          //              else
+ 130          //              {
+ 131          //              
+ 132          //              *(send_buff-1)= CPU_PCB;
+ 133          //                      
+ 134          //              result=Pcd_Comm(Transceive,send_buff-1,send_len+1,rece_buff,&rece_bitlen);
+ 135          //              }
+ 136          //              if (result==OK)
+ 137          //                      {
+ 138          //                      *rece_len=rece_bitlen/8;
+ 139          //                      CPU_PCB=*rece_buff;
+ 140          //                      CPU_PCB_CONVER();
+ 141          //                      if (CPU_PCB&0x08)
+ 142          //                              *rece_len=*rece_len-2;
+ 143          //                      else
+ 144          //                              *rece_len=*rece_len-1;
+ 145          //                      }
+ 146          //              return result;
+ 147          // }
+ 148          //
+ 149          
+ 150           unsigned char CPU_R_Block(unsigned char *rece_len,unsigned char *rece_buff)
+ 151           {
+ 152   1              unsigned char data send_buff[2],result;
+ 153   1              unsigned int data rece_bitlen;
+ 154   1              if(CPU_PCB&0x08)
+ 155   1              {
+ 156   2              send_buff[0] = (CPU_PCB&0x0F)|0xA0;
+ 157   2              send_buff[1] = CPU_CID;
+ 158   2              Pcd_SetTimer(100);
+ 159   2              result=Pcd_Comm(Transceive,send_buff,2,rece_buff,&rece_bitlen);
+ 160   2              }
+ 161   1              else
+ 162   1              {
+ 163   2              send_buff[0] = (CPU_PCB&0x0F)|0xA0;
+ 164   2              Pcd_SetTimer(100);
+ 165   2              result=Pcd_Comm(Transceive,send_buff,1,rece_buff,&rece_bitlen);
+ 166   2              }
+ 167   1              if (result==OK)
+ 168   1                              {
+ 169   2                              *rece_len=rece_bitlen/8;
+ 170   2                              CPU_PCB_CONVER();
+ 171   2                              }
+ 172   1              return result;
+ 173   1       }
+ 174          
+C51 COMPILER V9.01   CPU_CARD                                                              07/15/2014 20:44:01 PAGE 4   
+
+ 175           unsigned char CPU_S_Block(unsigned char pcb,unsigned char wtxm,unsigned char *rece_len,unsigned char *rec
+             -e_buff)
+ 176           {
+ 177   1         //pcb=0xCA:Deselect
+ 178   1         //pcb=0xFA:WTX
+ 179   1      
+ 180   1         unsigned char data send_buff[3],result;
+ 181   1         unsigned int data rece_bitlen;
+ 182   1         Pcd_SetTimer(100);
+ 183   1         send_buff[0] = pcb;
+ 184   1          if ((pcb&0x08)==0x08)//判断是否有CID字节
+ 185   1         {
+ 186   2                 if ((pcb&0xF0)==0xF0) //WTX
+ 187   2                 {
+ 188   3                              send_buff[1] = CPU_CID;
+ 189   3                              send_buff[2] = wtxm;
+ 190   3                              result=Pcd_Comm(Transceive,send_buff,3,rece_buff,&rece_bitlen);
+ 191   3                      }
+ 192   2                      else  //DESELECT
+ 193   2                      {
+ 194   3                              send_buff[1] = CPU_CID;
+ 195   3                              result=Pcd_Comm(Transceive,send_buff,2,rece_buff,&rece_bitlen);
+ 196   3                      }
+ 197   2              }
+ 198   1              else
+ 199   1              {
+ 200   2                      if ((pcb&0xF0)==0xF0) //WTX
+ 201   2                 {
+ 202   3                              send_buff[1] = wtxm;
+ 203   3                              result=Pcd_Comm(Transceive,send_buff,2,rece_buff,&rece_bitlen);
+ 204   3                      }
+ 205   2                      else   //DESELECT
+ 206   2                      {
+ 207   3                              send_buff[1] = 0x00;
+ 208   3                              result=Pcd_Comm(Transceive,send_buff,2,rece_buff,&rece_bitlen);
+ 209   3                      }
+ 210   2              }
+ 211   1              if (result==OK)
+ 212   1                              {
+ 213   2                              *rece_len=rece_bitlen/8;
+ 214   2                              }
+ 215   1              return result;
+ 216   1       }
+ 217          
+ 218          /****************************************************************/
+ 219          /*名称: CPU_baud_rate_change                                                                    */
+ 220          /*功能: 调整通信波特率                                                                                  */
+ 221          /*输入:                                                                                                                 */
+ 222          /*              mode=0 接收发送波特率106kbps                                                    */
+ 223          /*              mode=1 接收发送波特率212kbps                                                    */
+ 224          /*              mode=2 接收发送波特率424kbps                                                    */
+ 225          /*                                                                                                                              */
+ 226          /*输出:响应长度                                                                                                 */
+ 227          /*              OK: 应答正确                                                                                    */
+ 228          /*              ERROR: 应答错误                                                                                 */
+ 229          /****************************************************************/
+ 230          unsigned char CPU_BaudRate_Set(unsigned char mode) //mode=0:106Kbps;1:212Kpbs;2:424Kpbs
+ 231          {
+ 232   1              Clear_BitMask(TxModeReg,0x70);
+ 233   1              Clear_BitMask(RxModeReg,0x70);
+ 234   1        switch (mode)
+ 235   1        {
+C51 COMPILER V9.01   CPU_CARD                                                              07/15/2014 20:44:01 PAGE 5   
+
+ 236   2        case 0:         //106kbps
+ 237   2                      Set_BitMask(TxModeReg,0x00);
+ 238   2                      Set_BitMask(RxModeReg,0x00);
+ 239   2                      break;
+ 240   2        case 1:         //212kbps
+ 241   2                      Set_BitMask(TxModeReg,0x10);
+ 242   2                      Set_BitMask(RxModeReg,0x10);
+ 243   2                      break;
+ 244   2        case 2:         //424kbps
+ 245   2                      Set_BitMask(TxModeReg,0x20);
+ 246   2                      Set_BitMask(RxModeReg,0x20);
+ 247   2                      break;
+ 248   2        case 3:         //848kbps
+ 249   2                      Set_BitMask(TxModeReg,0x30);
+ 250   2                      Set_BitMask(RxModeReg,0x30);
+ 251   2                      break;
+ 252   2        }
+ 253   1      return OK;
+ 254   1      }
+ 255          
+ 256           void CPU_PCB_CONVER(void)
+ 257          {
+ 258   1              //PCB bit0=~(bit0)
+ 259   1              CPU_PCB=CPU_PCB^0x01;//设置块号变换
+ 260   1              return;
+ 261   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    856    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      2      50
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      14
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

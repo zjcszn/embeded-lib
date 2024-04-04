@@ -1,0 +1,194 @@
+C51 COMPILER V9.01   CPU_APP                                                               07/15/2014 20:44:58 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE CPU_APP
+OBJECT MODULE PLACED IN .\Output\cpu_app.obj
+COMPILER INVOKED BY: D:\Program Files\Keil4\C51\BIN\C51.EXE cpu_app.c LARGE OMF2 BROWSE INCDIR(.\Inc) DEBUG PRINT(.\List
+                    -\cpu_app.lst) OBJECT(.\Output\cpu_app.obj)
+
+line level    source
+
+   1          #include "cpu_card.h"
+   2          #include "uart.h"
+   3          #include "main.h"
+   4          #include "des.h"
+   5          #include <string.h>
+   6          
+   7          unsigned char TPDU_Send[255],TPDU_Rece[255],TPDU_len;
+   8          
+   9          struct 
+  10          {
+  11          unsigned char send_len;
+  12          unsigned char *send_buff;//应用单元发送指针
+  13          unsigned char rece_len;
+  14          unsigned char *rece_buff;//应用单元接收指针
+  15          }APDU;
+  16          
+  17          
+  18          unsigned char APDU_Init()//初始化APDU收发单元指针
+  19          {
+  20   1               if(CPU_PCB&0x08)
+  21   1               {
+  22   2               APDU.send_buff=TPDU_Send+2;//保留2字节用于pcb与cid
+  23   2               APDU.rece_buff=TPDU_Rece+2;//保留2字节用于pcb与cid
+  24   2               }
+  25   1               else
+  26   1               {
+  27   2               APDU.send_buff=TPDU_Send+1;//保留1字节用于pcb
+  28   2               APDU.rece_buff=TPDU_Rece+1;//保留1字节用于pcb
+  29   2               }
+  30   1              return OK;
+  31   1      }
+  32          
+  33          
+  34          unsigned char APDU_Exchange(unsigned char send_len,unsigned char *send,unsigned char *rece_len,unsigned ch
+             -ar *rece)
+  35                  {
+  36   1              unsigned char data i,result,tpdu_tx_len,tpdu_rx_len,WTXM;
+  37   1      
+  38   1              if(CPU_PCB&0x08)
+  39   1               {
+  40   2               *send=CPU_PCB;//pcb
+  41   2               *(send+1)=CPU_CID;//cid
+  42   2               tpdu_tx_len=send_len+2;
+  43   2               }
+  44   1               else
+  45   1               {
+  46   2               *send=CPU_PCB;//pcb
+  47   2               tpdu_tx_len=send_len+1;
+  48   2               }
+  49   1              
+  50   1              result= CPU_TPDU(tpdu_tx_len,send,&tpdu_rx_len,rece);
+  51   1              if (result==OK)
+  52   1              {
+  53   2              CPU_PCB=*rece;
+C51 COMPILER V9.01   CPU_APP                                                               07/15/2014 20:44:58 PAGE 2   
+
+  54   2              if((CPU_PCB&0xF0)==0xF0)//WTX
+  55   2                      {
+  56   3                      if(CPU_PCB&0x08)
+  57   3                      WTXM=*(rece+2);
+  58   3                      else
+  59   3                      WTXM=*(rece+1);
+  60   3                      }
+  61   2              *rece_len=tpdu_rx_len;
+  62   2                                                              
+  63   2              while(1)
+  64   2                      {
+  65   3                              if((CPU_PCB&0xF0)==0xF0)//WTX
+  66   3                              {
+  67   4                                      result=CPU_S_Block(CPU_PCB,WTXM,&tpdu_rx_len,rece);
+  68   4                                      if(result==ERROR)
+  69   4                                              return ERROR;
+  70   4                                      CPU_PCB=*rece;
+  71   4                                      *rece_len=tpdu_rx_len;
+  72   4                              }
+  73   3                              if((CPU_PCB&0xF0)==0x10)//R_Block
+  74   3                              {
+  75   4                                      CPU_PCB_CONVER();
+  76   4                                      result=CPU_R_Block(&tpdu_rx_len,rece+(*rece_len));
+  77   4                                      if(result==ERROR)
+  78   4                                              return ERROR;
+  79   4                                      CPU_PCB=*(rece+(*rece_len));
+  80   4                                      if(CPU_PCB&0x08)
+  81   4                                                      {
+  82   5                                                              for (i=0;i<tpdu_rx_len-2;i++)
+  83   5                                                                      *(rece+i+(*rece_len))=*(rece+i+(*rece_len)+2);
+  84   5                                                              *rece_len=*rece_len+tpdu_rx_len-2;
+  85   5                                                      }
+  86   4                                                      else
+  87   4                                                      {
+  88   5                                                              for (i=0;i<tpdu_rx_len-1;i++)
+  89   5                                                                      *(rece+i+(*rece_len))=*(rece+i+(*rece_len)+1);
+  90   5                                                              *rece_len=*rece_len+tpdu_rx_len-1;
+  91   5                                                      }
+  92   4                              }
+  93   3                              if((CPU_PCB&0xF0)==0x00)//I_Block
+  94   3                              {
+  95   4                              CPU_PCB_CONVER();
+  96   4                                      if(CPU_PCB&0x08)
+  97   4                                              APDU.rece_len=*rece_len-2;
+  98   4                                      else
+  99   4                                              APDU.rece_len=*rece_len-1;
+ 100   4                              break;
+ 101   4                              }
+ 102   3                      }
+ 103   2              }
+ 104   1      
+ 105   1              return OK;
+ 106   1              }
+ 107          
+ 108          unsigned char CPU_APP(void)
+ 109          {
+ 110   1                      Uart_Send_Msg("-> Card Rats\r\n");
+ 111   1                      if(CPU_Rats(0x02,0x10,&TPDU_len,TPDU_Rece)==ERROR)//RATS
+ 112   1                              return ERROR;   
+ 113   1                              
+ 114   1                      Uart_Send_Msg("-> Ats=");Uart_Send_Hex(TPDU_Rece,TPDU_len);Uart_Send_Msg("\r\n");
+ 115   1                              
+C51 COMPILER V9.01   CPU_APP                                                               07/15/2014 20:44:58 PAGE 3   
+
+ 116   1                      APDU_Init();
+ 117   1      
+ 118   1                      Uart_Send_Msg("-> Select NFC T4\r\n");
+ 119   1                      memcpy(APDU.send_buff,"\x00\xA4\x04\x00\x07\xD2\x76\x00\x00\x85\x01\x01\x00",13);
+ 120   1                      if(APDU_Exchange(13,TPDU_Send,&TPDU_len,TPDU_Rece)==ERROR)
+ 121   1                              return ERROR;
+ 122   1                      Uart_Send_Msg("-> Return =");Uart_Send_Hex(APDU.rece_buff,APDU.rece_len);Uart_Send_Msg("\r\n");
+ 123   1                                              
+ 124   1                      Uart_Send_Msg("->  Select NDEF file\r\n");
+ 125   1                      memcpy(APDU.send_buff,"\x00\xA4\x00\x0C\x02\x00\x01",7);
+ 126   1                      if(APDU_Exchange(7,TPDU_Send,&TPDU_len,TPDU_Rece)==ERROR)
+ 127   1                              return ERROR;
+ 128   1                      Uart_Send_Msg("-> Return =");Uart_Send_Hex(APDU.rece_buff,APDU.rece_len);Uart_Send_Msg("\r\n");
+ 129   1      
+ 130   1                      Uart_Send_Msg("-> Write NDEF file\r\n");
+ 131   1                      memcpy(APDU.send_buff,"\x00\xD6\x00\x02\x1a\xd1\x02\x15\x53\x70\x91\x01\x06\x55\x05\x31\x30\x30\x31\x30\
+             -x51\x01\x07\x54\x02\x65\x6e\x74\x65\x73\x74",31);
+ 132   1                      if(APDU_Exchange(31,TPDU_Send,&TPDU_len,TPDU_Rece)==ERROR)
+ 133   1                              return ERROR;
+ 134   1                      Uart_Send_Msg("-> Return =");Uart_Send_Hex(APDU.rece_buff,APDU.rece_len);Uart_Send_Msg("\r\n");
+ 135   1      
+ 136   1                      Uart_Send_Msg("->  Write NDEF file leng\r\n");
+ 137   1                      memcpy(APDU.send_buff,"\x00\xD6\x00\x00\x02\x00\x01A",7);
+ 138   1                      if(APDU_Exchange(7,TPDU_Send,&TPDU_len,TPDU_Rece)==ERROR)
+ 139   1                              return ERROR;
+ 140   1                      Uart_Send_Msg("-> Return =");Uart_Send_Hex(APDU.rece_buff,APDU.rece_len);Uart_Send_Msg("\r\n");
+ 141   1      
+ 142   1                      Uart_Send_Msg("-> Read NDEF leng\r\n");
+ 143   1                      memcpy(APDU.send_buff,"\x00\xb0\x00\x00\x02",5);
+ 144   1                      if(APDU_Exchange(5,TPDU_Send,&TPDU_len,TPDU_Rece)==ERROR)
+ 145   1                              return ERROR;
+ 146   1                      Uart_Send_Msg("-> Return =");Uart_Send_Hex(APDU.rece_buff,APDU.rece_len);Uart_Send_Msg("\r\n");
+ 147   1      
+ 148   1                      Uart_Send_Msg("-> Read NDEF message\r\n");
+ 149   1                      memcpy(APDU.send_buff,"\x00\xb0\x00\x02\x1a",5);
+ 150   1                      if(APDU_Exchange(5,TPDU_Send,&TPDU_len,TPDU_Rece)==ERROR)
+ 151   1                              return ERROR;
+ 152   1                      Uart_Send_Msg("-> Return =");Uart_Send_Hex(APDU.rece_buff,APDU.rece_len);Uart_Send_Msg("\r\n");
+ 153   1      
+ 154   1      //              Uart_Send_Msg("-> Read EF01\r\n");
+ 155   1      //              memcpy(APDU.send_buff,"\x00\xB0\x00\x00\xDC",5);
+ 156   1      //              if(APDU_Exchange(5,TPDU_Send,&TPDU_len,TPDU_Rece)==ERROR)
+ 157   1      //                      return ERROR;
+ 158   1      //              Uart_Send_Msg("-> Return =");Uart_Send_Hex(APDU.rece_buff,APDU.rece_len);Uart_Send_Msg("\r\n");
+ 159   1                              return OK;
+ 160   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1423    ----
+   CONSTANT SIZE    =    245    ----
+   XDATA SIZE       =    519      10
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       5
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

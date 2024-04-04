@@ -1,0 +1,255 @@
+C51 COMPILER V9.01   MIFARE_CARD                                                           08/14/2014 17:50:52 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE MIFARE_CARD
+OBJECT MODULE PLACED IN .\Output\mifare_card.obj
+COMPILER INVOKED BY: D:\Program Files\Keil4\C51\BIN\C51.EXE mifare_card.c LARGE OMF2 BROWSE INCDIR(.\Inc) DEBUG PRINT(.\
+                    -List\mifare_card.lst) OBJECT(.\Output\mifare_card.obj)
+
+line level    source
+
+   1          /*************************************************************/
+   2          //2014.07.15修改版
+   3          /*************************************************************/
+   4          #include "mifare_card.h"
+   5          #include "fm175xx.h"
+   6          #include "type_a.h" 
+   7          #include "main.h"
+   8          /*****************************************************************************************/
+   9          /*名称：Mifare_Auth                                                                                                                                              */
+  10          /*功能：Mifare_Auth卡片认证                                                                                                                              */
+  11          /*输入：mode，认证模式（0：key A认证，1：key B认证）；sector，认证的扇区号（0~15）               */
+  12          /*              *mifare_key，6字节认证密钥数组；*card_uid，4字节卡片UID数组                                              */
+  13          /*输出:                                                                                                                                                                  */
+  14          /*              OK    :认证成功                                                                                                                                  */
+  15          /*              ERROR :认证失败                                                                                                                                  */
+  16          /*****************************************************************************************/
+  17           unsigned char Mifare_Auth(unsigned char mode,unsigned char sector,unsigned char *mifare_key,unsigned char
+             - *card_uid)
+  18          {
+  19   1              unsigned char data send_buff[12],rece_buff[1],result;
+  20   1              unsigned int data rece_bitlen;
+  21   1              if(mode==0x0)
+  22   1                      send_buff[0]=0x60;//60 kayA认证指令
+  23   1              if(mode==0x1)
+  24   1                      send_buff[0]=0x61;//61 keyB认证指令
+  25   1              send_buff[1]=sector*4;//认证扇区的块0地址
+  26   1              send_buff[2]=mifare_key[0];
+  27   1              send_buff[3]=mifare_key[1];
+  28   1              send_buff[4]=mifare_key[2];
+  29   1              send_buff[5]=mifare_key[3];
+  30   1              send_buff[6]=mifare_key[4];
+  31   1              send_buff[7]=mifare_key[5];
+  32   1              send_buff[8]=card_uid[0];
+  33   1              send_buff[9]=card_uid[1];
+  34   1              send_buff[10]=card_uid[2];
+  35   1              send_buff[11]=card_uid[3];
+  36   1      
+  37   1              Pcd_SetTimer(1);
+  38   1              result =Pcd_Comm(MFAuthent,send_buff,12,rece_buff,&rece_bitlen);//Authent认证
+  39   1      
+  40   1              if (result==OK)
+  41   1                      {
+  42   2                      if(Read_Reg(Status2Reg)&0x08)//判断加密标志位，确认认证结果
+  43   2                              return OK;
+  44   2                      else
+  45   2                              return ERROR;
+  46   2                      }
+  47   1              return ERROR;
+  48   1      }
+  49          /*****************************************************************************************/
+  50          /*名称：Mifare_Blockset                                                                                                                                  */
+  51          /*功能：Mifare_Blockset卡片数值设置                                                                                                              */
+  52          /*输入：block，块号；*buff，需要设置的4字节数值数组                                                                              */
+  53          /*                                                                                                                                                                               */
+C51 COMPILER V9.01   MIFARE_CARD                                                           08/14/2014 17:50:52 PAGE 2   
+
+  54          /*输出:                                                                                                                                                                  */
+  55          /*              OK    :设置成功                                                                                                                                  */
+  56          /*              ERROR :设置失败                                                                                                                                  */
+  57          /*****************************************************************************************/
+  58           unsigned char Mifare_Blockset(unsigned char block,unsigned char *buff)
+  59           {
+  60   1        unsigned char data block_data[16],result;
+  61   1              block_data[0]=buff[3];
+  62   1              block_data[1]=buff[2];
+  63   1              block_data[2]=buff[1];
+  64   1              block_data[3]=buff[0];
+  65   1              block_data[4]=~buff[3];
+  66   1              block_data[5]=~buff[2];
+  67   1              block_data[6]=~buff[1];
+  68   1              block_data[7]=~buff[0];
+  69   1              block_data[8]=buff[3];
+  70   1              block_data[9]=buff[2];
+  71   1              block_data[10]=buff[1];
+  72   1              block_data[11]=buff[0];
+  73   1              block_data[12]=block;
+  74   1              block_data[13]=~block;
+  75   1              block_data[14]=block;
+  76   1              block_data[15]=~block;
+  77   1        result= Mifare_Blockwrite(block,block_data);
+  78   1        return result;
+  79   1       }
+  80          /*****************************************************************************************/
+  81          /*名称：Mifare_Blockread                                                                                                                                 */
+  82          /*功能：Mifare_Blockread卡片读块操作                                                                                                     */
+  83          /*输入：block，块号（0x00~0x3F）；buff，16字节读块数据数组                                                               */
+  84          /*输出:                                                                                                                                                                  */
+  85          /*              OK    :成功                                                                                                                                              */
+  86          /*              ERROR :失败                                                                                                                                              */
+  87          /*****************************************************************************************/
+  88          unsigned char Mifare_Blockread(unsigned char block,unsigned char *buff)
+  89          {       
+  90   1              unsigned char data send_buff[2],result;
+  91   1              unsigned int data rece_bitlen;
+  92   1              Pcd_SetTimer(1);
+  93   1              send_buff[0]=0x30;//30 读块指令
+  94   1              send_buff[1]=block;//块地址
+  95   1              result =Pcd_Comm(Transceive,send_buff,2,buff,&rece_bitlen);//
+  96   1              if ((result!=0 )|(rece_bitlen!=16*8)) //接收到的数据长度为16
+  97   1                      return ERROR;
+  98   1              return OK;
+  99   1      }
+ 100          /*****************************************************************************************/
+ 101          /*名称：mifare_blockwrite                                                                                                                                */
+ 102          /*功能：Mifare卡片写块操作                                                                                                                               */
+ 103          /*输入：block，块号（0x00~0x3F）；buff，16字节写块数据数组                                                               */
+ 104          /*输出:                                                                                                                                                                  */
+ 105          /*              OK    :成功                                                                                                                                              */
+ 106          /*              ERROR :失败                                                                                                                                              */
+ 107          /*****************************************************************************************/
+ 108          unsigned char Mifare_Blockwrite(unsigned char block,unsigned char *buff)
+ 109          {       
+ 110   1              unsigned char data result,send_buff[16],rece_buff[1];
+ 111   1              unsigned int data rece_bitlen;
+ 112   1              Pcd_SetTimer(1);
+ 113   1              send_buff[0]=0xA0;//A0 写块指令
+ 114   1              send_buff[1]=block;//块地址
+ 115   1        
+C51 COMPILER V9.01   MIFARE_CARD                                                           08/14/2014 17:50:52 PAGE 3   
+
+ 116   1              result =Pcd_Comm(Transceive,send_buff,2,rece_buff,&rece_bitlen);//
+ 117   1              if ((result!=OK)|((rece_buff[0]&0x0F)!=0x0A))   //如果未接收到0x0A，表示无ACK
+ 118   1              return(ERROR);
+ 119   1              
+ 120   1              Pcd_SetTimer(5);
+ 121   1      
+ 122   1              result =Pcd_Comm(Transceive,buff,16,rece_buff,&rece_bitlen);//
+ 123   1              if ((result!=OK )|((rece_buff[0]&0x0F)!=0x0A)) //如果未接收到0x0A，表示无ACK
+ 124   1                      return ERROR;
+ 125   1              return OK;
+ 126   1      }
+ 127          /*****************************************************************************************/
+ 128          /*名称：                                                                                                                                                                 */
+ 129          /*功能：Mifare 卡片增值操作                                                                                                                              */
+ 130          /*输入：block，块号（0x00~0x3F）；buff，4字节增值数据数组                                                                */
+ 131          /*输出:                                                                                                                                                                  */
+ 132          /*              OK    :成功                                                                                                                                              */
+ 133          /*              ERROR :失败                                                                                                                                              */
+ 134          /*****************************************************************************************/
+ 135          unsigned char Mifare_Blockinc(unsigned char block,unsigned char *buff)
+ 136          {       
+ 137   1              unsigned char data result,send_buff[2],rece_buff[1];
+ 138   1              unsigned int data rece_bitlen;
+ 139   1              Pcd_SetTimer(5);
+ 140   1              send_buff[0]=0xc1;// C1 增值指令
+ 141   1              send_buff[1]=block;//块地址
+ 142   1              result=Pcd_Comm(Transceive,send_buff,2,rece_buff,&rece_bitlen);
+ 143   1              if ((result!=OK )|((rece_buff[0]&0x0F)!=0x0A))  //如果未接收到0x0A，表示无ACK
+ 144   1                      return ERROR;
+ 145   1              Pcd_SetTimer(5);
+ 146   1              Pcd_Comm(Transceive,buff,4,rece_buff,&rece_bitlen);
+ 147   1      
+ 148   1              return result;
+ 149   1      }
+ 150          /*****************************************************************************************/
+ 151          /*名称：mifare_blockdec                                                                                                                                  */
+ 152          /*功能：Mifare 卡片减值操作                                                                                                                              */
+ 153          /*输入：block，块号（0x00~0x3F）；buff，4字节减值数据数组                                                                */
+ 154          /*输出:                                                                                                                                                                  */
+ 155          /*              OK    :成功                                                                                                                                              */
+ 156          /*              ERROR :失败                                                                                                                                              */
+ 157          /*****************************************************************************************/
+ 158          unsigned char Mifare_Blockdec(unsigned char block,unsigned char *buff)
+ 159          {       
+ 160   1              unsigned char data result,send_buff[2],rece_buff[1];
+ 161   1              unsigned int data rece_bitlen;
+ 162   1              Pcd_SetTimer(5);
+ 163   1              send_buff[0]=0xc0;//
+ 164   1              send_buff[1]=block;//块地址
+ 165   1              result=Pcd_Comm(Transceive,send_buff,2,rece_buff,&rece_bitlen);
+ 166   1              if ((result!=OK )|((rece_buff[0]&0x0F)!=0x0A))  //如果未接收到0x0A，表示无ACK
+ 167   1                      return ERROR;
+ 168   1              Pcd_SetTimer(5);
+ 169   1              Pcd_Comm(Transceive,buff,4,rece_buff,&rece_bitlen);
+ 170   1      
+ 171   1              return result;
+ 172   1      }
+ 173          /*****************************************************************************************/
+ 174          /*名称：mifare_transfer                                                                                                                                  */
+ 175          /*功能：Mifare 卡片transfer操作                                                                                                                  */
+ 176          /*输入：block，块号（0x00~0x3F）                                                                                                                 */
+ 177          /*输出:                                                                                                                                                                  */
+C51 COMPILER V9.01   MIFARE_CARD                                                           08/14/2014 17:50:52 PAGE 4   
+
+ 178          /*              OK    :成功                                                                                                                                              */
+ 179          /*              ERROR :失败                                                                                                                                              */
+ 180          /*****************************************************************************************/
+ 181          unsigned char Mifare_Transfer(unsigned char block)
+ 182          {       
+ 183   1              unsigned char data result,send_buff[2],rece_buff[1];
+ 184   1              unsigned int data rece_bitlen;
+ 185   1              Pcd_SetTimer(5);
+ 186   1              send_buff[0]=0xb0;//
+ 187   1              send_buff[1]=block;//块地址
+ 188   1              result=Pcd_Comm(Transceive,send_buff,2,rece_buff,&rece_bitlen);
+ 189   1              if ((result!=OK )|((rece_buff[0]&0x0F)!=0x0A))  //如果未接收到0x0A，表示无ACK
+ 190   1                      return ERROR;
+ 191   1              return result;
+ 192   1      }
+ 193          /*****************************************************************************************/
+ 194          /*名称：mifare_restore                                                                                                                                   */
+ 195          /*功能：Mifare 卡片restore操作                                                                                                                   */
+ 196          /*输入：block，块号（0x00~0x3F）                                                                                                                 */
+ 197          /*输出:                                                                                                                                                                  */
+ 198          /*              OK    :成功                                                                                                                                              */
+ 199          /*              ERROR :失败                                                                                                                                              */
+ 200          /*****************************************************************************************/
+ 201          
+ 202          unsigned char Mifare_Restore(unsigned char block)
+ 203          {       
+ 204   1              unsigned char data result,send_buff[4],rece_buff[1];
+ 205   1              unsigned int data rece_bitlen;
+ 206   1              Pcd_SetTimer(5);
+ 207   1              send_buff[0]=0xc2;//
+ 208   1              send_buff[1]=block;//块地址
+ 209   1              result=Pcd_Comm(Transceive,send_buff,2,rece_buff,&rece_bitlen);
+ 210   1              if ((result!=OK )|((rece_buff[0]&0x0F)!=0x0A))  //如果未接收到0x0A，表示无ACK
+ 211   1                      return ERROR;
+ 212   1              Pcd_SetTimer(5);
+ 213   1              send_buff[0]=0x00;
+ 214   1              send_buff[1]=0x00;
+ 215   1              send_buff[2]=0x00;
+ 216   1              send_buff[3]=0x00;
+ 217   1              Pcd_Comm(Transceive,send_buff,4,rece_buff,&rece_bitlen);
+ 218   1      
+ 219   1              return result;
+ 220   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1148    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----      26
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      84
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

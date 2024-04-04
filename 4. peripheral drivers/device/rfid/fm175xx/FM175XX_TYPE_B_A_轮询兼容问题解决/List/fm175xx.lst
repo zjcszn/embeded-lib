@@ -1,0 +1,501 @@
+C51 COMPILER V9.54   FM175XX                                                               09/05/2017 11:31:03 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE FM175XX
+OBJECT MODULE PLACED IN .\Output\fm175xx.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE Code\fm175xx.c LARGE OMF2 BROWSE INCDIR(.\Inc) DEBUG PRINT(.\List\fm175x
+                    -x.lst) TABS(2) OBJECT(.\Output\fm175xx.obj)
+
+line level    source
+
+   1          /*************************************************************/
+   2          //2014.07.15修改版
+   3          /*************************************************************/
+   4          #include "spi.h"
+   5          #include "main.h"
+   6          #include "fm175xx.h"
+   7          #include "STC15F2K60S2.h"
+   8          #include "pin.h"
+   9          #include <string.h> 
+  10          /*************************************************************/
+  11          /*函数名：      Read_Reg
+  12          /*功能：      读寄存器操作
+  13          /*输入参数：  reg_add，寄存器地址
+  14          /*返回值：      寄存器数值
+  15          /*************************************************************/
+  16          unsigned char Read_Reg(unsigned char reg_add)
+  17          {
+  18   1      unsigned char data reg_value;    
+  19   1       reg_value=SPIRead(reg_add);
+  20   1       return reg_value;
+  21   1      }
+  22          /*************************************************************/
+  23          /*函数名：      Read_Reg All
+  24          /*功能：      读64个寄存器操作
+  25          /*输入参数：  无
+  26          /*输出参数    *reg_value，寄存器数值指针,长度为64字节
+  27          /*返回值：      OK
+  28          /*************************************************************/
+  29          unsigned char Read_Reg_All(unsigned char *reg_value)
+  30          {
+  31   1      unsigned char data i;
+  32   1        for (i=0;i<64;i++)     
+  33   1          *(reg_value+i)=SPIRead(i);
+  34   1       return OK;
+  35   1      }
+  36          /*************************************************************/
+  37          /*函数名：      Write_Reg                  */
+  38          /*功能：      写寄存器操作                 */
+  39          /*                               */
+  40          /*输入参数：  reg_add，寄存器地址；reg_value，寄存器数值   */
+  41          /*返回值：      OK                       */
+  42          /*        ERROR                    */
+  43          /*************************************************************/
+  44          unsigned char Write_Reg(unsigned char reg_add,unsigned char reg_value)
+  45          {
+  46   1        SPIWrite(reg_add,reg_value);
+  47   1        return OK;
+  48   1      }
+  49          /*************************************************************/
+  50          /*函数名：      Read_FIFO                  */
+  51          /*功能：      读取FIFO                     */
+  52          /*                               */
+  53          /*输入参数：  length，读取FIFO数据长度           */
+  54          /*输出参数：  *fifo_data，FIFO数据存放指针         */
+C51 COMPILER V9.54   FM175XX                                                               09/05/2017 11:31:03 PAGE 2   
+
+  55          /*返回值：                             */
+  56          /*                               */
+  57          /*************************************************************/
+  58          void Read_FIFO(unsigned char length,unsigned char *fifo_data)
+  59          {  
+  60   1        SPIRead_Sequence(length,FIFODataReg,fifo_data);
+  61   1        return;
+  62   1      }
+  63          /*************************************************************/
+  64          /*函数名：      Write_FIFO                   */
+  65          /*功能：      写入FIFO                     */
+  66          /*                               */
+  67          /*输入参数：  length，读取数据长度；             */
+  68          /*        *fifo_data，数据存放指针           */
+  69          /*输出参数：                         */
+  70          /*返回值：                             */
+  71          /*                               */
+  72          /*************************************************************/
+  73          void Write_FIFO(unsigned char length,unsigned char *fifo_data)
+  74          {
+  75   1        SPIWrite_Sequence(length,FIFODataReg,fifo_data);
+  76   1        return;
+  77   1      }
+  78          /*************************************************************/
+  79          /*函数名：      Clear_FIFO                   */
+  80          /*功能：      清空FIFO                     */
+  81          /*                               */
+  82          /*输入参数：  无                      */
+  83          /*输出参数：                         */
+  84          /*返回值：      OK                       */
+  85          /*        ERROR                    */
+  86          /*************************************************************/
+  87          unsigned char Clear_FIFO(void)
+  88          {
+  89   1         Set_BitMask(FIFOLevelReg,0x80);//清除FIFO缓冲
+  90   1         if (SPIRead(FIFOLevelReg)==0)
+  91   1          return OK;
+  92   1        else
+  93   1          return ERROR;
+  94   1      }
+  95          /*************************************************************/
+  96          /*函数名：      Set_BitMask                  */
+  97          /*功能：      置位寄存器操作                 */
+  98          /*输入参数：  reg_add，寄存器地址；mask，寄存器置位    */
+  99          /*返回值：      OK                       */
+ 100          /*        ERROR                    */
+ 101          /*************************************************************/
+ 102          unsigned char Set_BitMask(unsigned char reg_add,unsigned char mask)
+ 103          {
+ 104   1          unsigned char data result;
+ 105   1          result=Write_Reg(reg_add,Read_Reg(reg_add) | mask);  // set bit mask
+ 106   1        return result;
+ 107   1      }
+ 108          /*********************************************/
+ 109          /*函数名：      Clear_BitMask
+ 110          /*功能：      清除位寄存器操作
+ 111                  
+ 112          /*输入参数：  reg_add，寄存器地址；mask，寄存器清除位
+ 113          /*返回值：      OK
+ 114                  ERROR
+ 115          /*********************************************/
+ 116          unsigned char Clear_BitMask(unsigned char reg_add,unsigned char mask)
+C51 COMPILER V9.54   FM175XX                                                               09/05/2017 11:31:03 PAGE 3   
+
+ 117          {
+ 118   1          unsigned char data result;
+ 119   1          result=Write_Reg(reg_add,Read_Reg(reg_add) & ~mask);  // clear bit mask
+ 120   1        return result;
+ 121   1      }
+ 122          /*********************************************/
+ 123          /*函数名：      Set_RF
+ 124          /*功能：      设置射频输出
+ 125                  
+ 126          /*输入参数：  mode，射频输出模式
+ 127                  0，关闭输出
+ 128                  1,仅打开TX1输出
+ 129                  2,仅打开TX2输出
+ 130                  3，TX1，TX2打开输出，TX2为反向输出
+ 131          /*返回值：      OK
+ 132                  ERROR
+ 133          /*********************************************/
+ 134          unsigned char Set_Rf(unsigned char mode)
+ 135          {
+ 136   1      unsigned char data result;
+ 137   1      if  ((Read_Reg(TxControlReg)&0x03)==mode)
+ 138   1        return OK;
+ 139   1      if (mode==0)
+ 140   1        {
+ 141   2        result=Clear_BitMask(TxControlReg,0x03); //关闭TX1，TX2输出
+ 142   2        }
+ 143   1      if (mode==1)
+ 144   1        {
+ 145   2        result=Clear_BitMask(TxControlReg,0x01); //仅打开TX1输出
+ 146   2        }
+ 147   1      if (mode==2)
+ 148   1        {
+ 149   2        result=Clear_BitMask(TxControlReg,0x02); //仅打开TX2输出
+ 150   2        }
+ 151   1      if (mode==3)
+ 152   1        {
+ 153   2        result=Set_BitMask(TxControlReg,0x03); //打开TX1，TX2输出
+ 154   2        }
+ 155   1          Delay_100us(1000);//打开TX输出后需要延时等待天线载波信号稳定
+ 156   1      return result;
+ 157   1      }
+ 158          /*********************************************/
+ 159          /*函数名：      Pcd_Comm
+ 160          /*功能：      读卡器通信
+ 161                  
+ 162          /*输入参数：  Command，通信操作命令；
+ 163                  pInData，发送数据数组；
+ 164                  InLenByte，发送数据数组字节长度；
+ 165                  pOutData，接收数据数组；
+ 166                  pOutLenBit，接收数据的位长度
+ 167          /*返回值：      OK
+ 168                  ERROR
+ 169          /*********************************************/  
+ 170          unsigned char Pcd_Comm( unsigned char Command, 
+ 171                              unsigned char *pInData, 
+ 172                              unsigned char InLenByte,
+ 173                              unsigned char *pOutData, 
+ 174                              unsigned int *pOutLenBit)
+ 175          {
+ 176   1          unsigned char data result;
+ 177   1        unsigned char data rx_temp=0;//临时数据字节长度
+ 178   1        unsigned char data rx_len=0;//接收数据字节长度
+C51 COMPILER V9.54   FM175XX                                                               09/05/2017 11:31:03 PAGE 4   
+
+ 179   1          unsigned char data lastBits=0;//接收数据位长度
+ 180   1          unsigned char data irq;
+ 181   1        Clear_FIFO();
+ 182   1          Write_Reg(CommandReg,Idle);
+ 183   1          Write_Reg(WaterLevelReg,0x20);//设置FIFOLevel=32字节
+ 184   1        Write_Reg(ComIrqReg,0x7F);//清除IRQ标志
+ 185   1        if(Command==MFAuthent)
+ 186   1          {
+ 187   2          Write_FIFO(InLenByte,pInData);//填入认证密钥  
+ 188   2          Set_BitMask(BitFramingReg,0x80);//启动发送
+ 189   2          }
+ 190   1          Set_BitMask(TModeReg,0x80);//自动启动定时器
+ 191   1      
+ 192   1        Write_Reg(CommandReg,Command);
+ 193   1      
+ 194   1        while(1)//循环判断中断标识
+ 195   1          {
+ 196   2          irq = Read_Reg(ComIrqReg);//查询中断标志    
+ 197   2            if(irq&0x01)    //TimerIRq  定时器时间用尽
+ 198   2            {
+ 199   3              result=ERROR;   
+ 200   3              break;
+ 201   3            }
+ 202   2            if(Command==MFAuthent)
+ 203   2            {
+ 204   3              if(irq&0x10)    //IdelIRq  command寄存器为空闲，指令操作完成
+ 205   3              {
+ 206   4                result=OK;
+ 207   4                  break;
+ 208   4              }
+ 209   3              }
+ 210   2            if(Command==Transmit) 
+ 211   2              {
+ 212   3                if((irq&0x04)&&(InLenByte>0))//LoAlertIrq+发送字节数大于0
+ 213   3                  {
+ 214   4                    if (InLenByte<32)
+ 215   4                      {
+ 216   5                        Write_FIFO(InLenByte,pInData);  
+ 217   5                        InLenByte=0;
+ 218   5                      }
+ 219   4                      else
+ 220   4                      {
+ 221   5                        Write_FIFO(32,pInData);
+ 222   5                        InLenByte=InLenByte-32;
+ 223   5                        pInData=pInData+32;
+ 224   5                      }
+ 225   4                    Set_BitMask(BitFramingReg,0x80);//启动发送
+ 226   4                    Write_Reg(ComIrqReg,0x04);//清除LoAlertIrq
+ 227   4                  } 
+ 228   3                
+ 229   3                if((irq&0x40)&&(InLenByte==0))    //TxIRq
+ 230   3                {
+ 231   4                  result=OK;
+ 232   4                    break;
+ 233   4                }
+ 234   3              }
+ 235   2                      
+ 236   2            if(Command==Transceive)
+ 237   2              {
+ 238   3                if((irq&0x04)&&(InLenByte>0))//LoAlertIrq+发送字节数大于0
+ 239   3                { 
+ 240   4                  if (InLenByte>32)
+C51 COMPILER V9.54   FM175XX                                                               09/05/2017 11:31:03 PAGE 5   
+
+ 241   4                    {
+ 242   5                      Write_FIFO(32,pInData);
+ 243   5                      InLenByte=InLenByte-32;
+ 244   5                      pInData=pInData+32;
+ 245   5                    }
+ 246   4                  else
+ 247   4                    {
+ 248   5                      Write_FIFO(InLenByte,pInData);
+ 249   5                      InLenByte=0;
+ 250   5                    }
+ 251   4                    Set_BitMask(BitFramingReg,0x80);//启动发送
+ 252   4                    Write_Reg(ComIrqReg,0x04);//清除LoAlertIrq
+ 253   4                }
+ 254   3                if(irq&0x08)  //HiAlertIRq
+ 255   3                {
+ 256   4                   if((irq&0x40)&&(InLenByte==0)&&(Read_Reg(FIFOLevelReg)>32))//TxIRq + 待发送长度为0 + FIFO长度大于32
+ 257   4                      {
+ 258   5                      Read_FIFO(32,pOutData+rx_len); //读出FIFO内容
+ 259   5                      rx_len=rx_len+32;
+ 260   5                      Write_Reg(ComIrqReg,0x08);  //清除 HiAlertIRq
+ 261   5                    }
+ 262   4                  }
+ 263   3                  if((irq&0x20)&&(InLenByte==0))  //RxIRq=1
+ 264   3                  {
+ 265   4                    result=OK;
+ 266   4                      break;
+ 267   4                  }
+ 268   3                  }
+ 269   2              }
+ 270   1      //    if (Read_Reg(ErrorReg)&0x0F)  //Mifare卡片的写操作时会返回4个BIT,需要屏蔽错误检测
+ 271   1      //        {
+ 272   1      //      result = ERROR;
+ 273   1      //        }
+ 274   1      //        else
+ 275   1              {   
+ 276   2             if (Command == Transceive)
+ 277   2              {
+ 278   3                rx_temp=Read_Reg(FIFOLevelReg);
+ 279   3                Read_FIFO(rx_temp,pOutData+rx_len); //读出FIFO内容
+ 280   3                rx_len=rx_len+rx_temp;//接收长度累加
+ 281   3                      
+ 282   3                        lastBits = Read_Reg(ControlReg) & 0x07;
+ 283   3                      if (lastBits)
+ 284   3                        *pOutLenBit = (rx_len-1)*(unsigned int)8 + lastBits;  
+ 285   3                else
+ 286   3                        *pOutLenBit = rx_len*(unsigned int)8;   
+ 287   3              }
+ 288   2          }
+ 289   1          Set_BitMask(ControlReg,0x80);           // stop timer now
+ 290   1          Write_Reg(CommandReg,Idle); 
+ 291   1        Clear_BitMask(BitFramingReg,0x80);//关闭发送
+ 292   1          return result;
+ 293   1      }
+ 294          /*********************************************/
+ 295          /*函数名：      Pcd_SetTimer
+ 296          /*功能：      设置接收延时
+ 297          /*输入参数：  delaytime，延时时间（单位为毫秒）
+ 298          /*返回值：      OK
+ 299          /*********************************************/
+ 300           unsigned char Pcd_SetTimer(unsigned long delaytime)//设定超时时间（ms）
+ 301          {
+ 302   1        unsigned long data TimeReload;
+C51 COMPILER V9.54   FM175XX                                                               09/05/2017 11:31:03 PAGE 6   
+
+ 303   1        unsigned int data Prescaler;
+ 304   1      
+ 305   1        Prescaler=0;
+ 306   1        TimeReload=0;
+ 307   1        while(Prescaler<0xfff)
+ 308   1        {
+ 309   2          TimeReload = ((delaytime*(long)13560)-1)/(Prescaler*2+1);
+ 310   2          
+ 311   2          if( TimeReload<0xffff)
+ 312   2            break;
+ 313   2          Prescaler++;
+ 314   2        }
+ 315   1          TimeReload=TimeReload&0xFFFF;
+ 316   1          Set_BitMask(TModeReg,Prescaler>>8);
+ 317   1          Write_Reg(TPrescalerReg,Prescaler&0xFF);          
+ 318   1          Write_Reg(TReloadMSBReg,TimeReload>>8);
+ 319   1          Write_Reg(TReloadLSBReg,TimeReload&0xFF);
+ 320   1        return OK;
+ 321   1      }
+ 322          /*********************************************/
+ 323          /*函数名：      Pcd_ConfigISOType
+ 324          /*功能：      设置操作协议
+ 325          /*输入参数：  type 0，ISO14443A协议；
+ 326          /*           1，ISO14443B协议；
+ 327          /*返回值：      OK
+ 328          /*********************************************/
+ 329          unsigned char Pcd_ConfigISOType(unsigned char data type)
+ 330          {
+ 331   1      //    Write_Reg(ComIEnReg, 0x00 ); //ComIEnReg  0x02
+ 332   1      //  Write_Reg(DivIEnReg, 0x00 );//DivIEnReg 0x03
+ 333   1      //    Write_Reg(ComIrqReg , 0x3f );//ComIrqReg  0x04
+ 334   1      //  Clear_BitMask(Status2Reg,0x08);//Status2Reg 0x08
+ 335   1      //  Write_Ext_Reg(0x01,0x21);//
+ 336   1      //    Write_Ext_Reg(0x03,0x04);//
+ 337   1      //    Write_Reg(RxSelReg  , 0x88);// RxSelReg 0x17
+ 338   1        
+ 339   1        
+ 340   1         if (type == 0)                     //ISO14443_A
+ 341   1         { 
+ 342   2           
+ 343   2          Set_BitMask(ControlReg, 0x10); //ControlReg 0x0C 设置reader模式
+ 344   2          Set_BitMask(TxAutoReg, 0x40); //TxASKReg 0x15 设置100%ASK有效
+ 345   2          Write_Reg(TxModeReg, 0x00);  //TxModeReg 0x12 设置TX CRC无效，TX FRAMING =TYPE A
+ 346   2          Write_Reg(RxModeReg, 0x00); //RxModeReg 0x13 设置RX CRC无效，RX FRAMING =TYPE A
+ 347   2         }
+ 348   1         if (type == 1)                     //ISO14443_B
+ 349   1         { 
+ 350   2          Write_Reg(ControlReg, 0x10); //ControlReg 0x0C 设置reader模式
+ 351   2          Write_Reg(TxModeReg, 0x83); //TxModeReg 0x12 设置TX CRC有效，TX FRAMING =TYPE B
+ 352   2          Write_Reg(RxModeReg, 0x83); //RxModeReg 0x13 设置RX CRC有效，RX FRAMING =TYPE B
+ 353   2          Write_Reg(TxAutoReg, 0x00);// TxASKReg 0x15 设置100%ASK无效 
+ 354   2           
+ 355   2      //    Write_Reg(TxAutoReg, 0x24);// 金融过检设置TxASKReg 0x15 设置100%ASK无效 
+ 356   2      //    Write_Reg(TxBitPhaseReg, 0x8f);// 金融过检设置TxBitPhaseReg 0x25 
+ 357   2      //    Write_Reg(GsNOnReg, 0xf7);// 金融过检设置GsNOnReg 0x27
+ 358   2      //    Write_Reg(GsNOffReg, 0xff);// 金融过检设置 GsNOffReg 0x23
+ 359   2      //    Write_Reg(TYPEBREG, 0xc0);// 金融过检设置 TYPEBREG  0x1E 
+ 360   2      //     Write_Reg(ControlReg, 0x10);// 金融过检设置 ControlReg 0x0C
+ 361   2      //    Write_Reg(DemodReg, 0x5D);// 金融过检设置 DemodReg 0x19
+ 362   2          Write_Reg(BitFramingReg, 0x00);// 金融过检设置 BitFramingReg 0x0D  不加这个寄存器设置 typer A  B轮询即有
+             -问题寻卡失败
+ 363   2           
+C51 COMPILER V9.54   FM175XX                                                               09/05/2017 11:31:03 PAGE 7   
+
+ 364   2           //CWGsNOn/ModGsNOn// 低四位改变调制深度，数值越小，调制深度越小；
+ 365   2           
+ 366   2          Write_Reg(RFCfgReg,0x58);  //0x26 6-4 RxGain 接收增益  0x08/0x38 18db 0x18/0x48 33db 0x58 38db 0x68 43db
+             - 0x78 48db
+ 367   2          Write_Reg(GsNOnReg, 0xF4); //0x27 7-4 CWGsNOn 无调制N电导 3-0 ModGsNOn 调制时N电导，深度
+ 368   2          Write_Reg(CWGsPReg,0x3F);  //0x28 5-0 CWGsP 无调制时PMOS的输出
+ 369   2          Write_Reg(ModGsPReg,0x20); //0x29 5-0 ModGsP 调制时PMOS的输出，可以控制调制深度
+ 370   2          Write_Reg(RxThresholdReg,0x84);//0x18 7-4 MinLevel译码器最小信号强度，低于不处理 2-0 CollLevel
+ 371   2        }
+ 372   1         return OK;
+ 373   1      }
+ 374          /*********************************************/
+ 375          /*函数名：      FM175XX_SoftReset
+ 376          /*功能：      软复位操作
+ 377                  
+ 378          /*输入参数：  
+ 379                  
+ 380          
+ 381          /*返回值：      OK
+ 382                  ERROR
+ 383          /*********************************************/
+ 384          
+ 385          unsigned char  FM175XX_SoftReset(void)
+ 386            { 
+ 387   1        Write_Reg(CommandReg,SoftReset);//
+ 388   1        return  Set_BitMask(ControlReg,0x10);//17520初始值配置
+ 389   1        }
+ 390          
+ 391          unsigned char FM175XX_HardReset(void)
+ 392            { 
+ 393   1        NPD=0;
+ 394   1        Delay_100us(1);
+ 395   1        NPD=1;
+ 396   1        Delay_100us(1);
+ 397   1        return OK;
+ 398   1        }
+ 399          /*********************************************/
+ 400          /*函数名：      FM175XX_SoftPowerdown
+ 401          /*功能：      软件低功耗操作
+ 402          /*输入参数：  
+ 403          /*返回值：      OK，进入低功耗模式；
+ 404          /*        ERROR，退出低功耗模式；
+ 405          /*********************************************/
+ 406          unsigned char FM175XX_SoftPowerdown(void)
+ 407          {
+ 408   1        if (Read_Reg(CommandReg)&0x10)
+ 409   1          {
+ 410   2          Clear_BitMask(CommandReg,0x10);//退出低功耗模式
+ 411   2          return ERROR;
+ 412   2          }
+ 413   1        else
+ 414   1          Set_BitMask(CommandReg,0x10);//进入低功耗模式
+ 415   1          return OK;
+ 416   1      }
+ 417          /*********************************************/
+ 418          /*函数名：      FM175XX_HardPowerdown
+ 419          /*功能：      硬件低功耗操作
+ 420          /*输入参数：  
+ 421          /*返回值：      OK，进入低功耗模式；
+ 422          /*        ERROR，退出低功耗模式；
+ 423          /*********************************************/
+ 424          unsigned char FM175XX_HardPowerdown(void)
+C51 COMPILER V9.54   FM175XX                                                               09/05/2017 11:31:03 PAGE 8   
+
+ 425          { 
+ 426   1        NPD=~NPD;
+ 427   1        if(NPD==1)
+ 428   1          return OK; //进入低功耗模式
+ 429   1        else
+ 430   1          return ERROR;//退出低功耗模式
+ 431   1      }
+ 432          /*********************************************/
+ 433          /*函数名：      Read_Ext_Reg
+ 434          /*功能：      读取扩展寄存器
+ 435          /*输入参数：  reg_add，寄存器地址
+ 436          /*返回值：      寄存器数值
+ 437          /*********************************************/
+ 438          unsigned char Read_Ext_Reg(unsigned char reg_add)
+ 439          {
+ 440   1        Write_Reg(0x0F,0x80+reg_add);
+ 441   1        return Read_Reg(0x0F);
+ 442   1      }
+ 443          /*********************************************/
+ 444          /*函数名：      Write_Ext_Reg
+ 445          /*功能：      写入扩展寄存器
+ 446          /*输入参数：  reg_add，寄存器地址；reg_value，寄存器数值
+ 447          /*返回值：      OK
+ 448                  ERROR
+ 449          /*********************************************/
+ 450          unsigned char Write_Ext_Reg(unsigned char reg_add,unsigned char reg_value)
+ 451          {
+ 452   1        Write_Reg(0x0F,0x40+reg_add);
+ 453   1        Write_Reg(0x0F,0xC0+reg_value);
+ 454   1        return OK;
+ 455   1      }
+ 456          
+ 457          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1215    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----      25
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      16
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

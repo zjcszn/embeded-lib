@@ -1,0 +1,125 @@
+C51 COMPILER V9.54   MAIN                                                                  09/05/2017 11:31:03 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Output\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE Code\main.c LARGE OMF2 BROWSE INCDIR(.\Inc) DEBUG PRINT(.\List\main.lst)
+                    - TABS(2) OBJECT(.\Output\main.obj)
+
+line level    source
+
+   1          /*************************************************************/
+   2          //2014.07.10修改版
+   3          /*************************************************************/
+   4          #include "STC15F2K60S2.h"
+   5          #include "intrins.h"
+   6          #include "pin.h"
+   7          #include "uart.h"
+   8          #include "spi.h"
+   9          #include "FM175XX.h"
+  10          #include "main.h"
+  11          #include "type_a.h"
+  12          #include "type_b.h"
+  13          #include "type_b_app.h"
+  14          #include <string.h>
+  15          void main()
+  16          {
+  17   1        Io_Init();
+  18   1        Timer_Uart_Init();
+  19   1        SPI_Init();
+  20   1        Uart_Send_Msg("FM17550 Card TYPE B Reader\r\n");
+  21   1        Uart_Send_Msg("Version 2.0 2014.7.10\r\n");
+  22   1        FM175XX_SoftReset();
+  23   1        Uart_Send_Msg("-> Reset OK\r\n");
+  24   1        
+  25   1        //Pcd_ConfigISOType(1);//选择TYPE B模式
+  26   1        while(1)
+  27   1        {
+  28   2          Pcd_ConfigISOType(0);//选择TYPE B模式
+  29   2          Set_Rf(3); 
+  30   2        if (TypeA_CardActivate(PICC_ATQA,PICC_UID,PICC_SAK)==OK)
+  31   2          {
+  32   3          Uart_Send_Msg("---------------------\r\n");
+  33   3          Uart_Send_Msg("-> Card Activate OK\r\n");
+  34   3          Uart_Send_Msg("<- ATQA = ");Uart_Send_Hex(PICC_ATQA,2);Uart_Send_Msg("\r\n");
+  35   3          Uart_Send_Msg("<- UID = ");Uart_Send_Hex(PICC_UID,4);Uart_Send_Msg("\r\n");
+  36   3          Uart_Send_Msg("<- SAK = ");Uart_Send_Hex(PICC_SAK,1);Uart_Send_Msg("\r\n");
+  37   3      //    if(CPU_APP()!=OK)
+  38   3      //      {
+  39   3      //      Set_Rf(0);
+  40   3      //      Set_Rf(3);
+  41   3      //      }
+  42   3          Set_Rf(0);  
+  43   3         }
+  44   2      Delay_100us(1000);      
+  45   2         
+  46   2          Pcd_ConfigISOType(1);//选择TYPE B模式
+  47   2          Set_Rf(3); 
+  48   2          TYPE_B_APP();
+  49   2         
+  50   2      }
+  51   1        
+  52   1      
+  53   1      }
+  54          
+C51 COMPILER V9.54   MAIN                                                                  09/05/2017 11:31:03 PAGE 2   
+
+  55          /*****************************/
+  56          /*函数介绍：  管脚初始化程序
+  57          /*输入参数：  无
+  58          /*输出参数：  无
+  59          /*返回值：    无
+  60          /*占用资源：  无
+  61          /*****************************/
+  62          void Io_Init()
+  63          {
+  64   1        P0=0xFF;
+  65   1        P1=0xFF;
+  66   1        P2=0xFF;
+  67   1        P3=0xFF;
+  68   1        NPD=1;
+  69   1        LED_2=0;
+  70   1        LED_3=0;
+  71   1        return;
+  72   1      }
+  73          /*************************/
+  74          /*函数介绍：  延时函数
+  75          /*输入参数：  delay_time
+  76          /*输出参数：  无
+  77          /*返回值：    无
+  78          /*占用资源：  无
+  79          /*************************/
+  80          void Delay_100us(unsigned int delay_time)   //0.1ms*delay_time
+  81          {
+  82   1        unsigned int data i;
+  83   1        for(i=0;i<delay_time;i++)
+  84   1        {
+  85   2          _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); 
+  86   2          _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_();
+  87   2          _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_();
+  88   2          _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_();
+  89   2          _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_(); _nop_();
+  90   2        }
+  91   1      }
+  92          
+  93          
+  94          
+  95          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    320    ----
+   CONSTANT SIZE    =    147    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

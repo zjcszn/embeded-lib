@@ -1,0 +1,211 @@
+C51 COMPILER V9.54   CPU_APP                                                               12/14/2016 10:49:17 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE CPU_APP
+OBJECT MODULE PLACED IN .\Output\cpu_app.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE Code\cpu_app.c LARGE OMF2 BROWSE INCDIR(.\Inc) DEBUG PRINT(.\List\cpu_ap
+                    -p.lst) TABS(2) OBJECT(.\Output\cpu_app.obj)
+
+line level    source
+
+*** WARNING C500 IN LINE 1 OF Code\cpu_app.c: LICENSE ERROR (R207(2): REGISTRY READ ERROR)
+
+   1          #include "cpu_card.h"
+   2          #include "uart.h"
+   3          #include "main.h"
+   4          #include "des.h"
+   5          #include "type_a.h"
+   6          #include "fm175xx.h"
+   7          #include <string.h>
+   8          #define APDU_Debug 0
+   9          
+  10          unsigned char CPU_Send_Buff[255],CPU_Rece_Buff[255],CPU_Send_Len,CPU_Rece_Len;
+  11          
+  12          unsigned char APDU_Exchange(unsigned char send_len,unsigned char *send_buff,unsigned char *rece_len,unsign
+             -ed char *rece_buff)
+  13            {
+  14   1        unsigned char data i,result,tpdu_rx_len;
+  15   1        *rece_len=0;
+  16   1      
+  17   1        #if APDU_Debug
+                Uart_Send_Msg("<- CPU_CARD.PCB = ");Uart_Send_Hex(&CPU_CARD.PCB,1);Uart_Send_Msg("\r\n");
+                Uart_Send_Msg("<- CPU_CARD.CID = ");Uart_Send_Hex(&CPU_CARD.CID,1);Uart_Send_Msg("\r\n");
+                Uart_Send_Msg("<- CPU_CARD.FSD = ");Uart_Send_Hex(&CPU_CARD.FSD,1);Uart_Send_Msg("\r\n");
+              
+                #endif 
+  23   1      
+  24   1        if(send_len>CPU_CARD.FSD)//发送长度不能超过卡片ATS中定义的最大接收帧长度
+  25   1          {
+  26   2          Uart_Send_Msg("<- APDU Send Length Overflow\r\n");
+  27   2          return ERROR;
+  28   2          }
+  29   1      
+  30   1        result= CPU_I_Block(send_len,send_buff,&(*rece_len),rece_buff);
+  31   1      
+  32   1        #if APDU_Debug
+                  Uart_Send_Msg("<- result = ");Uart_Send_Hex(&result,1);Uart_Send_Msg("\r\n");
+                  Uart_Send_Msg("<- rece_buff = ");Uart_Send_Hex(rece_buff,*rece_len);Uart_Send_Msg("\r\n");
+                #endif
+  36   1      
+  37   1        if (result==OK)
+  38   1          {
+  39   2            while(1)
+  40   2              {
+  41   3                if(( CPU_CARD.PCB&0xF0)==0xF0)//WTX
+  42   3                {
+  43   4                  result=CPU_WTX(CPU_CARD.WTXM,&tpdu_rx_len,rece_buff);
+  44   4                  if(result!=OK)
+  45   4                    return ERROR;
+  46   4                  CPU_CARD.PCB=*rece_buff;
+  47   4                  if(( CPU_CARD.PCB&0xF0)==0xF0)//WTX
+  48   4                    {
+  49   5                    if( CPU_CARD.PCB&0x08)
+  50   5                      CPU_CARD.WTXM=*(rece_buff+2);
+  51   5                    else
+  52   5                      CPU_CARD.WTXM=*(rece_buff+1);
+C51 COMPILER V9.54   CPU_APP                                                               12/14/2016 10:49:17 PAGE 2   
+
+  53   5                    }
+  54   4                  *rece_len=tpdu_rx_len;
+  55   4                }
+  56   3      
+  57   3                if((CPU_CARD.PCB&0xF0)==0x10)//R_Block
+  58   3                {
+  59   4                  CPU_PCB_CONVER();
+  60   4                  result=CPU_R_Block(&tpdu_rx_len,rece_buff+(*rece_len));
+  61   4                  if(result!=OK)
+  62   4                    return ERROR;
+  63   4                   CPU_CARD.PCB=*(rece_buff+(*rece_len));
+  64   4                  if( CPU_CARD.PCB&0x08)
+  65   4                      {
+  66   5                        for (i=0;i<tpdu_rx_len-2;i++)
+  67   5                          *(rece_buff+i+(*rece_len))=*(rece_buff+i+(*rece_len)+2);
+  68   5                        *rece_len=*rece_len+tpdu_rx_len-2;
+  69   5                      }
+  70   4                      else
+  71   4                      {
+  72   5                        for (i=0;i<tpdu_rx_len-1;i++)
+  73   5                          *(rece_buff+i+(*rece_len))=*(rece_buff+i+(*rece_len)+1);
+  74   5                        *rece_len=*rece_len+tpdu_rx_len-1;
+  75   5                      }
+  76   4                }
+  77   3      
+  78   3                if(( CPU_CARD.PCB&0xF0)==0x00)//I_Block
+  79   3                {
+  80   4                    if(result==OK)
+  81   4                    {
+  82   5                    CPU_PCB_CONVER();
+  83   5                    if( CPU_CARD.PCB&0x08)//cid存在
+  84   5                      {
+  85   6                      *rece_len=*rece_len-2;
+  86   6                      memmove(rece_buff,rece_buff+2,*rece_len);
+  87   6                      }
+  88   5                    else
+  89   5                      {
+  90   6                      *rece_len=*rece_len-1;
+  91   6                      memmove(rece_buff,rece_buff+1,*rece_len);
+  92   6                      }
+  93   5                    return OK;
+  94   5                    }
+  95   4                    else
+  96   4                    return ERROR;
+  97   4                }
+  98   3              }
+  99   2              
+ 100   2          }
+ 101   1      
+ 102   1        return ERROR;
+ 103   1        }
+ 104          
+ 105          unsigned char CPU_APP(void)
+ 106          {
+ 107   1      unsigned char result;
+ 108   1      
+ 109   1          result = CPU_Rats(0x02,0x50,&CPU_Rece_Len,CPU_Rece_Buff);//CPU卡片RATS操作
+ 110   1          if(result != OK)
+ 111   1            {
+ 112   2            Uart_Send_Msg("-> Card RATS ERROR\r\n");
+ 113   2          
+ 114   2            return ERROR; 
+C51 COMPILER V9.54   CPU_APP                                                               12/14/2016 10:49:17 PAGE 3   
+
+ 115   2            }
+ 116   1          Uart_Send_Msg("-> Card RATS OK\r\n");
+ 117   1          Uart_Send_Msg("<- Ats = ");Uart_Send_Hex(CPU_Rece_Buff,CPU_Rece_Len);Uart_Send_Msg("\r\n");
+ 118   1            
+ 119   1          CPU_Send_Len=7;
+ 120   1          memcpy(CPU_Send_Buff,"\x00\xA4\x00\x00\x02\x3F\x00",CPU_Send_Len);//选择MF文件
+ 121   1          result = APDU_Exchange(CPU_Send_Len,CPU_Send_Buff,&CPU_Rece_Len,CPU_Rece_Buff);
+ 122   1          if(result !=OK)
+ 123   1            {
+ 124   2            Uart_Send_Msg("-> Select MF ERROR\r\n");
+ 125   2            return ERROR;
+ 126   2            }
+ 127   1          Uart_Send_Msg("-> Select MF OK\r\n");
+ 128   1          Uart_Send_Msg("<- Return = ");Uart_Send_Hex(CPU_Rece_Buff,CPU_Rece_Len);Uart_Send_Msg("\r\n");
+ 129   1      
+ 130   1          CPU_Send_Len=20;
+ 131   1          memcpy(CPU_Send_Buff,"\x00\xA4\x04\x00\x0E\x32\x50\x41\x59\x2E\x53\x59\x53\x2E\x44\x44\x46\x30\x31\x00",
+             -CPU_Send_Len);//选择MF文件
+ 132   1          result = APDU_Exchange(CPU_Send_Len,CPU_Send_Buff,&CPU_Rece_Len,CPU_Rece_Buff);
+ 133   1          if(result !=OK)
+ 134   1            {
+ 135   2            Uart_Send_Msg("-> Select File 1 ERROR\r\n");
+ 136   2            return ERROR;
+ 137   2            }
+ 138   1          Uart_Send_Msg("-> Select File 1 OK\r\n");
+ 139   1          Uart_Send_Msg("<- Return = ");Uart_Send_Hex(CPU_Rece_Buff,CPU_Rece_Len);Uart_Send_Msg("\r\n");
+ 140   1      
+ 141   1          CPU_Send_Len=14;
+ 142   1          memcpy(CPU_Send_Buff,"\x00\xA4\x04\x00\x08\xA0\x00\x00\x03\x33\x01\x01\x01\x00",CPU_Send_Len);//选择MF文
+             -件
+ 143   1          result = APDU_Exchange(CPU_Send_Len,CPU_Send_Buff,&CPU_Rece_Len,CPU_Rece_Buff);
+ 144   1          if(result !=OK)
+ 145   1            {
+ 146   2            Uart_Send_Msg("-> Select File 2 ERROR\r\n");
+ 147   2            return ERROR;
+ 148   2            }
+ 149   1          Uart_Send_Msg("-> Select File 2 OK\r\n");
+ 150   1          Uart_Send_Msg("<- Return = ");Uart_Send_Hex(CPU_Rece_Buff,CPU_Rece_Len);Uart_Send_Msg("\r\n");
+ 151   1      
+ 152   1          CPU_Send_Len=42;
+ 153   1          memcpy(CPU_Send_Buff,"\x80\xA8\x00\x00\x24\x83\x22\x28\x00\x00\x80\x00\x00\x00\x00\x00\x01\x00\x00\x00\x
+             -00\x00\x00\x01\x56\x00\x00\x00\x00\x00\x01\x56\x13\x08\x28\x82\x12\x34\x56\x78\x00\x00",CPU_Send_Len);//选择MF文件
+ 154   1          result = APDU_Exchange(CPU_Send_Len,CPU_Send_Buff,&CPU_Rece_Len,CPU_Rece_Buff);
+ 155   1          if(result !=OK)
+ 156   1            {
+ 157   2            Uart_Send_Msg("-> Select File 3 ERROR\r\n");
+ 158   2            return ERROR;
+ 159   2            }
+ 160   1          Uart_Send_Msg("-> Select File 3 OK\r\n");
+ 161   1          Uart_Send_Msg("<- Return = ");Uart_Send_Hex(CPU_Rece_Buff,CPU_Rece_Len);Uart_Send_Msg("\r\n");
+ 162   1      
+ 163   1          result = CPU_Deselect();
+ 164   1            if(result !=OK)
+ 165   1            {
+ 166   2            Uart_Send_Msg("-> Deselect ERROR\r\n");
+ 167   2            return ERROR;
+ 168   2            }
+ 169   1          Uart_Send_Msg("-> Deselect OK\r\n");
+ 170   1          return OK;
+ 171   1      }
+
+
+C51 COMPILER V9.54   CPU_APP                                                               12/14/2016 10:49:17 PAGE 4   
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1155    ----
+   CONSTANT SIZE    =    400    ----
+   XDATA SIZE       =    512      11
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       3
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

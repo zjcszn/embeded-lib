@@ -1,0 +1,203 @@
+C51 COMPILER V9.54   UART                                                                  12/14/2016 10:49:18 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE UART
+OBJECT MODULE PLACED IN .\Output\uart.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE Code\uart.c LARGE OMF2 BROWSE INCDIR(.\Inc) DEBUG PRINT(.\List\uart.lst)
+                    - TABS(2) OBJECT(.\Output\uart.obj)
+
+line level    source
+
+*** WARNING C500 IN LINE 1 OF Code\uart.c: LICENSE ERROR (R207(2): REGISTRY READ ERROR)
+
+   1          /*************************************************************/
+   2          //2014.03.06修改版
+   3          /*************************************************************/
+   4          //串口收发程序
+   5          
+   6          #include "STC15F2K60S2.h"
+   7          #include "intrins.h"
+   8          #include "pin.h"
+   9          #include "uart.h"
+  10          #include <string.h>
+  11          #define UART_BAUD 115200   //115200bps
+  12          #define ETU_WIDTH 97 //103us
+  13          #define SYS_CLK 33177600 //33Mhz
+  14          
+  15          // unsigned char data timer_L,timer_H;
+  16          
+  17          // unsigned char xdata uart_buffer[255];  //串口缓冲区
+  18           unsigned char data uart_data_length;   //串口数据长度
+  19           unsigned char data uart_point;   //数据指针
+  20           unsigned char data uart_verify;      //串口数据校验
+  21           bit data uart_receive_finish_flag;   //串口完成接收一帧有效数据标志位
+  22          
+  23           bit data uart_send_finish_flag;      //串口完成发送一帧数据标志位
+  24           bit data uart_receive_error_flag;    //串口接收出错标志
+  25           bit data uart_send_error_flag;     //串口发送出错标志
+  26          
+  27          /*********************************************/
+  28          /*函数名：      timer_uart_init
+  29          /*功能：      时钟与串口初始化
+  30                  初始化串口0为19200BPS
+  31                  1个停止位，8个数据位，无校验位
+  32                  接收中断允许
+  33          /*输入参数：  无
+  34          /*返回值：      无
+  35          /*********************************************/
+  36          void Timer_Uart_Init()
+  37          {
+  38   1        SCON=0x50;                    //SM0:0 SM1:1 SM2:0 REN:1 TB8:0 RB8:0 TI:0 RI:0
+  39   1        PCON=0x00;                  //SMOD=0  
+  40   1        AUXR |= 0x40;   //定时器1时钟为Fosc,即1T
+  41   1        AUXR &= 0xFE;   //串口1选择定时器1为波特率发生器
+  42   1        TMOD &= 0x0F;   //设定定时器1为16位自动重装方式
+  43   1      
+  44   1        TL1=(65536-((long)SYS_CLK/4/(long)UART_BAUD));    
+  45   1        TH1=(65536-((long)SYS_CLK/4/(long)UART_BAUD))>>8;
+  46   1      
+  47   1        ET1 = 0;    //禁止定时器1中断
+  48   1        TR1 = 1;    //启动定时器1
+  49   1      
+  50   1        INT1=1;//配置中断脚为高电平
+  51   1        IT1=1;//仅触发下降沿
+  52   1        EX1=1;//中断使能
+  53   1      
+C51 COMPILER V9.54   UART                                                                  12/14/2016 10:49:18 PAGE 2   
+
+  54   1        ES=1;                     //开串口0中断
+  55   1        EA=1;                     //开总中断
+  56   1        return;
+  57   1      }
+  58          
+  59          /********************************/
+  60          /*函数名：      uart_int
+  61          /*功能：      串口中断程序
+  62          /*输入参数：  无
+  63          /*返回值：      无
+  64          /*******************************/
+  65          void Uart_Int() interrupt 4
+  66          {
+  67   1      
+  68   1        if(RI==1)                                               //串口接收中断
+  69   1        { 
+  70   2      //    if (SBUF != '#')
+  71   2      //    {
+  72   2      //      uart_buffer[uart_point]=SBUF;
+  73   2      //      uart_point++;
+  74   2      //    }
+  75   2      //    else
+  76   2      //    {
+  77   2      //      uart_receive_finish_flag=1;
+  78   2      //    }
+  79   2          RI=0;
+  80   2        }
+  81   1      
+  82   1        if(TI==1)                                               //串口发送中断
+  83   1        {
+  84   2          TI=0;
+  85   2          uart_send_finish_flag=1;
+  86   2        }
+  87   1        return;
+  88   1      }
+  89          
+  90          
+  91          
+  92          
+  93          //void Timer0_Int(void) interrupt 1
+  94          //{
+  95          //  TH0=timer_H;
+  96          //  TL0=timer_L;
+  97          //  return;
+  98          //}
+  99          
+ 100          void Uart_Send_Msg(unsigned char *msg)
+ 101          { 
+ 102   1        unsigned int data i;
+ 103   1        unsigned int data msg_len;
+ 104   1        msg_len= strlen(msg);
+ 105   1      //  REN=0;
+ 106   1        for (i=0;i<msg_len;i++)
+ 107   1        {
+ 108   2          SBUF=msg[i];//
+ 109   2          while(uart_send_finish_flag==0);
+ 110   2            uart_send_finish_flag=0;
+ 111   2        }
+ 112   1      //  REN=1;
+ 113   1        return;
+ 114   1      }
+ 115          
+C51 COMPILER V9.54   UART                                                                  12/14/2016 10:49:18 PAGE 3   
+
+ 116          //void Uart_Rece_Msg(unsigned char recr_len)
+ 117          //{
+ 118          //  uart_point=0;
+ 119          //  while(uart_point!=recr_len);
+ 120          //    uart_data_length=uart_point;
+ 121          //    uart_point=0;
+ 122          //  return;
+ 123          //}
+ 124          
+ 125          void Uart_Send_Hex(unsigned char *input_byte,unsigned int input_len)
+ 126          {
+ 127   1      unsigned char data temp_byte;
+ 128   1      unsigned int data i;
+ 129   1      
+ 130   1        for(i=0;i<input_len;i++)
+ 131   1        {
+ 132   2          temp_byte=(*(input_byte+i) & 0xF0)>>4;
+ 133   2          if (temp_byte<0x0A)
+ 134   2            SBUF=0x30+temp_byte;
+ 135   2          else
+ 136   2            SBUF=0x37+temp_byte;
+ 137   2      
+ 138   2          while(uart_send_finish_flag==0);
+ 139   2            uart_send_finish_flag=0;
+ 140   2        
+ 141   2          temp_byte=(*(input_byte+i) & 0x0F);
+ 142   2          if (temp_byte<0x0A)
+ 143   2            SBUF=0x30+temp_byte;
+ 144   2          else
+ 145   2              SBUF=0x37+temp_byte;
+ 146   2          while(uart_send_finish_flag==0);
+ 147   2            uart_send_finish_flag=0;
+ 148   2        }
+ 149   1        return;
+ 150   1      }
+ 151          
+ 152          
+ 153          //void Hex_to_BCD(unsigned long hex_input,unsigned char *BCD_output)
+ 154          //{
+ 155          //    BCD_output[0] = hex_input / (long)100000;
+ 156          //    hex_input = hex_input - (BCD_output[0]* (long)100000);
+ 157          //    BCD_output[1] = hex_input / (long)10000;
+ 158          //    hex_input = hex_input - (BCD_output[1]* (long)10000);
+ 159          //    BCD_output[2] = hex_input / (long)1000;
+ 160          //    hex_input = hex_input -(BCD_output[2] *(long) 1000);
+ 161          //    BCD_output[3] = hex_input / 100;
+ 162          //    hex_input = hex_input - (BCD_output[3] * 100);
+ 163          //    BCD_output[4] = hex_input / 10;
+ 164          //    hex_input = hex_input - (BCD_output[4] * 10);
+ 165          //    BCD_output[5] = hex_input / 1;
+ 166          //    return;
+ 167          //}
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    255    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----       6
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      3       7
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      4    ----
+C51 COMPILER V9.54   UART                                                                  12/14/2016 10:49:18 PAGE 4   
+
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

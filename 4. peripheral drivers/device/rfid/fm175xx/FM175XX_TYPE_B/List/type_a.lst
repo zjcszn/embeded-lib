@@ -1,0 +1,13 @@
+C51 COMPILER V9.01   TYPE_A                                                                09/28/2014 08:54:02 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE TYPE_A
+OBJECT MODULE PLACED IN .\Output\type_a.obj
+COMPILER INVOKED BY: D:\Program Files\Keil4\C51\BIN\C51.EXE type_a.c LARGE OMF2 BROWSE INCDIR(.\Inc) DEBUG PRINT(.\List\
+                    -type_a.lst) OBJECT(.\Output\type_a.obj)
+
+line level    source
+
+*** ERROR C318 OF type_a.c: can't open file 'type_a.c'
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  1 ERROR(S)

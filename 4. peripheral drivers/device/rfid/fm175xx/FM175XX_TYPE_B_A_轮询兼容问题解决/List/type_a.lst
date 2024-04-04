@@ -1,0 +1,320 @@
+C51 COMPILER V9.54   TYPE_A                                                                09/05/2017 11:31:03 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE TYPE_A
+OBJECT MODULE PLACED IN .\Output\type_a.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE Code\type_a.c LARGE OMF2 BROWSE INCDIR(.\Inc) DEBUG PRINT(.\List\type_a.
+                    -lst) TABS(2) OBJECT(.\Output\type_a.obj)
+
+line level    source
+
+   1          /*************************************************************/
+   2          //2014.03.06修改版
+   3          /*************************************************************/
+   4          #include "main.h"
+   5          #include "FM175XX.h"
+   6          #include "type_a.h"
+   7          #include "uart.h"
+   8          unsigned char PICC_ATQA[2],PICC_UID[15],PICC_SAK[3];
+   9          #define Type_A_Debug 0  
+  10          /****************************************************************************************/
+  11          /*名称：TypeA_Request                                 */
+  12          /*功能：TypeA_Request卡片寻卡                             */
+  13          /*输入：                                        */
+  14          /*                                                  */
+  15          /*                                                */
+  16          /*输出：                                        */
+  17          /*          pTagType[0],pTagType[1] =ATQA                                             */          
+  18          /*        OK: 应答正确                                                                */
+  19          /*      ERROR: 应答错误                               */
+  20          /****************************************************************************************/
+  21          unsigned char TypeA_Request(unsigned char *pTagType)
+  22          {
+  23   1        unsigned char result,send_buff[1],rece_buff[2];
+  24   1        unsigned int rece_bitlen;  
+  25   1        Clear_BitMask(TxModeReg,0x80);//关闭TX CRC
+  26   1        Clear_BitMask(RxModeReg,0x80);//关闭RX CRC
+  27   1        Clear_BitMask(Status2Reg,0x08);//清除MFCrypto1On
+  28   1        Write_Reg(BitFramingReg,0x07);
+  29   1        send_buff[0] =0x26;
+  30   1          Pcd_SetTimer(1);
+  31   1        result = Pcd_Comm(Transceive,send_buff,1,rece_buff,&rece_bitlen);
+  32   1        
+  33   1        if ((result == OK) && (rece_bitlen == 2*8))
+  34   1        {   
+  35   2         
+  36   2          *pTagType     = rece_buff[0];
+  37   2          *(pTagType+1) = rece_buff[1];
+  38   2          return OK;
+  39   2        }
+  40   1      
+  41   1        return ERROR;
+  42   1      }
+  43          /****************************************************************************************/
+  44          /*名称：TypeA_WakeUp                                  */
+  45          /*功能：TypeA_WakeUp卡片寻卡                              */
+  46          /*输入：                                        */
+  47          /*                                                  */
+  48          /*                                                */
+  49          /*输出：                                        */
+  50          /*          pTagType[0],pTagType[1] =ATQA                                             */          
+  51          /*        OK: 应答正确                                                                */
+  52          /*      ERROR: 应答错误                               */
+  53          /****************************************************************************************/
+  54          unsigned char TypeA_WakeUp(unsigned char *pTagType)
+C51 COMPILER V9.54   TYPE_A                                                                09/05/2017 11:31:03 PAGE 2   
+
+  55          {
+  56   1        unsigned char result,send_buff[1],rece_buff[2];
+  57   1        unsigned int rece_bitlen;  
+  58   1        Clear_BitMask(TxModeReg,0x80);//关闭TX CRC
+  59   1        Clear_BitMask(RxModeReg,0x80);//关闭RX CRC
+  60   1        Clear_BitMask(Status2Reg,0x08);//清除MFCrypto1On
+  61   1        Write_Reg(BitFramingReg,0x07);
+  62   1        send_buff[0] = 0x52;
+  63   1          Pcd_SetTimer(1);
+  64   1        result = Pcd_Comm(Transceive,send_buff,1,rece_buff,&rece_bitlen);
+  65   1      
+  66   1        if ((result == OK) && (rece_bitlen == 2*8))
+  67   1        {   
+  68   2          *pTagType     = rece_buff[0];
+  69   2          *(pTagType+1) = rece_buff[1];
+  70   2          return OK;
+  71   2        }
+  72   1        return ERROR;
+  73   1      }
+  74          /****************************************************************************************/
+  75          /*名称：TypeA_Anticollision                               */
+  76          /*功能：TypeA_Anticollision卡片防冲突                         */
+  77          /*输入：selcode =0x93，0x95，0x97                           */
+  78          /*                                                  */
+  79          /*                                                */
+  80          /*输出：                                        */
+  81          /*          pSnr[0],pSnr[1],pSnr[2],pSnr[3]pSnr[4] =UID                               */          
+  82          /*        OK: 应答正确                                                                */
+  83          /*      ERROR: 应答错误                               */
+  84          /****************************************************************************************/
+  85          unsigned char TypeA_Anticollision(unsigned char selcode,unsigned char *pSnr)
+  86          {
+  87   1          unsigned char result,i,send_buff[2],rece_buff[5];
+  88   1          unsigned int rece_bitlen;
+  89   1        Clear_BitMask(TxModeReg,0x80);
+  90   1        Clear_BitMask(RxModeReg,0x80);
+  91   1        Clear_BitMask(Status2Reg,0x08);//清除MFCrypto1On
+  92   1          Write_Reg(BitFramingReg,0x00);
+  93   1          Write_Reg(CollReg,0x80);
+  94   1       
+  95   1          send_buff[0] = selcode;
+  96   1          send_buff[1] = 0x20;
+  97   1          Pcd_SetTimer(1);
+  98   1          result = Pcd_Comm(Transceive,send_buff,2,rece_buff,&rece_bitlen);
+  99   1      
+ 100   1          if ((result == OK)&&(rece_bitlen==5*8))
+ 101   1          {
+ 102   2             for (i=0; i<5; i++)
+ 103   2               {   
+ 104   3                   *(pSnr+i)  = rece_buff[i];
+ 105   3               }
+ 106   2               if (pSnr[4] == (pSnr[0]^pSnr[1]^pSnr[2]^pSnr[3]))
+ 107   2            {
+ 108   3              return OK;
+ 109   3            }
+ 110   2        
+ 111   2          } 
+ 112   1        return ERROR;
+ 113   1      }
+ 114          /****************************************************************************************/
+ 115          /*名称：TypeA_Select                                  */
+ 116          /*功能：TypeA_Select卡片选卡                              */
+C51 COMPILER V9.54   TYPE_A                                                                09/05/2017 11:31:03 PAGE 3   
+
+ 117          /*输入：selcode =0x93，0x95，0x97                           */
+ 118          /*      pSnr[0],pSnr[1],pSnr[2],pSnr[3]pSnr[4] =UID                       */
+ 119          /*                                                */
+ 120          /*输出：                                        */
+ 121          /*          pSak[0],pSak[1],pSak[2] =SAK                                      */          
+ 122          /*        OK: 应答正确                                                                */
+ 123          /*      ERROR: 应答错误                               */
+ 124          /****************************************************************************************/
+ 125          unsigned char TypeA_Select(unsigned char selcode,unsigned char *pSnr,unsigned char *pSak)
+ 126          {
+ 127   1          unsigned char result,i,send_buff[7],rece_buff[5];
+ 128   1          unsigned int rece_bitlen;
+ 129   1        Write_Reg(BitFramingReg,0x00);
+ 130   1          Set_BitMask(TxModeReg,0x80);
+ 131   1        Set_BitMask(RxModeReg,0x80);
+ 132   1          Clear_BitMask(Status2Reg,0x08);//清除MFCrypto1On
+ 133   1        
+ 134   1        send_buff[0] = selcode;
+ 135   1          send_buff[1] = 0x70;
+ 136   1          
+ 137   1          for (i=0; i<5; i++)
+ 138   1          {
+ 139   2            send_buff[i+2] = *(pSnr+i);
+ 140   2          }
+ 141   1          
+ 142   1        Pcd_SetTimer(1);
+ 143   1          result = Pcd_Comm(Transceive,send_buff,7,rece_buff,&rece_bitlen);
+ 144   1          
+ 145   1          if (result == OK)
+ 146   1            { 
+ 147   2          *pSak=rece_buff[0];
+ 148   2          return OK;
+ 149   2          }
+ 150   1          return ERROR;
+ 151   1      }
+ 152          /****************************************************************************************/
+ 153          /*名称：TypeA_Halt                                    */
+ 154          /*功能：TypeA_Halt卡片停止                                */
+ 155          /*输入：                                        */
+ 156          /*                                                  */
+ 157          /*                                                */
+ 158          /*输出：                                        */
+ 159          /*                                                              */          
+ 160          /*        OK: 应答正确                                                                */
+ 161          /*      ERROR: 应答错误                               */
+ 162          /****************************************************************************************/
+ 163          unsigned char TypeA_Halt(void)
+ 164          {
+ 165   1          unsigned char result,send_buff[2],rece_buff[1],len;
+ 166   1        unsigned int rece_bitlen=0;
+ 167   1          send_buff[0] = 0x50;
+ 168   1          send_buff[1] = 0x00;
+ 169   1          
+ 170   1          Write_Reg(BitFramingReg,0x00);
+ 171   1          Set_BitMask(TxModeReg,0x80);
+ 172   1        Set_BitMask(RxModeReg,0x80);
+ 173   1      
+ 174   1        Pcd_SetTimer(1);
+ 175   1          result=Pcd_Comm(Transceive,send_buff,2,rece_buff,&rece_bitlen);
+ 176   1        if(result==TIMEOUT_Err) 
+ 177   1            return OK;//1ms内无应答，halt成功
+ 178   1        else
+C51 COMPILER V9.54   TYPE_A                                                                09/05/2017 11:31:03 PAGE 4   
+
+ 179   1          #if Type_A_Debug
+                    Uart_Send_Msg("<- result = ");Uart_Send_Hex(&result,1);Uart_Send_Msg("\r\n");
+                    len=rece_bitlen>>8;
+                    Uart_Send_Msg("<- rece_bitlen H = ");Uart_Send_Hex(&len,1);Uart_Send_Msg("\r\n");
+                    len=rece_bitlen&0xFF;
+                    Uart_Send_Msg("<- rece_bitlen L = ");Uart_Send_Hex(&len,1);Uart_Send_Msg("\r\n");
+                  #endif
+ 186   1          return ERROR;
+ 187   1      
+ 188   1      }
+*** WARNING C280 IN LINE 165 OF Code\type_a.c: 'len': unreferenced local variable
+ 189          /****************************************************************************************/
+ 190          /*名称：TypeA_CardActivate                                */
+ 191          /*功能：TypeA_CardActivate卡片激活                            */
+ 192          /*输入：                                        */
+ 193          /*                                                  */
+ 194          /*                                                */
+ 195          /*输出：  pTagType[0],pTagType[1] =ATQA                         */
+ 196          /*          pSnr[0],pSnr[1],pSnr[2],pSnr[3]pSnr[4] =UID                           */
+ 197          /*          pSak[0],pSak[1],pSak[2] =SAK                                      */          
+ 198          /*        OK: 应答正确                                                                */
+ 199          /*      ERROR: 应答错误                               */
+ 200          /****************************************************************************************/
+ 201          unsigned char TypeA_CardActivate(unsigned char *pTagType,unsigned char *pSnr,unsigned char *pSak)
+ 202          {
+ 203   1      unsigned char result;
+ 204   1        
+ 205   1          result=TypeA_Request(pTagType);//寻卡 Standard   send request command Standard mode
+ 206   1          
+ 207   1          if (result==ERROR)
+ 208   1          {
+ 209   2            return ERROR;
+ 210   2          }
+ 211   1      
+ 212   1            if  ((pTagType[0]&0xC0)==0x00)
+ 213   1              {
+ 214   2              result=TypeA_Anticollision(0x93,pSnr);
+ 215   2              if (result==ERROR)
+ 216   2                {
+ 217   3                  return ERROR;
+ 218   3                }
+ 219   2              result=TypeA_Select(0x93,pSnr,pSak);
+ 220   2              if (result==ERROR)
+ 221   2                {
+ 222   3                  return ERROR;
+ 223   3                } 
+ 224   2              }
+ 225   1      
+ 226   1            if  ((pTagType[0]&0xC0)==0x40)
+ 227   1              {
+ 228   2              result=TypeA_Anticollision(0x93,pSnr);
+ 229   2              if (result==ERROR)
+ 230   2                {
+ 231   3                  return ERROR;
+ 232   3                }
+ 233   2              result=TypeA_Select(0x93,pSnr,pSak);
+ 234   2              if (result==ERROR)
+ 235   2                {
+ 236   3                  return ERROR;
+ 237   3                }
+ 238   2              result=TypeA_Anticollision(0x95,pSnr+5);
+ 239   2              if (result==ERROR)
+C51 COMPILER V9.54   TYPE_A                                                                09/05/2017 11:31:03 PAGE 5   
+
+ 240   2                {
+ 241   3                  return ERROR;
+ 242   3                }
+ 243   2              result=TypeA_Select(0x95,pSnr+5,pSak+1);
+ 244   2              if (result==ERROR)
+ 245   2                {
+ 246   3                  return ERROR;
+ 247   3                }
+ 248   2                }
+ 249   1            if  ((pTagType[0]&0xC0)==0x80)
+ 250   1              {
+ 251   2              result=TypeA_Anticollision(0x93,pSnr);
+ 252   2              if (result==ERROR)
+ 253   2                {
+ 254   3                  return ERROR;
+ 255   3                }
+ 256   2              result=TypeA_Select(0x93,pSnr,pSak);
+ 257   2              if (result==ERROR)
+ 258   2                {
+ 259   3                  return ERROR;
+ 260   3                }
+ 261   2              result=TypeA_Anticollision(0x95,pSnr+5);
+ 262   2              if (result==ERROR)
+ 263   2                {
+ 264   3                  return ERROR;
+ 265   3                }
+ 266   2              result=TypeA_Select(0x95,pSnr+5,pSak+1);
+ 267   2              if (result==ERROR)
+ 268   2                {
+ 269   3                  return ERROR;
+ 270   3                }
+ 271   2              result=TypeA_Anticollision(0x97,pSnr+10);
+ 272   2              if (result==ERROR)
+ 273   2                {
+ 274   3                  return ERROR;
+ 275   3                }
+ 276   2              result=TypeA_Select(0x97,pSnr+10,pSak+2);
+ 277   2              if (result==ERROR)
+ 278   2                {
+ 279   3                  return ERROR;
+ 280   3                }
+ 281   2              }
+ 282   1          return result;
+ 283   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1274    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =     20      65
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,158 @@
+C51 COMPILER V9.54   SPI                                                                   09/05/2017 11:31:03 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE SPI
+OBJECT MODULE PLACED IN .\Output\spi.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE Code\spi.c LARGE OMF2 BROWSE INCDIR(.\Inc) DEBUG PRINT(.\List\spi.lst) T
+                    -ABS(2) OBJECT(.\Output\spi.obj)
+
+line level    source
+
+   1          /*************************************************************/
+   2          //2014.03.06修改版
+   3          /*************************************************************/
+   4          #include "STC15F2K60S2.h"
+   5          #include "intrins.h"
+   6          #include "pin.h"
+   7          #include "spi.h"
+   8          #include "main.h"
+   9          
+  10          
+  11          unsigned char SPI_Init()
+  12          {
+  13   1        SPDAT=0;
+  14   1        SPSTAT=SPIF|WCOL;//清除SPIF与WCOL标志
+  15   1        SPCTL=0xD0;//SSIG=1,SPEN=1,DORD=0,MSTR=1,CPOL=0,CPHA=0,SPR1=0,SPR0=0 (SPI_CLK=CPU_CLK/4)
+  16   1        AUXR1=0x00;//PCA_P4=0,SPI_P4=0(SPI在P1 Port),S2_P4=0,GF2=0,ADRJ=0,DPS=0
+  17   1        return OK;
+  18   1      }
+  19          /*******************************************************************************************************/
+  20          /*名称：                                                 */
+  21          /*功能：SPI接口读取数据 SPI read function                                */
+  22          /*输入:                                                  */
+  23          /*    N/A                                                */
+  24          /*输出：                                                 */
+  25          /*    addr: 读取FM175XX内的寄存器地址[0x00~0x3f]  reg_address                    */
+  26          /*    rddata: 读取的数据              reg_data                       */
+  27          /*******************************************************************************************************/
+  28          unsigned char SPIRead(unsigned char addr)       //SPI读函数
+  29          {
+  30   1       unsigned char data reg_value,send_data;
+  31   1        SPI_CS=0;
+  32   1      
+  33   1          send_data=(addr<<1)|0x80;
+  34   1        SPSTAT=SPIF|WCOL;//清除SPIF与WCOL标志
+  35   1        SPDAT=send_data;
+  36   1        while(!(SPSTAT&SPIF));
+  37   1      
+  38   1        SPSTAT=SPIF|WCOL;//清除SPIF与WCOL标志
+  39   1        SPDAT=0x00;
+  40   1        while(!(SPSTAT&SPIF));
+  41   1        reg_value=SPDAT;
+  42   1        SPI_CS=1;
+  43   1        return(reg_value);
+  44   1      }
+  45          
+  46          void SPIRead_Sequence(unsigned char sequence_length,unsigned char addr,unsigned char *reg_value)  
+  47          //SPI连续读函数,用于READ FIFO函数
+  48          {
+  49   1       unsigned char data i,send_data;
+  50   1        if (sequence_length==0)
+  51   1          return;
+  52   1      
+  53   1        SPI_CS=0;
+  54   1      
+C51 COMPILER V9.54   SPI                                                                   09/05/2017 11:31:03 PAGE 2   
+
+  55   1          send_data=(addr<<1)|0x80;
+  56   1        SPSTAT=SPIF|WCOL;//清除SPIF与WCOL标志
+  57   1        SPDAT=send_data;
+  58   1        while(!(SPSTAT&SPIF));
+  59   1      
+  60   1        for (i=0;i<sequence_length;i++)
+  61   1        {
+  62   2          SPSTAT=SPIF|WCOL;//清除SPIF与WCOL标志
+  63   2          if (i==sequence_length-1)
+  64   2            SPDAT=0x00;
+  65   2          else
+  66   2            SPDAT=send_data;
+  67   2      
+  68   2          while(!(SPSTAT&SPIF));
+  69   2          *(reg_value+i)=SPDAT;
+  70   2        }
+  71   1        SPI_CS=1;
+  72   1        return;
+  73   1      } 
+  74          /*******************************************************************************************************/
+  75          /*名称：SPIWrite                                             */
+  76          /*功能：SPI接口写入数据   SPI write function                               */
+  77          /*输入:                                                  */
+  78          /*    add:  写入FM17XX内的寄存器地址[0x00~0x3f]   reg_address                    */
+  79          /*    wrdata:   要写入的数据              reg_data                       */
+  80          /*输出：                                                 */
+  81          /*    N/A                                                */
+  82          /*******************************************************************************************************/
+  83          void SPIWrite(unsigned char addr,unsigned char wrdata)  //SPI写函数
+  84          {
+  85   1      unsigned char data send_data;
+  86   1        SPI_CS=0;          
+  87   1      
+  88   1        send_data=(addr<<1)&0x7e;
+  89   1        
+  90   1          SPSTAT=SPIF|WCOL;//清除SPIF与WCOL标志
+  91   1        SPDAT=send_data;
+  92   1        while(!(SPSTAT&SPIF));
+  93   1      
+  94   1        SPSTAT=0xC0;
+  95   1        SPDAT=wrdata;
+  96   1        while(!(SPSTAT&SPIF));
+  97   1      
+  98   1        SPI_CS=1;
+  99   1        return ;  
+ 100   1      }
+ 101          
+ 102          void SPIWrite_Sequence(unsigned char sequence_length,unsigned char addr,unsigned char *reg_value)
+ 103          //SPI连续写函数,用于WRITE FIFO函数
+ 104          {
+ 105   1      unsigned char data send_data,i;
+ 106   1        if(sequence_length==0)
+ 107   1          return;
+ 108   1      
+ 109   1        SPI_CS=0;
+ 110   1      
+ 111   1        send_data=(addr<<1)&0x7e;
+ 112   1        
+ 113   1          SPSTAT=SPIF|WCOL;//清除SPIF与WCOL标志
+ 114   1        SPDAT=send_data;
+ 115   1        while(!(SPSTAT&SPIF));
+ 116   1      
+C51 COMPILER V9.54   SPI                                                                   09/05/2017 11:31:03 PAGE 3   
+
+ 117   1        for (i=0;i<sequence_length;i++)
+ 118   1        {
+ 119   2        SPSTAT=0xC0;
+ 120   2        SPDAT=*(reg_value+i);
+ 121   2        while(!(SPSTAT&SPIF));
+ 122   2        }
+ 123   1      
+ 124   1        SPI_CS=1;
+ 125   1        return ;  
+ 126   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    264    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----       6
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       7
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
