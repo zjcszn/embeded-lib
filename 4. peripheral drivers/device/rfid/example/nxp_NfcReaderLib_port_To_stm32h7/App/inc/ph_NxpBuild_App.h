@@ -73,7 +73,7 @@
 #ifdef NXPBUILD__PHAC_DISCLOOP_SW                           /**< If DiscLoop SW Component is included,  macros( & it's dependencies) to include/exclude SRC/DATA within Discloop is defined. */
 
 #if defined (NXPBUILD__PHHAL_HW_RC663)
-#define NXPBUILD__PHAC_DISCLOOP_LPCD       /**< SRC to enable LPCD is included. */
+//#define NXPBUILD__PHAC_DISCLOOP_LPCD       /**< SRC to enable LPCD is included. */
 #endif
 
 #ifdef  NXPBUILD__PHPAL_I14443P3A_SW
@@ -208,7 +208,7 @@
 
 /* Enable/disable Debugging */
 #define NXPBUILD__PH_DEBUG                                   /**< TODO: To be checked if required */
-
+//#define NXPBUILD__PH_LOG
 /** @}
 * end of ph_NxpBuild
 */

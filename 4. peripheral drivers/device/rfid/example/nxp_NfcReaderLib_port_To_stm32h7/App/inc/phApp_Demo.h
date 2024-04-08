@@ -20,17 +20,17 @@
 */
 
 
-#ifndef NFCRDLIBEX1_DISCOVERYLOOP_H
-#define NFCRDLIBEX1_DISCOVERYLOOP_H
+#ifndef PHAPP_DEMO_H
+#define PHAPP_DEMO_H
 
 #include <ph_Status.h>
 
-#if defined (NXPBUILD__PHHAL_HW_PN5180)   || \
-    defined (NXPBUILD__PHHAL_HW_PN5190)   || \
-    defined (NXPBUILD__PHHAL_HW_RC663)    || \
+#if defined (NXPBUILD__PHHAL_HW_PN5180) || \
+    defined (NXPBUILD__PHHAL_HW_PN5190) || \
+    defined (NXPBUILD__PHHAL_HW_RC663) || \
     defined (NXPBUILD__PHHAL_HW_PN7462AU) || \
     defined (NXPBUILD__PHHAL_HW_PN7642)
-        #define PH_EXAMPLE1_LPCD_ENABLE             /* If LPCD needs to be configured and used over HAL or over DiscLoop */
+#define PH_EXAMPLE1_LPCD_ENABLE             /* If LPCD needs to be configured and used over HAL or over DiscLoop */
 #endif
 
 #define LISTEN_PHASE_TIME_MS              300       /* Listen Phase TIME */
@@ -49,23 +49,17 @@
 //    #define ENABLE_EMVCO_PROF
 #endif /* ENABLE_DISC_CONFIG */
 
-
 #ifdef PH_OSAL_FREERTOS
-    #ifdef PHOSAL_FREERTOS_STATIC_MEM_ALLOCATION
-        #define DISC_DEMO_TASK_STACK         (1800/4)
-    #else /* PHOSAL_FREERTOS_STATIC_MEM_ALLOCATION */
-        #if defined( __PN74XXXX__) || defined(__PN76XX__)
-            #define DISC_DEMO_TASK_STACK     (1600/4)
-        #else /* defined( __PN74XXXX__) || defined(__PN76XX__) */
-            #define DISC_DEMO_TASK_STACK     (1650)
-        #endif /* defined( __PN74XXXX__) || defined(__PN76XX__) */
-    #endif /* PHOSAL_FREERTOS_STATIC_MEM_ALLOCATION */
-    #define DISC_DEMO_TASK_PRIO              4
+#ifdef PHOSAL_FREERTOS_STATIC_MEM_ALLOCATION
+#define DISC_DEMO_TASK_STACK         (1800/4)
+#else /* PHOSAL_FREERTOS_STATIC_MEM_ALLOCATION */
+#if defined( __PN74XXXX__) || defined(__PN76XX__)
+#define DISC_DEMO_TASK_STACK     (1600/4)
+#else /* defined( __PN74XXXX__) || defined(__PN76XX__) */
+#define DISC_DEMO_TASK_STACK     (1650)
+#endif /* defined( __PN74XXXX__) || defined(__PN76XX__) */
+#endif /* PHOSAL_FREERTOS_STATIC_MEM_ALLOCATION */
+#define DISC_DEMO_TASK_PRIO              4
 #endif /* PH_OSAL_FREERTOS */
 
-#ifdef PH_OSAL_LINUX
-#define DISC_DEMO_TASK_STACK                0x20000
-#define DISC_DEMO_TASK_PRIO                 0
-#endif /* PH_OSAL_LINUX */
-
-#endif /* NFCRDLIBEX1_DISCOVERYLOOP_H */
+#endif /* PHAPP_DEMO_H */

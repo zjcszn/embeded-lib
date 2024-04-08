@@ -49,6 +49,10 @@ void CLIF_IRQHandler(void);
 *******************************************************************************/
 phbalReg_Type_t sBalParams;
 phhalHw_Rc663_DataParams_t *pHal;
+phpalI14443p3a_Sw_DataParams_t *pI14443a;
+phpalI14443p3b_Sw_DataParams_t *pI14443b;
+
+phhalHw_Rc663_DataParams_t *pHal;
 
 /*******************************************************************************
 **   Function Definitions

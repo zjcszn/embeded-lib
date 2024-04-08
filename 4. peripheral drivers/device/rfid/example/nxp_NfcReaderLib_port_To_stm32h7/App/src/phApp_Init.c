@@ -152,17 +152,12 @@ phStatus_t phApp_Comp_Init(void *pDiscLoopParams) {
 }
 
 phStatus_t phApp_Configure_IRQ() {
-
-#ifdef PH_PLATFORM_HAS_ICFRONTEND
     phDriver_Pin_Config_t pinCfg;
     
     pinCfg.bOutputLogic = PH_DRIVER_SET_LOW;
     pinCfg.bPullSelect = PHDRIVER_PIN_IRQ_PULL_CFG;
-    
     pinCfg.eInterruptConfig = PIN_IRQ_TRIGGER_TYPE;
     phDriver_PinConfig(PHDRIVER_PIN_IRQ, PH_DRIVER_PINFUNC_INTERRUPT, &pinCfg);
-
-#endif /* #ifdef PH_PLATFORM_HAS_ICFRONTEND */
     
     return PH_ERR_SUCCESS;
 }
