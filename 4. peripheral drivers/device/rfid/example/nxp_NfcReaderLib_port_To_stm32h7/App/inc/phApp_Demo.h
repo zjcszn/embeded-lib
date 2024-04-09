@@ -51,7 +51,7 @@
 
 #ifdef PH_OSAL_FREERTOS
 #ifdef PHOSAL_FREERTOS_STATIC_MEM_ALLOCATION
-#define DISC_DEMO_TASK_STACK         (1800/4)
+#define DISC_DEMO_TASK_STACK         (2048/4)
 #else /* PHOSAL_FREERTOS_STATIC_MEM_ALLOCATION */
 #if defined( __PN74XXXX__) || defined(__PN76XX__)
 #define DISC_DEMO_TASK_STACK     (1600/4)
@@ -59,7 +59,7 @@
 #define DISC_DEMO_TASK_STACK     (1650)
 #endif /* defined( __PN74XXXX__) || defined(__PN76XX__) */
 #endif /* PHOSAL_FREERTOS_STATIC_MEM_ALLOCATION */
-#define DISC_DEMO_TASK_PRIO              4
+#define DISC_DEMO_TASK_PRIO              28
 #endif /* PH_OSAL_FREERTOS */
 
 #endif /* PHAPP_DEMO_H */

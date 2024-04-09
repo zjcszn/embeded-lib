@@ -47,6 +47,8 @@
 /* Local headers */
 #include <phApp_Demo.h>
 #include <stdlib.h>
+#include "bsp_led.h"
+#include "perf_counter.h"
 
 
 /*******************************************************************************
@@ -60,12 +62,12 @@
 #define DATA_BUFFER_LEN             16 /* Buffer length */
 #define MFC_BLOCK_DATA_SIZE         16 /* Block Data size - 16 Bytes */
 
-phacDiscLoop_Sw_DataParams_t *pDiscLoop;       /* Discovery loop component */
-void *psKeyStore;
-void *psalMFC;
+static phacDiscLoop_Sw_DataParams_t *pDiscLoop;       /* Discovery loop component */
+
+static uint16_t bSavePollTechCfg;
 
 /*The below variables needs to be initialized according to example requirements by a customer */
-uint8_t bDataBuffer[DATA_BUFFER_LEN];  /* universal data buffer */
+static uint8_t bDataBuffer[DATA_BUFFER_LEN];  /* universal data buffer */
 
 /*PAL variables*/
 phKeyStore_Sw_KeyEntry_t sKeyEntries[NUMBER_OF_KEYENTRIES];                                  /* Sw KeyEntry structure */
@@ -73,15 +75,15 @@ phKeyStore_Sw_KUCEntry_t sKUCEntries[NUMBER_OF_KUCENTRIES];                     
 phKeyStore_Sw_KeyVersionPair_t sKeyVersionPairs[NUMBER_OF_KEYVERSIONPAIRS * NUMBER_OF_KEYENTRIES]; /* Sw KeyVersionPair structure */
 
 /* Set the key for the MIFARE (R) Classic cards. */
-uint8_t Key[12] = {0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU};
+static uint8_t Key[12] = {0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU};
 
 #ifdef NXPBUILD__PH_LOG
 phLog_RegisterEntry_t phLogRegisterEntry[4];
 phLog_LogEntry_t phLogLogEntry[16];
 #endif
 
-uint32_t aDiscTaskBuffer[DISC_DEMO_TASK_STACK];
-const uint8_t bTaskName[configMAX_TASK_NAME_LEN] = {"DiscLoop"};
+static uint32_t aDiscTaskBuffer[DISC_DEMO_TASK_STACK];
+static const uint8_t bTaskName[configMAX_TASK_NAME_LEN] = {"DiscLoop"};
 
 
 /*******************************************************************************
@@ -94,6 +96,55 @@ const uint8_t bTaskName[configMAX_TASK_NAME_LEN] = {"DiscLoop"};
 *******************************************************************************/
 
 void DiscoveryLoop_Task(void *pDataParams);
+
+phStatus_t LoadProfile(void) {
+    phStatus_t status = PH_ERR_SUCCESS;
+    uint16_t wPasPollConfig = 0;
+    
+    wPasPollConfig |= PHAC_DISCLOOP_POS_BIT_MASK_A;
+    wPasPollConfig |= PHAC_DISCLOOP_POS_BIT_MASK_B;
+    
+    /* passive Bailout bitmap config. */
+    status = phacDiscLoop_SetConfig(pDiscLoop, PHAC_DISCLOOP_CONFIG_BAIL_OUT, 0x00);
+    CHECK_STATUS(status);
+    
+    /* Set Passive poll bitmap config. */
+    status = phacDiscLoop_SetConfig(pDiscLoop, PHAC_DISCLOOP_CONFIG_PAS_POLL_TECH_CFG, wPasPollConfig);
+    CHECK_STATUS(status);
+    
+    /* reset collision Pending */
+    status = phacDiscLoop_SetConfig(pDiscLoop, PHAC_DISCLOOP_CONFIG_COLLISION_PENDING, PH_OFF);
+    CHECK_STATUS(status);
+    
+    /* whether anti-collision is supported or not. */
+    status = phacDiscLoop_SetConfig(pDiscLoop, PHAC_DISCLOOP_CONFIG_ANTI_COLL, PH_ON);
+    CHECK_STATUS(status);
+    
+    /* Poll Mode default state*/
+    status = phacDiscLoop_SetConfig(pDiscLoop, PHAC_DISCLOOP_CONFIG_NEXT_POLL_STATE, PHAC_DISCLOOP_POLL_STATE_DETECTION);
+    CHECK_STATUS(status);
+    
+    /* Device limit for Type A */
+    status = phacDiscLoop_SetConfig(pDiscLoop, PHAC_DISCLOOP_CONFIG_TYPEA_DEVICE_LIMIT, 1);
+    CHECK_STATUS(status);
+    
+    /* Passive polling Tx Guard times in micro seconds. */
+    status = phacDiscLoop_SetConfig(pDiscLoop, PHAC_DISCLOOP_CONFIG_GTA_VALUE_US, 5100);
+    CHECK_STATUS(status);
+    
+    /* Device limit for Type B */
+    status = phacDiscLoop_SetConfig(pDiscLoop, PHAC_DISCLOOP_CONFIG_TYPEB_DEVICE_LIMIT, 1);
+    CHECK_STATUS(status);
+    
+    status = phacDiscLoop_SetConfig(pDiscLoop, PHAC_DISCLOOP_CONFIG_GTB_VALUE_US, 5100);
+    CHECK_STATUS(status);
+    
+    /* Discovery loop Operation mode */
+    status = phacDiscLoop_SetConfig(pDiscLoop, PHAC_DISCLOOP_CONFIG_OPE_MODE, RD_LIB_MODE_NFC);
+    CHECK_STATUS(status);
+    
+    return status;
+}
 
 /*******************************************************************************
 **   Code
@@ -109,7 +160,8 @@ phStatus_t phApp_ReadUID(void) {
     uint8_t bErrCnt = 0;
     phpalI14443p3b_Sw_DataParams_t *psal14443b = phNfcLib_GetDataParams(PH_COMP_PAL_ISO14443P3B);
     
-    while (bErrCnt < 10) {
+    do {
+        if (bErrCnt > 10) break;
         
         phhalHw_FieldReset(pHal);
         
@@ -135,7 +187,7 @@ phStatus_t phApp_ReadUID(void) {
         phApp_Print_Buff(pResp, 8);
         DEBUG_PRINTF("\r\n");
         break;
-    }
+    } while (1);
     
     return status;
 }
@@ -144,6 +196,8 @@ phStatus_t phApp_MifareClassics(void) {
     phStatus_t status;
     uint8_t bUid[PHAC_DISCLOOP_I3P3A_MAX_UID_LENGTH];
     uint8_t bUidSize;
+    
+    void *psalMFC = phNfcLib_GetDataParams(PH_COMP_AL_MFC);
     
     do {
         /* Print UID */
@@ -154,7 +208,7 @@ phStatus_t phApp_MifareClassics(void) {
         /* Print ATQA  and SAK */
         DEBUG_PRINTF("\nATQA:");
         phApp_Print_Buff(pDiscLoop->sTypeATargetInfo.aTypeA_I3P3[0].aAtqa, 2);
-        DEBUG_PRINTF("\nSAK: 0x%x", pDiscLoop->sTypeATargetInfo.aTypeA_I3P3[0].aSak);
+        DEBUG_PRINTF("\nSAK: 0x%X", pDiscLoop->sTypeATargetInfo.aTypeA_I3P3[0].aSak);
         
         /* Print Product type */
         DEBUG_PRINTF("\nProduct: MIFARE Classic \n");
@@ -173,8 +227,6 @@ phStatus_t phApp_MifareClassics(void) {
         if ((status & PH_ERR_MASK) != PH_ERR_SUCCESS) {
             /* Print Error info */
             DEBUG_PRINTF("\nAuthentication Failed!!!");
-            DEBUG_PRINTF("\nPlease correct the used key");
-            DEBUG_PRINTF("\nExecution aborted!!!\n");
             break;
         }
         
@@ -186,13 +238,12 @@ phStatus_t phApp_MifareClassics(void) {
         DEBUG_PRINTF("\nRead data from Block 4");
         
         /* Read data from block 4 */
-        status = phalMfc_Read(psalMFC, 6, bDataBuffer);
+        status = phalMfc_Read(psalMFC, 4, bDataBuffer);
         
         /* Check for Status */
         if (status != PH_ERR_SUCCESS) {
             /* Print Error info */
             DEBUG_PRINTF("\nRead operation failed!!!\n");
-            DEBUG_PRINTF("\nExecution aborted!!!\n\n");
             break; /* Break from the loop*/
         }
         
@@ -205,32 +256,23 @@ phStatus_t phApp_MifareClassics(void) {
         DEBUG_PRINTF("\nWrite data to Block 4 \n");
         
         /* Write data to block 4 */
+        srand(get_system_ms());
         for (int i = 0; i < DATA_BUFFER_LEN; i++) {
-            bDataBuffer[i] = 0xFF;
+            bDataBuffer[i] = rand() & 0xFF;
         }
-        bDataBuffer[6] = 0xFF;
-        bDataBuffer[7] = 0X07;
-        bDataBuffer[8] = 0x80;
-        bDataBuffer[9] = 0x69;
-        SCB_CleanDCache_by_Addr((uint32_t *)bDataBuffer, DATA_BUFFER_LEN);
-        
         phApp_Print_Buff(&bDataBuffer[0], MFC_BLOCK_DATA_SIZE);
         
-        status = phalMfc_Write(psalMFC, 7, bDataBuffer);
+        status = phalMfc_Write(psalMFC, 4, bDataBuffer);
         
         /* Check for Status */
         if (status != PH_ERR_SUCCESS) {
             /* Print Error info */
             DEBUG_PRINTF("\nWrite operation failed!!!\n");
-            DEBUG_PRINTF("\nExecution aborted!!!\n");
             break; /* Break from the loop*/
         }
         
         DEBUG_PRINTF("\nWrite Success");
         DEBUG_PRINTF("\n\n --- End of Write Operation --- ");
-        
-        /* End of example */
-        DEBUG_PRINTF("\n\n --- End of Example --- \n\n");
         
     } while (0);
     
@@ -242,25 +284,10 @@ phStatus_t phApp_MifareClassics(void) {
  * \param   none
  * \return  status  Returns the function status
  **********************************************************************************************/
-static phStatus_t Ex4_NfcRdLibInit(void) {
+static phStatus_t NfcRdLib_KeyStore_Init(void) {
     phStatus_t status;
     
-    psKeyStore = phNfcLib_GetDataParams(PH_COMP_KEYSTORE);
-    psalMFC = phNfcLib_GetDataParams(PH_COMP_AL_MFC);
-    
-    /* Device limit for Type A */
-    status = phacDiscLoop_SetConfig(pDiscLoop, PHAC_DISCLOOP_CONFIG_TYPEA_DEVICE_LIMIT, 1);
-    CHECK_STATUS(status);
-    status = phacDiscLoop_SetConfig(pDiscLoop, PHAC_DISCLOOP_CONFIG_GTA_VALUE_US, 5100);
-    CHECK_STATUS(status);
-    
-    status = phacDiscLoop_SetConfig(pDiscLoop, PHAC_DISCLOOP_CONFIG_TYPEB_DEVICE_LIMIT, 1);
-    CHECK_STATUS(status);
-    status = phacDiscLoop_SetConfig(pDiscLoop, PHAC_DISCLOOP_CONFIG_GTB_VALUE_US, 5100);
-    CHECK_STATUS(status);
-    
-    status = phacDiscLoop_SetConfig(pDiscLoop, PHAC_DISCLOOP_CONFIG_BAIL_OUT, PHAC_DISCLOOP_POS_BIT_MASK_A);
-    CHECK_STATUS(status);
+    void *psKeyStore = phNfcLib_GetDataParams(PH_COMP_KEYSTORE);
     
     /* Initialize the keystore component */
     status = phKeyStore_Sw_Init(
@@ -272,6 +299,7 @@ static phStatus_t Ex4_NfcRdLibInit(void) {
         NUMBER_OF_KEYVERSIONPAIRS,
         &sKUCEntries[0],
         NUMBER_OF_KUCENTRIES);
+    
     CHECK_STATUS(status);
     
     /* load a Key to the Store */
@@ -331,7 +359,7 @@ phStatus_t phApp_Discovery_Loop(void) {
         phLog_Init(phApp_Log, phLogRegisterEntry, 4);
         phLog_Register(phNfcLib_GetDataParams(PH_COMP_PAL_ISO14443P3B), &phLogLogEntry[0], 16);
 #endif
-        status = Ex4_NfcRdLibInit();
+        status = NfcRdLib_KeyStore_Init();
         CHECK_STATUS(status);
         
         /* Perform Platform Init */
@@ -369,15 +397,22 @@ void DiscoveryLoop_Task(void *pDataParams) {
      * */
     phOsal_ThreadSecureStack(512);
     
+    LoadProfile();
+    
+    /* Get Poll Configuration */
+    status = phacDiscLoop_GetConfig(pDataParams, PHAC_DISCLOOP_CONFIG_PAS_POLL_TECH_CFG, &bSavePollTechCfg);
+    CHECK_STATUS(status);
+    
     while (1) {
         DEBUG_PRINTF("\nReady to detect...\n");
         
         do {
+            
             /* Field OFF */
             status = phhalHw_FieldOff(pHal);
             CHECK_STATUS(status);
             
-            status = phhalHw_Wait(pDiscLoop->pHalDataParams, PHHAL_HW_TIME_MICROSECONDS, 100);
+            status = phhalHw_Wait(pHal, PHHAL_HW_TIME_MICROSECONDS, 5100);
             CHECK_STATUS(status);
             
             /* Configure Discovery loop for Poll Mode */
@@ -403,6 +438,7 @@ void DiscoveryLoop_Task(void *pDataParams) {
         if ((status & PH_ERR_MASK) == PH_ERR_SUCCESS) {
             /* Check for Type A tag detection */
             if (PHAC_DISCLOOP_CHECK_ANDMASK(wTagsDetected, PHAC_DISCLOOP_POS_BIT_MASK_A)) {
+                user_led_on();
                 /* Check for MIFARE Classic */
                 if (0x08 == (pDiscLoop->sTypeATargetInfo.aTypeA_I3P3[0].aSak & 0x08)) {
                     
@@ -427,6 +463,7 @@ void DiscoveryLoop_Task(void *pDataParams) {
                     /* Check for Status */
                     if ((status & PH_ERR_MASK) == (PH_ERR_IO_TIMEOUT)) {
                         DEBUG_PRINTF("\nCard Removed, status = %04X\n", status);
+                        user_led_off();
                         break; /* Card Removed, break from the loop */
                     }
                     
@@ -471,6 +508,8 @@ void DiscoveryLoop_Task(void *pDataParams) {
             }
             
         }
+        
+        delay_ms(100);
     }
 }
 

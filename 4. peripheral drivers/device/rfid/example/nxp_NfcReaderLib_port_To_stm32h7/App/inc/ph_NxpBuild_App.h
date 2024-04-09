@@ -56,15 +56,15 @@
 
 #define NXPBUILD__PHPAL_MIFARE_SW                           /**< PAL MIFARE SW Component is included */
 
-#define NXPBUILD__PHPAL_FELICA_SW                           /**< PAL Felica SW Component is included. */
+//#define NXPBUILD__PHPAL_FELICA_SW                           /**< PAL Felica SW Component is included. */
 
 #define NXPBUILD__PHPAL_SLI15693_SW                         /**< PAL SLI 15693 Component is included. */
 
-#define NXPBUILD__PHPAL_I18000P3M3_SW                       /**< PAL ISO 18000p3m3 Component is included. */
+//#define NXPBUILD__PHPAL_I18000P3M3_SW                       /**< PAL ISO 18000p3m3 Component is included. */
 
-#define NXPBUILD__PHPAL_EPCUID_SW                           /**< PAL EPC UID SW Component is included. */
+//#define NXPBUILD__PHPAL_EPCUID_SW                           /**< PAL EPC UID SW Component is included. */
 
-#define NXPBUILD__PHPAL_I18092MPI_SW                        /**< PAL ISO18092 (P2P) SW Component is included. */
+//#define NXPBUILD__PHPAL_I18092MPI_SW                        /**< PAL ISO18092 (P2P) SW Component is included. */
 
 /*********************************************************************************************************************************************************************************/
 
