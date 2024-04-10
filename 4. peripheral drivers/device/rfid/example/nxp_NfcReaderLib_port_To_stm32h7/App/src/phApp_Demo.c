@@ -439,15 +439,13 @@ void DiscoveryLoop_Task(void *pDataParams) {
             /* Check for Type A tag detection */
             if (PHAC_DISCLOOP_CHECK_ANDMASK(wTagsDetected, PHAC_DISCLOOP_POS_BIT_MASK_A)) {
                 user_led_on();
+
                 /* Check for MIFARE Classic */
                 if (0x08 == (pDiscLoop->sTypeATargetInfo.aTypeA_I3P3[0].aSak & 0x08)) {
                     
                     phApp_MifareClassics();
                     DEBUG_PRINTF("\nPlease Remove the Card\n\n");
-                    
-                    /* Field RESET */
-                    status = phhalHw_FieldReset(pHal);
-                    CHECK_STATUS(status);
+
                 }
                 
                 /* Field RESET */
@@ -485,6 +483,7 @@ void DiscoveryLoop_Task(void *pDataParams) {
                 /* Field RESET */
                 status = phhalHw_FieldReset(pHal);
                 CHECK_STATUS(status);
+                
                 /* Make sure that example application is not detecting the same card continuously */
                 do {
                     /* Send WakeUpA */
