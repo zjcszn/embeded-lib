@@ -1,0 +1,60 @@
+@charset "UTF-8";
+
+.content .panel-1 {
+    position: relative;
+    width: 500px;
+    height: 200px;
+    background-color: #ddd;
+    text-align: left;
+}
+
+.content .panel-2 {
+    position: relative;
+    left: 600px;
+    bottom: 200px;
+    width: 500px;
+    height: 200px;
+    background-color: #ddd;
+    text-align: left;
+}
+
+.content .panel-3 {
+    position: relative;
+    bottom: 150px;
+    width: 500px;
+    height: 200px;
+    background-color: #ddd;
+    text-align: left;
+}
+
+.content .panel-4 {
+    position: relative;
+    left: 600px;
+    bottom: 350px;
+    width: 500px;
+    height: 200px;
+    background-color: #ddd;
+    text-align: left;
+}
+
+.content > div > h3 {
+    margin-top: 0;
+    margin-left: 15px;
+    font-size: large;
+}
+
+.content > div > p {
+    margin-left: 15px;
+    font-size: medium;
+}
+
+.content > div > img {
+    margin-left: 15px;
+    margin-top: 10px;
+}
+
+.content > div > label {
+    margin-left: 15px;
+    vertical-align: middle;
+}
+

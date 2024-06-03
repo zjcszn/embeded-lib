@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>STM32F4 Control Panel</title>
+    <link href="./css/frame.css" rel="stylesheet"/>
+    <link href="./css/sensor.css" rel="stylesheet"/>
+    <script> history.replaceState({}, "", "./sensor.shtml")</script>
+</head>
+
+<body ondragstart="return false">
+<div class="outer-container">
+    <div class="top-header">
+        <h1>STM32F4 Control Panel</h1>
+    </div>
+    <div class="main-container">
+        <div class="nav">
+            <a href="./home.shtml" class="nav-inactive">Board Info</a>
+            <a href="./status.shtml" class="nav-inactive">Device Status</a>
+            <a href="./sensor.shtml" class="nav-active">Sensor & LED</a>
+            <a href="./sdcard.shtml" class="nav-inactive">SD Card</a>
+            <a href="./update.shtml" class="nav-inactive">Firmware Update</a>
+            <a href="./config.shtml" class="nav-inactive">Preferences</a>
+            <span class="nav-last-child">
+                <input type="button" name="logout" value="Login Out" onclick="loginOut();">
+            </span>
+        </div>
+        <div class="content">
+            <div id="led">
+                <h3>LED Control</h3>
+                <div class="switch-wrapper">
+                    <label for="led-checkbox">LED Switch</label>
+                    <input type="checkbox" id="led-checkbox" class="switch">
+                </div>
+                <div id="led-params-form-wrapper">
+                    <form id="led-params-form">
+                        <fieldset>
+                            <legend>LED Mode Params</legend>
+                            <label for="mode">LED Mode:</label>
+                            <select id="mode" name="mode">
+                                <option value="always">Always On</option>
+                                <option value="blink">Blink Mode</option>
+                            </select><br>
+                            <label for="on-time">Hold Time [ON]:</label>
+                            <input type="number" id="on-time" name="on-time" value="0"
+                                   required/><span> ms </span><br>
+                            <label for="off-time">Hold Time [OFF]:</label>
+                            <input type="number" id="off-time" name="off-time" value="0"
+                                   required/><span> ms </span><br>
+                            <label for="cycles">Total Cycles:</label>
+                            <input type="number" id="cycles" name="cycles" value="0"
+                                   required/><br>
+                            <input type="button" value="Apply" onclick="setLedConfig(); return false;">
+                        </fieldset>
+                    </form>
+                </div>
+                <img id="led-img" src="./img/led_off.png" alt="led">
+            </div>
+            <div id="sensor">
+                <h3>Light Sensor</h3>
+                <div class="switch-wrapper">
+                    <label for="sensor-checkbox">Sensor Switch</label>
+                    <input type="checkbox" id="sensor-checkbox" class="switch" onchange="">
+                </div>
+                <div class="canvas-wrapper">
+                    <canvas width="450px" height="350px" id="canvas"></canvas>
+                </div>
+                <div class="peek-wrapper">
+                    <span style="color: red">MAX</span><br>
+                    <span id="max-val"></span><br>
+                    <span style="color: red">MIN</span><br>
+                    <span id="min-val"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <label>User: admin<!--#login_stat--></label>
+        <label>Server IP: <!--#ip--></label>
+        <label>Firmware Ver: <!--#ver--></label>
+        <label id="rtc">Time: <!--#rtc--></label>
+    </div>
+</div>
+<script type="text/javascript" src="./js/rtc.js"></script>
+<script type="text/javascript" src="./js/sensor.js"></script>
+</body>
+</html>

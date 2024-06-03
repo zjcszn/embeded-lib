@@ -1,0 +1,181 @@
+@charset "UTF-8";
+
+.content {
+    display: flex;
+
+    #led, #sensor {
+        display: inline-block;
+        width: 600px;
+        height: 600px;
+
+        & h3 {
+            margin-top: 50px;
+            text-align: center;
+        }
+    }
+}
+
+.switch-wrapper {
+    display: flex;
+    margin-top: 50px;
+    margin-bottom: 25px;
+    margin-left: 65px;
+    vertical-align: middle;
+
+    & label {
+        display: inline-block;
+        width: 100px;
+        height: 20px;
+        line-height: 20px;
+    }
+
+    & input[type=checkbox].switch {
+        outline: none;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        position: relative;
+        width: 45px;
+        height: 20px;
+        background: #ccc;
+        border-radius: 10px;
+        transition: border-color .3s, background-color .3s;
+
+        &::after {
+            content: '';
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            background: #fff;
+            transition: .4s;
+            position: absolute;
+            left: 2px;
+            top: 2px;
+        }
+
+        &:checked {
+            background: rgb(49, 123, 245);
+        }
+
+        &:checked::after {
+            content: '';
+            position: absolute;
+            left: 60%;
+        }
+    }
+}
+
+#led > #led-params-form-wrapper {
+    display: inline-block;
+    width: 300px;
+    margin-left: 50px;
+    margin-top: 25px;
+
+    #led-params-form {
+        font-size: small;
+
+        & fieldset {
+            width: 250px;
+            height: 300px;
+            display: block;
+            border-color: #f1f1f1;
+        }
+
+        & legend {
+            margin-bottom: 20px;
+        }
+
+        & select {
+            height: 20px;
+            width: 100px;
+            color: rgb(80, 80, 80);
+            background: rgb(255, 255, 255);
+            outline: none;
+            border: none;
+            border-radius: 2px;
+        }
+
+        & label {
+            vertical-align: middle;
+            display: inline-block;
+            width: 100px;
+            height: 20px;
+            overflow: hidden;
+            margin: 15px 2px;
+        }
+
+        & input[type = button] {
+            background-color: rgb(0, 100, 255);
+            border: none;
+            width: 100px;
+            height: 35px;
+            color: white;
+            cursor: pointer;
+            margin-top: 20px;
+            margin-left: 65px;
+
+            &:active {
+                background-color: rgb(30, 90, 235);
+
+            }
+        }
+
+        & input[type=number] {
+            -moz-appearance: textfield;
+            box-sizing: border-box;
+            color: #999;
+            font-size: 14px;
+            height: 20px;
+            width: 100px;
+            background: rgb(255, 255, 255);
+            border: none;
+            border-radius: 2px;
+            transition: 0.2s;
+            outline: none;
+            padding: 0 5px;
+            letter-spacing: 1px;
+            margin-top: 5px;
+            text-align: right;
+
+            &::-webkit-outer-spin-button,
+            &::-webkit-inner-spin-button {
+                -webkit-appearance: none !important;
+            }
+        }
+    }
+}
+
+#led > #led-img {
+    position: absolute;
+    margin: 70px 50px;
+    width: 100px;
+    height: 100px;
+}
+
+#sensor {
+    .canvas-wrapper {
+        display: inline-block;
+        position: absolute;
+        margin-left: 25px;
+    }
+
+    .peek-wrapper {
+        display: inline-block;
+        position: absolute;
+        margin-left: 450px;
+        margin-top: 75px;
+
+        & span {
+            display: inline-block;
+            width: 50px;
+            height: 25px;
+            margin: 10px 50px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: large;
+        }
+    }
+}
+
+

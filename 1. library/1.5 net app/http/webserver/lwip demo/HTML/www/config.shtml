@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>STM32F4 Control Panel</title>
+    <link href="./css/frame.css" rel="stylesheet"/>
+    <link href="./css/config.css" rel="stylesheet"/>
+    <script> history.replaceState({}, "", "./config.shtml")</script>
+</head>
+
+<body ondragstart="return false">
+<div class="outer-container">
+    <div class="top-header">
+        <h1>STM32F4 Control Panel</h1>
+    </div>
+    <div class="main-container">
+        <div class="nav">
+            <a href="./home.shtml" class="nav-inactive">Board Info</a>
+            <a href="./status.shtml" class="nav-inactive">Device Status</a>
+            <a href="./sensor.shtml" class="nav-inactive">Sensor & LED</a>
+            <a href="./sdcard.shtml" class="nav-inactive">SD Card</a>
+            <a href="./update.shtml" class="nav-inactive">Firmware Update</a>
+            <a href="./config.shtml" class="nav-active">Preferences</a>
+            <span class="nav-last-child">
+                <input type="button" name="logout" value="Login Out" onclick="loginOut();">
+            </span>
+        </div>
+
+        <div class="content">
+
+        </div>
+    </div>
+
+    <div class="footer">
+        <label>User: admin<!--#login_stat--></label>
+        <label>Server IP: <!--#ip--></label>
+        <label>Firmware Ver: <!--#ver--></label>
+        <label id="rtc">Time: <!--#rtc--></label>
+    </div>
+</div>
+<script type="text/javascript" src="./js/rtc.js"></script>
+</body>
+</html>

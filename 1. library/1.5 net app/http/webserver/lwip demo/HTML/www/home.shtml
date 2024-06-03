@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>STM32F4 Control Panel</title>
+    <link href="./css/frame.css" rel="stylesheet"/>
+    <link href="./css/home.css" rel="stylesheet"/>
+    <script> history.replaceState({}, "", "./home.shtml")</script>
+</head>
+<body ondragstart="return false">
+<div class="outer-container">
+    <div class="top-header">
+        <h1>STM32F4 Control Panel</h1>
+    </div>
+    <div class="main-container">
+        <div class="nav">
+            <a href="./home.shtml" class="nav-active">Board Info</a>
+            <a href="./status.shtml" class="nav-inactive">Device Status</a>
+            <a href="./sensor.shtml" class="nav-inactive">Sensor & LED</a>
+            <a href="./sdcard.shtml" class="nav-inactive">SD Card</a>
+            <a href="./update.shtml" class="nav-inactive">Firmware Update</a>
+            <a href="./config.shtml" class="nav-inactive">Preferences</a>
+            <span class="nav-last-child">
+                <input type="button" name="logout" value="Login Out" onclick="loginOut();">
+            </span>
+        </div>
+        <div class="content">
+            <br><br>
+            <div class="panel-1">
+                <h3>Board Info :</h3>
+                <p>MCU : STM32F407ZGT6</p>
+                <P>On-Chip Flash : 1024 KB</P>
+                <P>On-Chip S-RAM : 128 KB + 64 KB(CCM)</P>
+                <P>SPI Flash : 16 MB</P>
+                <P>Ext S-RAM : 1 MB</P>
+            </div>
+            <div class="panel-2">
+                <h3>Network :</h3>
+                <p>IP : <!--#ip--></p>
+                <p>MAC : <!--#mac--></p>
+                <p>DNS : <!--#dns--></p>
+                <p>GateWay : <!--#gw--></p>
+                <p>LinkSpeed : <!--#linkspd--></p>
+            </div>
+            <div class="panel-3">
+                <h3>Software :</h3>
+                <p>RTOS : FreeRTOS v10</p>
+                <p>Network Stack : LWIP 2.2.0</p>
+                <p>FileSystem : Fatfs-ELM 0.15 R2</p>
+                <p>USB Device Stack : CherryUSB 0.10</p>
+            </div>
+            <div class="panel-4">
+                <h3>QR Code :</h3>
+                <label>This is a QR Code demo</label><br>
+                <img src="./img/qrcode.png" alt="QR Code" width="100" height="100">
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <label>User: admin<!--#login_stat--></label>
+        <label>Server IP: <!--#ip--></label>
+        <label>Firmware Ver: <!--#ver--></label>
+        <label id="rtc">Time: <!--#rtc--></label>
+    </div>
+</div>
+<script type="text/javascript" src="./js/rtc.js" async></script>
+</body>
+</html>

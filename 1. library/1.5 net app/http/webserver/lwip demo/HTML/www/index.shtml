@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LWIP Web Server Demo</title>
+    <link href="./css/index.css" rel="stylesheet"/>
+    <script> history.replaceState(null, "", "./index.shtml")</script>
+</head>
+<body>
+<div class="outer-container">
+    <header class="top-header">
+        <h1>Alientek STM32F407 LWIP Web Server</h1>
+    </header>
+
+    <div class="content">
+        <img id="avatar" src="./img/cover.jpg" alt="avatar">
+        <form id="login-form">
+            <div id="login-input-wrapper">
+                <p>
+                    <label for="usr">Username:</label>
+                    <input type="text" id="usr" name="usr" value="admin" required>
+                </p>
+                <p>
+                    <label for="pwd">Password:</label>
+                    <input type="password" id="pwd" name="pwd" required>
+                </p>
+            </div>
+            <span id="login-msg"></span>
+            <div id="login-btn-wrapper">
+                <input type="button" value="Login" onclick="loginSubmit();">
+                <input type="reset" value="Reset" onclick="loginReset();">
+            </div>
+        </form>
+    </div>
+
+    <footer class="footer">
+        <label>User: admin<!--#login_stat--></label>
+        <label>Server IP: <!--#ip--></label>
+        <label id="rtc">Time: <!--#rtc--></label>
+    </footer>
+</div>
+<script type="text/javascript" src="./js/rtc.js"></script>
+<script type="text/javascript" src="./js/index.js"></script>
+</body>
+</html>

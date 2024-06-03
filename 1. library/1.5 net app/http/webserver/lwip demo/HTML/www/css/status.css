@@ -1,0 +1,70 @@
+.content {
+    #status-container {
+        width: 100%;
+        height: 40%;
+    }
+
+    #log-container {
+        background-color: gold;
+        width: 100%;
+        height: 60%;
+    }
+}
+
+#status-container {
+    display: flex;
+
+    #dev-info {
+        display: inline-block;
+        width: 30%;
+        height: 100%;
+        line-height: 30px;
+
+        #info-wrapper {
+            display: inline-block;
+            width: 80%;
+            height: 70%;
+            border-radius: 10px;
+            margin: 30px 50px;
+            background-color: #e5e5e5;
+
+            & h3 {
+                text-align: center;
+            }
+
+            & label {
+                margin-left: 25px;
+                display: inline-block;
+                width: 80px;
+            }
+        }
+
+    }
+
+    #dev-status {
+        display: flex;
+        width: 70%;
+        height: 100%;
+
+        .status-wrapper {
+            display: inline-block;
+            width: 25%;
+            height: 100%;
+            text-align: center;
+
+            .circle {
+                margin-top: 85px;
+                margin-left: 100px;
+                display: block;
+                width: 30px;
+                height: 30px;
+                background-color: #00c800;
+                border-radius: 15px;
+            }
+
+            & label {
+                margin-left: 10px;
+            }
+        }
+    }
+}
