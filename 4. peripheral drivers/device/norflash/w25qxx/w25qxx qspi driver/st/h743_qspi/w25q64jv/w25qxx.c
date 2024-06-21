@@ -9,14 +9,14 @@
  */
 
 #define LOG_TAG "W25QXX"
-#define LOG_LVL ELOG_LVL_INFO
+#define LOG_LVL ELOG_LVL_DEBUG
 
 #include "w25qxx.h"
 
 #include "bsp_qspi.h"
 #include "main.h"
-#include "elog.h"
-#include "perf_counter.h"
+// #include "elog.h"
+// #include "perf_counter.h"
 
 /*----------------------------------------------------------------------------*/
 #define W25QXX_MODE_SPI 0
@@ -27,7 +27,9 @@
 #define SUS_MASK  0x80
 /*----------------------------------------------------------------------------*/
 
-static ALIGN_32BYTES(uint8_t w25qxx_buf[4096]) __attribute__((section("axi_sram")));
+extern QSPI_HandleTypeDef qspi_handle;
+
+static __attribute__ ((aligned (32)))  uint8_t w25qxx_buf[4096] __attribute__((section(".AXI")));
 
 /*----------------------------------------------------------------------------*/
 
@@ -35,6 +37,8 @@ w25x_status_t w25qxx_init(void) {
     uint32_t id;
     uint64_t unique_id;
     
+    bsp_qspi_init();
+
     w25qxx_reset();
     
     id = w25qxx_read_jedec_id();
@@ -80,9 +84,9 @@ w25x_status_t w25qxx_read_sr(uint8_t srx, uint8_t *buf) {
             goto error;
     }
     
-    if (HAL_QSPI_Command(&dev_qspi.hqspi, &cmd, 100) != HAL_OK)
+    if (HAL_QSPI_Command(&qspi_handle, &cmd, 100) != HAL_OK)
         goto error;
-    if (HAL_QSPI_Receive(&dev_qspi.hqspi, buf, 100) != HAL_OK)
+    if (HAL_QSPI_Receive(&qspi_handle, buf, 100) != HAL_OK)
         goto error;
     
     return W25X_OK;
@@ -121,9 +125,9 @@ w25x_status_t w25qxx_write_sr(uint8_t srx, uint8_t dat) {
         default:
             goto error;
     }
-    if (HAL_QSPI_Command(&dev_qspi.hqspi, &cmd, 100) != HAL_OK)
+    if (HAL_QSPI_Command(&qspi_handle, &cmd, 100) != HAL_OK)
         goto error;
-    if (HAL_QSPI_Transmit(&dev_qspi.hqspi, &dat, 100) != HAL_OK)
+    if (HAL_QSPI_Transmit(&qspi_handle, &dat, 100) != HAL_OK)
         goto error;
     
     return W25X_OK;
@@ -149,7 +153,7 @@ w25x_status_t w25qxx_write_enable(void) {
     s_command.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
     s_command.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
     
-    if (HAL_QSPI_Command(&dev_qspi.hqspi, &s_command, 100) != HAL_OK)
+    if (HAL_QSPI_Command(&qspi_handle, &s_command, 100) != HAL_OK)
         goto error;
     
     s_config.Match = W25X_SR1_MASK_WEL;
@@ -162,7 +166,7 @@ w25x_status_t w25qxx_write_enable(void) {
     s_command.Instruction = W25X_ReadStatusReg1;
     s_command.DataMode = QSPI_DATA_1_LINE;
     
-    if (HAL_QSPI_AutoPolling_IT(&dev_qspi.hqspi, &s_command, &s_config) != HAL_OK)
+    if (HAL_QSPI_AutoPolling_IT(&qspi_handle, &s_command, &s_config) != HAL_OK)
         goto error;
     
     bsp_qspi_wait_status_match();
@@ -192,8 +196,8 @@ uint32_t w25qxx_read_jedec_id(void) {
     cmd.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
     cmd.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
     
-    if (HAL_QSPI_Command(&dev_qspi.hqspi, &cmd, 100) == HAL_OK) {
-        if (HAL_QSPI_Receive(&dev_qspi.hqspi, pData, 100) == HAL_OK) {
+    if (HAL_QSPI_Command(&qspi_handle, &cmd, 100) == HAL_OK) {
+        if (HAL_QSPI_Receive(&qspi_handle, pData, 100) == HAL_OK) {
             jedec_id = (pData[0] << 16) | (pData[1] << 8) | pData[2];
         }
     }
@@ -219,13 +223,14 @@ uint64_t w25qxx_read_unique_id(void) {
     cmd.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
     cmd.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
     
-    if (HAL_QSPI_Command(&dev_qspi.hqspi, &cmd, 100) == HAL_OK) {
-        HAL_QSPI_Receive(&dev_qspi.hqspi, (uint8_t *)&unique_id, 100);
+    if (HAL_QSPI_Command(&qspi_handle, &cmd, 100) == HAL_OK) {
+        HAL_QSPI_Receive(&qspi_handle, (uint8_t *)&unique_id, 100);
     }
     return unique_id;
 }
 
 w25x_status_t w25qxx_read(uint8_t *pbuf, uint32_t addr, uint32_t size) {
+
     QSPI_CommandTypeDef cmd;
     
     cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
@@ -250,27 +255,32 @@ w25x_status_t w25qxx_read(uint8_t *pbuf, uint32_t addr, uint32_t size) {
     /* polling mode */
     cmd.Address = addr;
     cmd.NbData = size;
-    if (HAL_QSPI_Command(&dev_qspi.hqspi, &cmd, 100) == HAL_OK) {
-        if (HAL_QSPI_Receive(&dev_qspi.hqspi, pbuf, 1000) == HAL_OK) {
+    if (HAL_QSPI_Command(&qspi_handle, &cmd, 100) == HAL_OK) {
+        if (HAL_QSPI_Receive(&qspi_handle, pbuf, 1000) == HAL_OK) {
             return W25X_OK;
         }
     }
 #else
+    uint32_t cnt = size;
+
     /* dma mode */
-    for (uint32_t btr = 0, pos = 0; size != 0; size -= btr, pos += btr) {
+    for (uint32_t btr = 0, pos = 0; cnt != 0; cnt -= btr, pos += btr) {
         
-        btr = (size > 65536) ? 65536 : size;
+        btr = (cnt > 65536) ? 65536 : cnt;
         cmd.Address = addr + pos;
         cmd.NbData = btr;
         
-        if (HAL_QSPI_Command(&dev_qspi.hqspi, &cmd, 100) != HAL_OK)
+        if (HAL_QSPI_Command(&qspi_handle, &cmd, 100) != HAL_OK)
             goto error;
         
-        if (HAL_QSPI_Receive_DMA(&dev_qspi.hqspi, pbuf + pos) != HAL_OK)
+        if (HAL_QSPI_Receive_DMA(&qspi_handle, pbuf + pos) != HAL_OK)
             goto error;
         
-        bsp_qspi_wait_tc();
+        if (bsp_qspi_wait_tc() != RET_OK) 
+            goto error;
     }
+
+    SCB_InvalidateDCache_by_Addr((uint32_t *)pbuf, (int32_t)size);
     return W25X_OK;
 #endif
 
@@ -305,13 +315,13 @@ w25x_status_t w25qxx_page_program(uint8_t *pbuf, uint32_t addr, uint16_t size) {
     if (w25qxx_write_enable() != W25X_OK)
         goto error;
     
-    if (HAL_QSPI_Command(&dev_qspi.hqspi, &cmd, 100) != HAL_OK)
+    if (HAL_QSPI_Command(&qspi_handle, &cmd, 100) != HAL_OK)
         goto error;
 
 #if !W25X_USE_DMA
-    if (HAL_QSPI_Transmit(&dev_qspi.hqspi, pbuf, 1000) != HAL_OK)
+    if (HAL_QSPI_Transmit(&qspi_handle, pbuf, 1000) != HAL_OK)
 #else
-    if (HAL_QSPI_Transmit_DMA(&dev_qspi.hqspi, pbuf) != HAL_OK)
+    if (HAL_QSPI_Transmit_DMA(&qspi_handle, pbuf) != HAL_OK)
 #endif
     {
         goto error;
@@ -321,7 +331,9 @@ w25x_status_t w25qxx_page_program(uint8_t *pbuf, uint32_t addr, uint16_t size) {
     bsp_qspi_wait_tc();
 #endif
     
-    w25qxx_wait_busy();
+    if (w25qxx_wait_busy() != W25X_OK)
+        goto error;
+
     return W25X_OK;
 
 error:
@@ -436,10 +448,12 @@ w25x_status_t w25qxx_chip_erase(void) {
     if (w25qxx_write_enable() != W25X_OK)
         goto error;
     
-    if (HAL_QSPI_Command(&dev_qspi.hqspi, &cmd, 100) != HAL_OK)
+    if (HAL_QSPI_Command(&qspi_handle, &cmd, 100) != HAL_OK)
         goto error;
     
-    w25qxx_wait_busy();
+    if (w25qxx_wait_busy() != W25X_OK)
+        goto error;
+
     return W25X_OK;
 
 error:
@@ -468,10 +482,12 @@ w25x_status_t w25qxx_sector_erase(uint32_t addr) {
     if (w25qxx_write_enable() != W25X_OK)
         goto error;
     
-    if (HAL_QSPI_Command(&dev_qspi.hqspi, &cmd, 100) != HAL_OK)
+    if (HAL_QSPI_Command(&qspi_handle, &cmd, 100) != HAL_OK)
         goto error;
     
-    w25qxx_wait_busy();
+    if (w25qxx_wait_busy() != W25X_OK)
+        goto error;
+
     return W25X_OK;
 
 error:
@@ -500,10 +516,12 @@ w25x_status_t w25qxx_block32k_erase(uint32_t addr) {
     if (w25qxx_write_enable() != W25X_OK)
         goto error;
     
-    if (HAL_QSPI_Command(&dev_qspi.hqspi, &cmd, 100) != HAL_OK)
+    if (HAL_QSPI_Command(&qspi_handle, &cmd, 100) != HAL_OK)
         goto error;
     
-    w25qxx_wait_busy();
+    if (w25qxx_wait_busy() != W25X_OK)
+        goto error;
+
     return W25X_OK;
 
 error:
@@ -532,10 +550,12 @@ w25x_status_t w25qxx_block64k_erase(uint32_t addr) {
     if (w25qxx_write_enable() != W25X_OK)
         goto error;
     
-    if (HAL_QSPI_Command(&dev_qspi.hqspi, &cmd, 100) != HAL_OK)
+    if (HAL_QSPI_Command(&qspi_handle, &cmd, 100) != HAL_OK)
         goto error;
     
-    w25qxx_wait_busy();
+    if (w25qxx_wait_busy() != W25X_OK)
+        goto error;
+
     return W25X_OK;
 
 error:
@@ -543,7 +563,7 @@ error:
     return W25X_ERR;
 }
 
-void w25qxx_wait_busy(void) {
+w25x_status_t w25qxx_wait_busy(void) {
     QSPI_CommandTypeDef s_command = {0};
     QSPI_AutoPollingTypeDef s_config = {0};
     
@@ -567,10 +587,14 @@ void w25qxx_wait_busy(void) {
     s_config.Interval = 0x10;
     s_config.AutomaticStop = QSPI_AUTOMATIC_STOP_ENABLE;
     
-    if (HAL_QSPI_AutoPolling_IT(&dev_qspi.hqspi, &s_command, &s_config) != HAL_OK) {
-        Error_Handler(__FILE__, __LINE__);
+    if (HAL_QSPI_AutoPolling_IT(&qspi_handle, &s_command, &s_config) != HAL_OK) {
+        return W25X_ERR;
     }
-    bsp_qspi_wait_status_match();
+    if (bsp_qspi_wait_status_match() != RET_OK){
+        return W25X_ERR;
+    }
+
+    return W25X_OK;
 }
 
 w25x_status_t w25qxx_reset(void) {
@@ -588,11 +612,11 @@ w25x_status_t w25qxx_reset(void) {
     cmd.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
     
     /* check busy & sus status before reset */
-    now = get_system_ms();
+    now = HAL_GetTick();
     do {
         w25qxx_read_sr(1, &sr1);
         w25qxx_read_sr(2, &sr2);
-        if ((get_system_ms() - now) > HAL_QSPI_TIMEOUT_DEFAULT_VALUE) {
+        if ((HAL_GetTick() - now) > HAL_QSPI_TIMEOUT_DEFAULT_VALUE) {
             log_e("w25qxx wait busy & sus status timeout");
             break;
         }
@@ -600,15 +624,15 @@ w25x_status_t w25qxx_reset(void) {
     
     cmd.Instruction = W25X_EnableReset;
     
-    if (HAL_QSPI_Command(&dev_qspi.hqspi, &cmd, 100) != HAL_OK)
+    if (HAL_QSPI_Command(&qspi_handle, &cmd, 100) != HAL_OK)
         goto error;
     
     cmd.Instruction = W25X_ResetDevice;
-    if (HAL_QSPI_Command(&dev_qspi.hqspi, &cmd, 100) != HAL_OK)
+    if (HAL_QSPI_Command(&qspi_handle, &cmd, 100) != HAL_OK)
         goto error;
     
     /* delay at least 30us after reset */
-    delay_us(50);
+    HAL_Delay(1);
     
     log_i("w25qxx reset success");
     return W25X_OK;
@@ -640,10 +664,108 @@ w25x_status_t w25qxx_memory_mapped_enable(void) {
     s_mem_mapped_cfg.TimeOutActivation = QSPI_TIMEOUT_COUNTER_DISABLE;
     s_mem_mapped_cfg.TimeOutPeriod = 0;
     
-    if (HAL_QSPI_MemoryMapped(&dev_qspi.hqspi, &s_command, &s_mem_mapped_cfg) != HAL_OK) {
+    if (HAL_QSPI_MemoryMapped(&qspi_handle, &s_command, &s_mem_mapped_cfg) != HAL_OK) {
         log_e("w25qxx memory mapped failed");
         return W25X_ERR;
     }
     
     return W25X_OK;
 }
+
+
+
+
+
+#if W25X_TEST
+
+#include <stdlib.h>
+
+uint8_t w25_test_buf[W25X_TEST_BUFSZ];
+uint8_t w25_read_buf[W25X_TEST_BUFSZ];
+
+
+void w25qxx_test(void) {
+    uint64_t start;
+    uint64_t spend_time;
+    bool test_ok = true;
+
+    log_d("------- W25QXX TEST START -------");
+
+    srand(NULL);
+
+    for (int i = 0; i < W25X_TEST_BUFSZ; i++) {
+        w25_test_buf[i] = rand() & 0xFF;
+    }
+
+    start = get_system_ms();
+    w25qxx_chip_erase();
+    spend_time = get_system_ms() - start;
+    log_d("chip erase spend %llu ms", spend_time);
+
+    start = get_system_us();
+    w25qxx_write(w25_test_buf, W25X_TEST_ADDR, W25X_TEST_BUFSZ);
+    spend_time = (uint64_t)get_system_us() - start;
+    log_d("[pre-erase] write 128k spend %llu us, speed: %.2f KB/S", spend_time, ((double)W25X_TEST_BUFSZ / 1024.0) / ((double) spend_time / 1000000.0));
+
+    start = get_system_us();
+    w25qxx_read(w25_read_buf, W25X_TEST_ADDR, W25X_TEST_BUFSZ);
+    spend_time = (uint64_t)get_system_us() - start;
+    log_d("[pre-erase] read  128k spend %llu us, speed: %.2f KB/S", spend_time, ((double)W25X_TEST_BUFSZ / 1024.0) / ((double) spend_time / 1000000.0));
+
+    for (int i = 0; i < W25X_TEST_BUFSZ; i++) {
+        if (w25_test_buf[i] != w25_read_buf[i]) {
+            test_ok = false;
+            log_e("[pre-erase] w25qxx write read test: [failed], idx: %u, w: %02X, r: %02X", i, w25_test_buf[i], w25_read_buf[i]);
+            break;
+        }
+    }
+
+    if (test_ok) log_d("[pre-erase] w25qxx write read test: [PASS]");
+
+    srand(get_system_ms());
+    for (int i = 0; i < W25X_TEST_BUFSZ; i++) {
+        w25_test_buf[i] = rand() & 0xFF;
+    }
+
+    start = get_system_us(); 
+    w25qxx_write(w25_test_buf, W25X_TEST_ADDR, W25X_TEST_BUFSZ);
+    spend_time = (uint64_t)get_system_us() - start;
+    log_d("[no pre-erase] write 128k spend %llu us, speed: %.2f KB/S", spend_time, ((double)W25X_TEST_BUFSZ / 1024.0) / ((double) spend_time / 1000000.0));
+    w25qxx_read(w25_read_buf, W25X_TEST_ADDR, W25X_TEST_BUFSZ);
+
+    test_ok = true;
+    for (int i = 0; i < W25X_TEST_BUFSZ; i++) {
+        if (w25_test_buf[i] != w25_read_buf[i]) {
+            test_ok = false;
+            log_e("[no pre-erase] w25qxx write read test: [failed], idx: %u, w: %02X, r: %02X", i, w25_test_buf[i], w25_read_buf[i]);
+            break;
+        }
+    }
+
+    if (test_ok) log_d("[no pre-erase] w25qxx write read test: [PASS]");
+
+    w25qxx_memory_mapped_enable();
+    volatile uint32_t tmp;
+    uint32_t *flash_addr = (uint32_t *)0x90000000;
+    start = get_system_ms(); 
+    for (int i = 0; i < W25Q_CAPACITY / sizeof(uint32_t) / 32; i++) {
+        tmp = *flash_addr++; tmp = *flash_addr++; tmp = *flash_addr++; tmp = *flash_addr++;
+        tmp = *flash_addr++; tmp = *flash_addr++; tmp = *flash_addr++; tmp = *flash_addr++;
+        tmp = *flash_addr++; tmp = *flash_addr++; tmp = *flash_addr++; tmp = *flash_addr++;
+        tmp = *flash_addr++; tmp = *flash_addr++; tmp = *flash_addr++; tmp = *flash_addr++;
+
+        tmp = *flash_addr++; tmp = *flash_addr++; tmp = *flash_addr++; tmp = *flash_addr++;
+        tmp = *flash_addr++; tmp = *flash_addr++; tmp = *flash_addr++; tmp = *flash_addr++;
+        tmp = *flash_addr++; tmp = *flash_addr++; tmp = *flash_addr++; tmp = *flash_addr++;
+        tmp = *flash_addr++; tmp = *flash_addr++; tmp = *flash_addr++; tmp = *flash_addr++;
+    }
+    spend_time = (uint64_t)get_system_ms() - start;
+    log_d("[memory-mapped] read %u MB spend %llu ms, speed: %.2f MB/S", W25Q_CAPACITY / 1024 / 1024, spend_time, ((double)(W25Q_CAPACITY / 1024 / 1024)) / ((double) spend_time / 1000.0));
+   
+
+    log_d("----- W25QXX TEST COMPLETE ------");
+}
+
+
+#endif
+

@@ -21,9 +21,14 @@ typedef enum {
     W25X_ERR
 } w25x_status_t;
 
-#define W25X_USE_DMA    1
+#define W25X_USE_DMA        1
 
 /*----------------------------------------------------------------------------*/
+
+#define W25X_TEST           0
+#define W25X_TEST_BUFSZ     (128 * 1024)
+#define W25X_TEST_ADDR      (0)
+#define W25Q_CAPACITY       (8*1024*1024)
 
 
 #define FLASH_ID_W25Q64     0xEF4017
@@ -99,12 +104,16 @@ w25x_status_t w25qxx_page_program(uint8_t *pbuf, uint32_t addr, uint16_t size);
 w25x_status_t w25qxx_write(uint8_t *pbuf, uint32_t addr, uint32_t size);
 w25x_status_t w25qxx_chip_erase(void);
 w25x_status_t w25qxx_sector_erase(uint32_t addr);
-void w25qxx_wait_busy(void);
+w25x_status_t w25qxx_wait_busy(void);
 w25x_status_t w25qxx_reset(void);
 
 w25x_status_t w25qxx_memory_mapped_enable(void);
-void MX_QUADSPI_Init(void);
 
 w25x_status_t w25qxx_block32k_erase(uint32_t addr);
 w25x_status_t w25qxx_block64k_erase(uint32_t addr);
+
+#if W25X_TEST
+void w25qxx_test(void);
+#endif
+
 #endif
