@@ -3,7 +3,7 @@
 
     MIT License
 
-    Copyright (c) 2022 Valerio De Benedetto (@debevv)
+    Copyright (c) 2024 Valerio De Benedetto (@debevv)
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@
 #include "nanomodbus.h"
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
 
 #ifdef NMBS_DEBUG
@@ -55,9 +56,11 @@ static void discard_1(nmbs_t* nmbs) {
 }
 
 
+#ifndef NMBS_SERVER_DISABLED
 static void discard_n(nmbs_t* nmbs, uint16_t n) {
     nmbs->msg.buf_idx += n;
 }
+#endif
 
 
 static uint16_t get_2(nmbs_t* nmbs) {
@@ -75,6 +78,7 @@ static void put_2(nmbs_t* nmbs, uint16_t data) {
 }
 
 
+#ifndef NMBS_SERVER_DISABLED
 static void set_1(nmbs_t* nmbs, uint8_t data, uint8_t index) {
     nmbs->msg.buf[index] = data;
 }
@@ -84,6 +88,7 @@ static void set_2(nmbs_t* nmbs, uint16_t data, uint8_t index) {
     nmbs->msg.buf[index] = (uint8_t) ((data >> 8) & 0xFFU);
     nmbs->msg.buf[index + 1] = (uint8_t) data;
 }
+#endif
 
 
 static uint8_t* get_n(nmbs_t* nmbs, uint16_t n) {
@@ -93,6 +98,7 @@ static uint8_t* get_n(nmbs_t* nmbs, uint16_t n) {
 }
 
 
+#ifndef NMBS_SERVER_DISABLED
 static void put_n(nmbs_t* nmbs, const uint8_t* data, uint8_t size) {
     memcpy(&nmbs->msg.buf[nmbs->msg.buf_idx], data, size);
     nmbs->msg.buf_idx += size;
@@ -107,8 +113,10 @@ static uint16_t* get_regs(nmbs_t* nmbs, uint16_t n) {
     }
     return msg_buf_ptr;
 }
+#endif
 
 
+#ifndef NMBS_CLIENT_DISABLED
 static void put_regs(nmbs_t* nmbs, const uint16_t* data, uint16_t n) {
     uint16_t* msg_buf_ptr = (uint16_t*) (nmbs->msg.buf + nmbs->msg.buf_idx);
     nmbs->msg.buf_idx += n * 2;
@@ -116,6 +124,7 @@ static void put_regs(nmbs_t* nmbs, const uint16_t* data, uint16_t n) {
         msg_buf_ptr[n] = (data[n] << 8) | ((data[n] >> 8) & 0xFF);
     }
 }
+#endif
 
 
 static void swap_regs(uint16_t* data, uint16_t n) {
@@ -358,12 +367,14 @@ static void put_msg_header(nmbs_t* nmbs, uint16_t data_length) {
 }
 
 
+#ifndef NMBS_SERVER_DISABLED
 static void set_msg_header_size(nmbs_t* nmbs, uint16_t data_length) {
     if (nmbs->platform.transport == NMBS_TRANSPORT_TCP) {
         data_length += 2;
         set_2(nmbs, data_length, 4);
     }
 }
+#endif
 
 
 static nmbs_error send_msg(nmbs_t* nmbs) {
@@ -423,7 +434,7 @@ static nmbs_error recv_res_header(nmbs_t* nmbs) {
     uint8_t req_unit_id = nmbs->msg.unit_id;
     uint8_t req_fc = nmbs->msg.fc;
 
-    bool first_byte_received;
+    bool first_byte_received = false;
     nmbs_error err = recv_msg_header(nmbs, &first_byte_received);
     if (err != NMBS_ERROR_NONE)
         return err;
@@ -1710,7 +1721,7 @@ static nmbs_error handle_read_device_identification(nmbs_t* nmbs) {
 
                 int16_t str_len = (int16_t) strlen(str);
 
-                res_size_left = res_size_left - 2 - str_len;
+                res_size_left = (int16_t) (res_size_left - 2 - str_len);
                 if (res_size_left < 0) {
                     res_more_follows = 0xFF;
                     res_next_object_id = id;
@@ -1747,9 +1758,9 @@ static nmbs_error handle_read_device_identification(nmbs_t* nmbs) {
 static nmbs_error handle_req_fc(nmbs_t* nmbs) {
     NMBS_DEBUG_PRINT("fc %d\t", nmbs->msg.fc);
 
-    nmbs_error err;
+    nmbs_error err = NMBS_ERROR_NONE;
     switch (nmbs->msg.fc) {
-#ifndef NMBS_SERVER_WRITE_MULTIPLE_COILS_DISABLED
+#ifndef NMBS_SERVER_READ_COILS_DISABLED
         case 1:
             err = handle_read_coils(nmbs);
             break;
@@ -1821,7 +1832,7 @@ static nmbs_error handle_req_fc(nmbs_t* nmbs) {
             break;
 #endif
         default:
-            err = NMBS_EXCEPTION_ILLEGAL_FUNCTION;
+            err = send_exception_msg(nmbs, NMBS_EXCEPTION_ILLEGAL_FUNCTION);
     }
 
     return err;
