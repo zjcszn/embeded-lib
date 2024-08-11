@@ -11,11 +11,11 @@ extern "C" {
 #define TASK_MAX_NUM    (10U)   // 最大任务数量
 
 
-typedef void (*entry_t)(void *args);
+typedef int (*entry_t)(void *args);
 
 
 
-
+uint32_t get_system_ticks(void);
 void task_ticks_update(void);
 int  task_create(entry_t entry, void *args, uint16_t delay, uint16_t period);
 int  task_delete(entry_t entry);
