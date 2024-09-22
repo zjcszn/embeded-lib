@@ -1,6 +1,20 @@
 #ifndef __DIFF_EVOLUTION_H__
 #define __DIFF_EVOLUTION_H__
 
+/**
+ * @file diff_evolution.h
+ * @author zjcszn (zjcszn@gmail.com)
+ * @brief 基于差分进化算法的一元四参数双指数模型拟合
+ * @note 推荐参数：
+ *       1. CR = 0.8, F = 0.5, 变异策略 BEST_2
+ *       2. CR = 0.8, F = 0.8, 变异策略 BEST_1
+ * @version 0.1
+ * @date 2024-09-22
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
+
 #include "stdint.h"
 
 #define MAX_NP       40

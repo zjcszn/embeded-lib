@@ -87,9 +87,6 @@ void diffevo_mutation(uint16_t NP, uint16_t dim, float F, uint16_t best_x, bound
     uint8_t r[5], tmp, is_equal;
     float tmpf;
 
-    /* 更新随机数种子 */
-    srand(SysTick->VAL);
-
     for (int i = 0; i < NP; i++) {
 
         /* 取5个不重复且不等于 i 的随机数，用于扰动变异 */
@@ -115,6 +112,12 @@ void diffevo_mutation(uint16_t NP, uint16_t dim, float F, uint16_t best_x, bound
 
         /* 变异 */
         switch (mutation_mode) {
+            case DE_BEST_1:
+                for (int k = 0; k < dim; k++) {
+                    V[i].raw[k] = X[best_x].raw[k] + F * (X[r[0]].raw[k] - X[r[1]].raw[k]);
+                }
+                break;
+
             case DE_BEST_2:
                 for (int k = 0; k < dim; k++) {
                     V[i].raw[k] = X[best_x].raw[k] + F * (X[r[0]].raw[k] - X[r[1]].raw[k]) + F * (X[r[2]].raw[k] - X[r[3]].raw[k]);
@@ -147,9 +150,6 @@ void diffevo_mutation(uint16_t NP, uint16_t dim, float F, uint16_t best_x, bound
 void diffevo_crossover(uint16_t NP, uint16_t dim, float CR, crossover_mode_t crossover_mode) {
     int j_rand;
     float cr_x;
-
-    /* 更新随机数种子 */
-    srand(SysTick->VAL);
 
     switch (crossover_mode) {
 
