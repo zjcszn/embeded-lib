@@ -22,8 +22,8 @@ static float_t fitnessX[MAX_NP], fitnessU[MAX_NP];
 void diffevo_initialiazation(bound_t *bound, uint16_t NP, uint16_t dim) {
     /* 初始化种群和适应度buffer */
     memset(X, 0, sizeof(X));
-    memset(X, 0, sizeof(V));
-    memset(X, 0, sizeof(U));
+    memset(V, 0, sizeof(V));
+    memset(U, 0, sizeof(U));
     memset(fitnessX, 0, sizeof(fitnessX));
     memset(fitnessU, 0, sizeof(fitnessU));
 
@@ -132,6 +132,24 @@ void diffevo_mutation(uint16_t NP, uint16_t dim, float F, uint16_t best_x, bound
                     #endif
                 }
                 break;
+
+            case DE_RAND_1:
+                for (int k = 0; k < dim; k++) {
+                    V[i].raw[k] = X[r[0]].raw[k] + F * (X[r[1]].raw[k] - X[r[2]].raw[k]);
+                }
+                break;
+
+            case DE_RAND_2:
+                for (int k = 0; k < dim; k++) {
+                    V[i].raw[k] = X[r[0]].raw[k] + F * (X[r[1]].raw[k] + X[r[2]].raw[k] - X[r[3]].raw[k] - X[r[4]].raw[k]);
+                }
+                break;
+
+            case DE_TARGET_TO_BEST_1:
+                for (int k = 0; k < dim; k++) {
+                    V[i].raw[k] = X[i].raw[k] + F * (X[best_x].raw[k] - X[i].raw[k]) + F * (X[r[0]].raw[k] - X[r[1]].raw[k]);
+                }
+                break;
             
             default:
                 break;
@@ -148,7 +166,7 @@ void diffevo_mutation(uint16_t NP, uint16_t dim, float F, uint16_t best_x, bound
  * @param crossover_mode 交叉策略
  */
 void diffevo_crossover(uint16_t NP, uint16_t dim, float CR, crossover_mode_t crossover_mode) {
-    int j_rand;
+    int j_rand, cross_flag, L;
     float cr_x;
 
     switch (crossover_mode) {
@@ -169,7 +187,30 @@ void diffevo_crossover(uint16_t NP, uint16_t dim, float CR, crossover_mode_t cro
             break;
 
         case CROSSOVER_EXP:
-            /* 未实现 */
+            /* 未验证 */
+            for (int i = 0; i < NP; i++) {
+                /* 交叉起始点 */
+                L = 0;
+                j_rand = rand() % dim;  
+                cross_flag = 1;
+
+                for (int j = 0; j < dim; j++) {
+                    if (cross_flag) {
+                        U[i].raw[j_rand] = V[i].raw[j_rand];
+
+                        cr_x = (float)rand() / (float)RAND_MAX;
+                        if ((cr_x > CR) || (++L > dim)) {
+                            cross_flag = 0;
+                        }
+                    } else {
+                        U[i].raw[j_rand] = X[i].raw[j_rand];
+                    }
+
+                    if (++j_rand >= dim) {
+                        j_rand = 0;
+                    }
+                }
+            }
             break;
 
         default:
@@ -249,7 +290,7 @@ int diffevo_curve_fitting(population_t *result, float *sse, bound_t *bound, data
     memcpy(result, &X[bestX], sizeof(population_t));
     *result_fitness = fitnessX[bestX];
 
-    LOG("curve fitting %s\r\n", result_ok ? "success", "failed");
+    LOG("curve fitting %s, times: %u\r\n", result_ok ? "success", "failed", gen_idx);
     LOG("f(x) = %.4f * exp (%.4f * x) + %.4f * exp (%.4f * x)", X[bestX].raw[0], X[bestX].raw[1], X[bestX].raw[2], X[bestX].raw[3]);
 
     return result_ok;

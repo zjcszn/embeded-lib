@@ -45,7 +45,7 @@ typedef struct {
 typedef enum {
     DE_RAND_1,
     DE_BEST_1,
-    DE_RAND_TO_BEST_1,
+    DE_TARGET_TO_BEST_1,
     DE_BEST_2,
     DE_RAND_2,
 } mutation_mode_t;
