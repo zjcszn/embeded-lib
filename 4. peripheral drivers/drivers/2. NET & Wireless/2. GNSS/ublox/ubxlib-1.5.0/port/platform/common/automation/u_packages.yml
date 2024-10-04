@@ -1,0 +1,203 @@
+unity:
+    type: git
+    url: https://github.com/ThrowTheSwitch/Unity
+    version: v2.5.0
+
+zephyr_native:
+    type: zephyr
+    version: v3.7.0-rc1
+
+nrfconnectsdk:
+    type: nrfconnectsdk
+    version: v2.5.0
+
+arm_embedded_gcc:
+    type: archive
+    version: 13.2.rel1
+    skip_first_subdir: True
+    windows:
+        url: https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-arm-none-eabi.zip
+    linux:
+        url: https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
+    linux_arm:
+        url: https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-aarch64-arm-none-eabi.tar.xz
+
+openocd:
+    type: archive
+    version: v0.12.0-3
+    skip_first_subdir: True
+    windows:
+        url: https://github.com/xpack-dev-tools/openocd-xpack/releases/download/v0.12.0-3/xpack-openocd-0.12.0-3-win32-x64.zip
+    linux:
+        url: https://github.com/xpack-dev-tools/openocd-xpack/releases/download/v0.12.0-3/xpack-openocd-0.12.0-3-linux-x64.tar.gz
+    linux_arm:
+        url: https://github.com/xpack-dev-tools/openocd-xpack/releases/download/v0.12.0-3/xpack-openocd-0.12.0-3-linux-arm64.tar.gz
+    add_to_path: bin
+
+nrf_cli:
+    version: 10.21.0
+    check_command: nrfjprog -v
+    windows:
+        type: executable
+        url: https://nsscprodmedia.blob.core.windows.net/prod/software-and-other-downloads/desktop-software/nrf-command-line-tools/sw/versions-10-x-x/10-21-0/nrf-command-line-tools-10.21.0-x64.exe
+        package_name: nrf-command-line-tools-10.21.0-x64.exe
+        run_with_switches: /passive /quiet
+        add_to_path: "%homedrive%\\Program Files\\Nordic Semiconductor\\nrf-command-line-tools\\bin"
+    linux:
+        type: apt
+        url: https://nsscprodmedia.blob.core.windows.net/prod/software-and-other-downloads/desktop-software/nrf-command-line-tools/sw/versions-10-x-x/10-21-0/nrf-command-line-tools_10.21.0_amd64.deb
+        package_name: nrf-command-line-tools_10.21.0_amd64.deb
+    linux_arm:
+        type: apt
+        url: https://nsscprodmedia.blob.core.windows.net/prod/software-and-other-downloads/desktop-software/nrf-command-line-tools/sw/versions-10-x-x/10-21-0/nrf-command-line-tools_10.21.0_arm64.deb
+        package_name: nrf-command-line-tools_10.21.0_arm64.deb
+
+segger_jlink:
+    type: segger_jlink
+    windows:
+        url: https://www.segger.com/downloads/jlink/JLink_Windows_V794m_x86_64.exe
+        package_name: JLink_Windows_V794m_x86_64.exe
+        add_to_path: "%homedrive%\\Program Files\\SEGGER\\JLink"
+        check_command: cmd /c "if exist %homedrive%\\Program Files\\SEGGER\\JLink\\JLink.exe else where jlink /Q"
+    linux:
+        url: https://www.segger.com/downloads/jlink/JLink_Linux_V794m_x86_64.deb
+        package_name: JLink_Linux_V794m_x86_64.deb
+        check_command: which JLinkExe
+    linux_arm:
+        url: https://www.segger.com/downloads/jlink/JLink_Linux_V794m_arm64.deb
+        package_name: JLink_Linux_V794m_arm64.deb
+        check_command: which JLinkExe
+
+stm32cubef4:
+    type: git
+    url: https://github.com/STMicroelectronics/STM32CubeF4.git
+    version: v1.28.0
+
+stm32cubeu5:
+    type: git
+    url: https://github.com/STMicroelectronics/STM32Cubeu5.git
+    version: v1.5.0
+
+stm32_cmsis_freertos:
+    type: git
+    url: https://github.com/STMicroelectronics/x-cube-freertos.git
+    version: v1.1.0
+
+esp_idf:
+    type: esp_idf
+    windows:
+        version: v5.2.2
+        url: https://github.com/espressif/esp-idf
+    linux:
+        version: v5.2.2
+        url: https://github.com/espressif/esp-idf
+    linux_arm:
+        version: v5.2.2
+        url: https://github.com/espressif/esp-idf
+
+make:
+    windows:
+        type: archive
+        version: v4.3.1
+        url: http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-make-4.3-1-any.pkg.tar.xz
+        post_install_command: mv mingw64\bin\mingw32-make.exe mingw64\bin\make.exe
+        add_to_path: mingw64\bin
+    linux:
+        type: apt
+        package_name: make
+        check_command: command -v make
+    linux_arm:
+        type: apt
+        package_name: make
+        check_command: command -v make
+
+ninja:
+    windows:
+        type: archive
+        version: v1.11.1
+        url: https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-win.zip
+        add_to_path: .\
+    linux:
+        type: apt
+        package_name: ninja-build
+        check_command: command -v ninja
+    linux_arm:
+        type: apt
+        package_name: ninja-build
+        check_command: command -v ninja
+
+cmake:
+    windows:
+        type: archive
+        version: v3.26.3
+        url: https://github.com/Kitware/CMake/releases/download/v3.26.3/cmake-3.26.3-windows-x86_64.zip
+        skip_first_subdir: True
+        add_to_path: bin
+    linux:
+        type: apt
+        package_name: cmake
+        check_command: command -v cmake
+    linux_arm:
+        type: apt
+        package_name: cmake
+        check_command: command -v cmake
+
+gperf:
+    windows:
+        type: archive
+        version: v3.0.1
+        url: https://sourceforge.net/projects/gnuwin32/files/gperf/3.0.1/gperf-3.0.1-bin.zip
+        add_to_path: bin
+    linux:
+        type: apt
+        package_name: gperf
+        check_command: command -v gperf
+    linux_arm:
+        type: apt
+        package_name: gperf
+        check_command: command -v gperf
+
+arduino-cli:
+    linux:
+        type: archive
+        version: 0.20.2
+        url: https://github.com/arduino/arduino-cli/releases/download/0.20.2/arduino-cli_0.20.2_Linux_64bit.tar.gz
+    linux_arm:
+        type: archive
+        version: 0.20.2
+        url: https://github.com/arduino/arduino-cli/releases/download/0.20.2/arduino-cli_0.20.2_Linux_ARM64.tar.gz
+    windows:
+        type: archive
+        version: 0.20.2
+        url: https://github.com/arduino/arduino-cli/releases/download/0.20.2/arduino-cli_0.20.2_Windows_64bit.zip
+
+platformio:
+    type: httpget
+    url: https://raw.githubusercontent.com/platformio/platformio-core-installer/master/get-platformio.py
+    post_install_command: python get-platformio.py
+    linux:
+        check_command: ~/.platformio/penv/bin/pio system info
+    linux_arm:
+        check_command: ~/.platformio/penv/bin/pio system info
+    windows:
+        check_command: ~/.platformio/penv/Scripts/pio system info
+
+libssl-dev:
+    linux:
+        type: apt
+        package_name: libssl-dev
+        check_command: test -e /usr/include/openssl/sha.h
+    linux_arm:
+        type: apt
+        package_name: libssl-dev
+        check_command: test -e /usr/include/openssl/sha.h
+
+libgpiod-dev:
+    linux:
+        type: apt
+        package_name: libgpiod-dev
+        check_command: test -e /usr/include/gpiod.h
+    linux_arm:
+        type: apt
+        package_name: libgpiod-dev
+        check_command: test -e /usr/include/gpiod.h

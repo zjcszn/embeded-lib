@@ -1,0 +1,42 @@
+# The few defaults that ubxlib cares about
+
+# Note: the IDF_TARGET is not specified here: it will default to esp32
+# and can be overridden by setting the environment variable IDF_TARGET
+
+# This is sufficient that the user is left with 5 kbytes of
+# main task stack free for themselves when compiled with -O2
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=8448
+
+# UART 0 is used for tracing
+CONFIG_ESP_DEBUG_STUBS_ENABLE=y
+CONFIG_ESP_CONSOLE_UART_DEFAULT=y
+CONFIG_ESP_CONSOLE_UART_NUM=0
+
+# ubxlib needs no more than the NANO stuff
+CONFIG_NEWLIB_NANO_FORMAT=y
+
+# Needed to include PPP interface for integration into the bottom of LWIP
+CONFIG_LWIP_PPP_SUPPORT=y
+CONFIG_LWIP_PPP_PAP_SUPPORT=y
+CONFIG_LWIP_PPP_CHAP_SUPPORT=y
+
+# We set this to "n" as otherwise the PlatformIO builds
+# fail because some AES functions are not brought-in
+# to their pre-built ESP-IDF library; normally it would
+# be set to "y"
+CONFIG_MBEDTLS_HARDWARE_AES=n
+
+# Set for testing purposes only
+CONFIG_ESP_INT_WDT=y
+CONFIG_ESP_INT_WDT_TIMEOUT_MS=300
+CONFIG_ESP_INT_WDT_CHECK_CPU1=y
+CONFIG_ESP_TASK_WDT=y
+CONFIG_ESP_TASK_WDT_TIMEOUT_S=5
+CONFIG_TASK_WDT_CHECK_IDLE_TASK_CPU0=y
+CONFIG_TASK_WDT_CHECK_IDLE_TASK_CPU1=y
+CONFIG_HEAP_TRACING_STANDALONE=y
+CONFIG_HEAP_TRACING=y
+
+# Uncomment these as required when debugging
+#CONFIG_LWIP_PPP_DEBUG_ON=y
+#CONFIG_LWIP_DEBUG=y

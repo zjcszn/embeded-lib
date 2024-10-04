@@ -1,0 +1,85 @@
+/ { // This portion in the "root" of the device tree
+
+    // The UARTs on this board exposed through the default
+    // .dts file are called USARTs (i.e. with an S inserted),
+    // and LPUARTs, hence we need to use aliases in order
+    // for ubxlib to be able to find them as UARTs
+    aliases {
+        // Don't need an alias for USART1 as that's the console
+        // and ubxlib doesn't need to open it
+        ubxlib-uart2 = &usart2; // For cellular module
+        ubxlib-uart3 = &usart3; // For short-range module
+    };
+
+    cfg-device-cellular {
+        compatible = "u-blox,ubxlib-device-cellular";
+        status = "okay";
+        transport-type = "uart2";
+        // Note: allow the cellular module type to be determined automatically
+        pin-pwr-on = <0x5e>;  // Arduino header pin D4, or pin F14 in STM32 port numbering
+        network = <&label_cfg_network_cellular>;
+    };
+
+    // Note: we allow the short-range configuration to come in from the
+    // C code definitions, i.e. outside Zephyr, since otherwise we would
+    // end up having to write the password of our Wifi test network into
+    // this public file
+
+    label_cfg_network_cellular: cfg-network-cellular {
+        compatible = "u-blox,ubxlib-network-cellular";
+        status = "okay";
+        apn = "iot.1nce.net";
+        timeout-seconds = <240>;
+    };
+
+    // A GNSS device connected to I2C1
+    cfg-device-gnss {
+        compatible = "u-blox,ubxlib-device-gnss";
+        status = "okay";
+        transport-type = "i2c1";
+        // There is an I2C segment size limitation on some STM32
+        // devices so limit to 255 byte segments to be on the safe
+        // side
+        i2c-max-segment-size = <255>;
+        // Allow the GNSS module type to be determined automatically
+    };
+
+    chosen {
+        // Only required if U_CFG_PPP_ENABLE is enabled
+        zephyr,ppp-uart = &uart99;
+    };
+
+    // Only required if U_CFG_PPP_ENABLE is enabled
+    // This creates instance 99 of a uart that we will give to zephyr,ppp-uart
+    uart99: uart-ppp@8000 { // The "8000" here is irrelevant but required for Zephyr to work
+        compatible = "u-blox,uart-ppp"; // The important part: this is an instance of u-blox,uart-ppp
+        reg = <0x8000 0x100>; // This is irrelevant but required for Zephyr to work
+        status = "okay"; // Zephyr boiler-plate
+    };
+};
+
+// Enable DMA because we need an asynchronous
+// UART for PPP and the device tree configuration
+// on STM32 won't allow that unless at least one
+// thing has DMA enabled.  Guidance from table 136
+// of reference manual RM0456 and
+// https://github.com/zephyrproject-rtos/zephyr/blob/main/dts/bindings/dma/st%2Cstm32u5-dma.yaml
+&usart2 {
+    dmas = <&gpdma1 0 27 STM32_DMA_PERIPH_TX
+            &gpdma1 1 26 STM32_DMA_PERIPH_RX>;
+    dma-names = "tx", "rx";
+};
+&gpdma1 {
+    status = "okay";
+};
+
+&usart3 {
+    pinctrl-0 = <&usart3_tx_pd8
+                 &usart3_rx_pd9
+                 &usart3_rts_pd12
+                 &usart3_cts_pd11>;
+    pinctrl-names = "default";
+    current-speed = <115200>;
+    hw-flow-control;
+    status = "okay";
+};

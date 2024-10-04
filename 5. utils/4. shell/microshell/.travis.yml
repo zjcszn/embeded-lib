@@ -1,0 +1,18 @@
+language: c
+
+compiler:
+  - gcc
+
+before_script:
+  - pip install gcovr
+  - mkdir build
+  - cd build
+  - cmake ..
+
+script:
+  - make
+  - make test
+  - make coverage
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

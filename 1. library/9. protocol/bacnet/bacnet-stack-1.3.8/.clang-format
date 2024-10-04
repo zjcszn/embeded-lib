@@ -1,0 +1,24 @@
+---
+BasedOnStyle: WebKit
+AlignAfterOpenBracket: AlwaysBreak
+BinPackArguments: true
+BinPackParameters: false
+PenaltyBreakBeforeFirstCallParameter: 1
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AlignEscapedNewlines: Left
+AlignArrayOfStructures: None
+PointerAlignment: Right
+BreakBeforeBraces: Linux
+BreakBeforeBinaryOperators: None
+KeepEmptyLinesAtTheStartOfBlocks: false
+IndentCaseLabels: true
+IndentWidth: 4
+UseTab: Never
+SortIncludes: false
+ColumnLimit: 80
+---
+Language: JavaScript
+DisableFormat: true
+...

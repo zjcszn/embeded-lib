@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="widgets\button.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\dialog.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\edit.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\keyboard.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\label.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\list_box.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\slide_group.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\spinbox.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\table.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\wave_buffer.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets\wave_ctrl.cpp">
+      <Filter>widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="core\bitmap.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\display.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\theme.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\wnd.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\word.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\adapter\api_win.cpp">
+      <Filter>core\adapter</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="core">
+      <UniqueIdentifier>{90BF9B29-451D-34AC-BF45-13C635ED39CD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="widgets">
+      <UniqueIdentifier>{338d9696-2a1d-4569-b435-dd3da382a8d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\adapter">
+      <UniqueIdentifier>{691801eb-7076-4af6-aa0c-5ce5b0fcb21c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

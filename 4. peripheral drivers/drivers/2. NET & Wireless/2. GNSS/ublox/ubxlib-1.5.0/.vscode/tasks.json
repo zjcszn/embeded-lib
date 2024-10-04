@@ -1,0 +1,286 @@
+{
+	"version": "2.0.0",
+	"options": {
+		"env": {
+			// Can't use this since windows must use ${env:PYTASKS_DIR} and linux $PYTASKS_DIR
+			"PYTASKS_DIR": "${workspaceFolder}/port/platform/common/automation"
+		}
+	},
+	"tasks": [
+        {
+            "label": "Clean all builds",
+            "type": "shell",
+            "linux": {
+                "command": "rm -rf ${input:getBuildRoot}",
+            },
+            "windows": {
+                "command": "rd -r ${input:getBuildRoot}",
+            },
+            "group": {"kind": "build"},
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "RTTTerminal",
+            "linux": {
+                "command": "JLinkRTTClient"
+            },
+            "windows": {
+                "command": "JLinkRTTClient"
+            },
+            "isBackground": true,
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": false,
+                "group": "ubxlib"
+            },
+            "problemMatcher": {
+                "owner": "typescript",
+                "fileLocation": "relative",
+                "pattern": {
+                    "regexp": "thisShouldNotMatch",
+                    "file": 1,
+                    "location": 2,
+                    "severity": 3,
+                    "code": 4,
+                    "message": 5
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "thisShouldNotMatch",
+                    "endsPattern": "^.*SEGGER"
+                }
+            },
+            "runOptions": {}
+        },
+        {
+            "label": "Build nrf5340dk runner [Zephyr]",
+            "type": "shell",
+            "options": { "cwd": "${input:getBuildRoot}" },
+            "command": "inv -r ${workspaceFolder}/port/platform/common/automation nrfconnect.build --board-name=nrf5340dk_nrf5340_cpuapp --output-name=runner_nrf5340dk_nrf5340_cpuapp",
+            "group": { "kind": "build" },
+            "presentation": { "group": "ubxlib" },
+            "problemMatcher": { "base": "$gcc", "fileLocation": "absolute" }
+        },
+        {
+            "type": "shell",
+            "label": "Predebug nrf5340dk runner [Zephyr]",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false,
+                "group": "ubxlib"
+            },
+            "dependsOn":["RTTTerminal","Build nrf5340dk runner [Zephyr]"],
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "Predebug evkninab3 runner [nRF5 SDK]",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false,
+                "group": "ubxlib"
+            },
+            "dependsOn":["RTTTerminal","Build evkninab3 runner [nRF5 SDK]"],
+            "problemMatcher": []
+        },
+        {
+            "label": "Build evkninab3 runner [nRF5 SDK]",
+            "type": "shell",
+            "options": {"cwd": "${input:getBuildRoot}"},
+            "command": "inv -r ${workspaceFolder}/port/platform/common/automation nrf5.build",
+            "group": { "kind": "build" },
+            "presentation": { "group": "ubxlib" },
+            "problemMatcher": { "base": "$gcc", "fileLocation": "absolute" }
+        },
+        {
+            "label": "Build windows runner [win32]",
+            "type": "cmake",
+            "command": "build",
+            "targets": ["ALL_BUILD"],
+            "group": {"kind": "build"},
+            "presentation": {"group": "ubxlib"},
+            "problemMatcher": [],
+        },
+        {
+            "label": "Build Linux runner",
+            "type": "shell",
+            "command": "inv -r ${workspaceFolder}/port/platform/common/automation linux.build",
+            "group": { "kind": "build" },
+            "presentation": { "group": "ubxlib" },
+            "problemMatcher": { "base": "$gcc", "fileLocation": "absolute" }
+        },
+        {
+            "label": "Build Linux runner [Zephyr]",
+            "type": "shell",
+            "options": { "cwd": "${input:getBuildRoot}" },
+            "command": "inv -r ${workspaceFolder}/port/platform/common/automation nrfconnect.build --board-name=native_posix --output-name=runner_linux",
+            "group": { "kind": "build" },
+            "presentation": { "group": "ubxlib" },
+            "problemMatcher": { "base": "$gcc", "fileLocation": "absolute" }
+        },
+        {
+            "type": "shell",
+            "label": "Predebug evkninab3 runner [Zephyr]",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false,
+                "group": "ubxlib"
+            },
+            "dependsOn":["RTTTerminal","Build evkninab3 runner [Zephyr]"],
+            "problemMatcher": []
+        },
+        {
+            "label": "Build evkninab3 runner [Zephyr]",
+            "type": "shell",
+            "options": { "cwd": "${input:getBuildRoot}" },
+            "command": "inv -r ${workspaceFolder}/port/platform/common/automation nrfconnect.build --board-name=ubx_evkninab3_nrf52840 --output-name=runner_ubx_evkninab3_nrf52840",
+            "group": { "kind": "build" },
+            "presentation": { "group": "ubxlib" },
+            "problemMatcher": { "base": "$gcc", "fileLocation": "absolute" }
+        },
+        {
+            "label": "Build stm32f4 runner [STM32CubeF4]",
+            "type": "shell",
+            "options": { "cwd": "${input:getBuildRoot}" },
+            "command": "inv -r ${workspaceFolder}/port/platform/common/automation stm32cubef4.build",
+            "group": { "kind": "build" },
+            "problemMatcher": { "base": "$gcc", "fileLocation": "absolute" }
+        },
+        {
+            "label": "Build esp32 runner [ESP-IDF]",
+            "type": "shell",
+            "options": { "cwd": "${input:getBuildRoot}" },
+            "command": "inv -r ${workspaceFolder}/port/platform/common/automation esp-idf.build",
+            "group": { "kind": "build" },
+            "problemMatcher": { "base": "$gcc", "fileLocation": "absolute" }
+        },
+        {
+            "label": "Build arduino runner",
+            "type": "shell",
+            "options": {"cwd": "${input:getBuildRoot}"},
+            "command": "inv -r ${workspaceFolder}/port/platform/common/automation arduino.build",
+            "group": { "kind": "build" },
+            "presentation": { "group": "ubxlib" },
+            "problemMatcher": { "base": "$gcc", "fileLocation": "absolute" }
+        },
+        {
+            "label": "Dry-run AStyle",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+            "linux": {
+                "command": "astyle --dry-run --options=astyle.cfg --suffix=none --verbose --errors-to-stdout --recursive *.c,*.h,*.cpp,*.hp"
+            },
+            "windows": {
+                // TODO
+                "command": ""
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Run AStyle",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+            "linux": {
+                "command": "astyle --options=astyle.cfg --suffix=none --verbose --errors-to-stdout --recursive *.c,*.h,*.cpp,*.hp"
+            },
+            "windows": {
+                // TODO
+                "command": ""
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Docker: bash",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceRoot}/port/platform/common/automation/docker/builder"
+            },
+            "linux": {
+                "command": "docker-compose run --rm -w /workdir/ubxlib/port/platform/common/automation -v ${workspaceRoot}:/workdir/ubxlib -v $HOME:/home/ubxlib ubxlib_builder sh"
+            },
+            "windows": {
+                "command": "echo \"Not supported for Windows\""
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "automation.build",
+            "type": "shell",
+            "options": { "cwd": "${input:getBuildRoot}" },
+            "command": "inv -r ${workspaceFolder}/port/platform/common/automation automation.build ${input:instance}",
+            "problemMatcher": []
+        },
+        {
+            "label": "automation.flash",
+            "type": "shell",
+            "options": { "cwd": "${input:getBuildRoot}" },
+            "command": "inv -r ${workspaceFolder}/port/platform/common/automation automation.flash ${input:instance}",
+            "problemMatcher": []
+        },
+        {
+            "label": "automation.test",
+            "type": "shell",
+            "options": { "cwd": "${input:getBuildRoot}" },
+            "command": "inv -r ${workspaceFolder}/port/platform/common/automation automation.test ${input:instance}",
+            "problemMatcher": []
+        },
+    ],
+    "inputs": [
+        {
+            "type": "pickString",
+            "id": "instance",
+            "description": "What instance do you want to run?",
+            "options": [
+              "1", "2", "3", "4", "5",
+              "10",
+              "11",
+              "12",
+              "13.0.0", "13.1",
+              "14",
+              "15.0.0", "15.1",
+              "16",
+              "17",
+              "18",
+              "19",
+              "20",
+              "21",
+              "22",
+              "23",
+              "24"
+            ],
+            "default": "component"
+        },
+        {
+            "id": "getBuildRoot",
+            "type": "command",
+            "command": "shellCommand.execute",
+            "args": {
+                "useFirstResult": "skip",
+                "command": "python -m scripts.u_get_build_dir root",
+                "cwd": "${workspaceFolder}/port/platform/common/automation",
+            }
+        }
+    ]
+
+}

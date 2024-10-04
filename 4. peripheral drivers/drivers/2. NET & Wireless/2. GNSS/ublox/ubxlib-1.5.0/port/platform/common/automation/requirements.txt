@@ -1,0 +1,16 @@
+PyYAML
+# Note: there is a bug in version 2.2.1 of invoke which stops it loading module directories
+# correctly, hence the fixing to version 2.0.0 below, which is known to work
+invoke==2.0.0
+psutil
+requests
+west
+pyserial
+pylink-square
+coloredlogs
+verboselogs
+portalocker
+lxml
+dataclasses
+pyelftools
+IntelHex

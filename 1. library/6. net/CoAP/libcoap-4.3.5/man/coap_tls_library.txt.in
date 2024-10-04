@@ -1,0 +1,263 @@
+// -*- mode:doc; -*-
+// vim: set syntax=asciidoc tw=0
+
+coap_tls_library(3)
+===================
+:doctype: manpage
+:man source:   coap_tls_library
+:man version:  @PACKAGE_VERSION@
+:man manual:   libcoap Manual
+
+NAME
+----
+coap_tls_library,
+coap_get_tls_library_version,
+coap_string_tls_support,
+coap_string_tls_version,
+coap_show_tls_version,
+coap_tls_engine_configure,
+coap_tls_engine_remove
+- Work with CoAP TLS libraries
+
+SYNOPSIS
+--------
+*#include <coap@LIBCOAP_API_VERSION@/coap.h>*
+
+*coap_tls_version_t *coap_get_tls_library_version(void);*
+
+*char *coap_string_tls_support(char *_buffer_, size_t _bufsize_);*
+
+*char *coap_string_tls_version(char *_buffer_, size_t _bufsize_);*
+
+*void coap_show_tls_version(coap_log_t _level_);*
+
+*int coap_tls_engine_configure(coap_str_const_t *_conf_mem_);*
+
+*int coap_tls_engine_remove(void);*
+
+For specific (D)TLS library support, link with
+*-lcoap-@LIBCOAP_API_VERSION@-notls*, *-lcoap-@LIBCOAP_API_VERSION@-gnutls*,
+*-lcoap-@LIBCOAP_API_VERSION@-openssl*, *-lcoap-@LIBCOAP_API_VERSION@-mbedtls*,
+*-lcoap-@LIBCOAP_API_VERSION@-wolfssl*
+or *-lcoap-@LIBCOAP_API_VERSION@-tinydtls*.   Otherwise, link with
+*-lcoap-@LIBCOAP_API_VERSION@* to get the default (D)TLS library support.
+
+DESCRIPTION
+-----------
+When the libcoap library was built, it will have been compiled using a
+specific TLS implementation type (e.g. https://www.openssl.org[OpenSSL],
+https://www.gnutls.org[GnuTLS],
+https://www.trustedfirmware.org/projects/mbed-tls/[Mbed TLS],
+https://wolfssl.com[wolfSSL],
+https://github.com/eclipse/tinydtls[TinyDTLS] or noTLS).
+When the libcoap library is linked into an application, it is possible that
+the application needs to dynamically determine whether DTLS or TLS is
+supported, what type of TLS implementation libcoap was compiled with, as well
+as detect what is the version of the currently loaded TLS library is.
+
+*NOTE:* If OpenSSL is being used, then the minimum OpenSSL library version is
+1.1.0.
+
+*NOTE:* If GnuTLS is being used, then the minimum GnuTLS library version is
+3.3.0.
+
+*NOTE:* If GnuTLS is going to interoperate with TinyDTLS, then a minimum
+revision of GnuTLS 3.5.5 which supports CCM algorithms is required
+by TinyDTLS as TinyDTLS currently only supports CCM.
+
+Network traffic can be encrypted or un-encrypted with libcoap - how to set
+this up is described in *coap_context*(3).
+
+Due to the nature of TLS, there can be Callbacks that are invoked as the TLS
+session negotiates encryption algorithms, encryption keys etc.
+Where possible, by default, the CoAP layer handles all this automatically.
+However, there is the flexibility of the Callbacks for imposing additional
+security checks etc. when PKI is being used.  These callbacks need to need to
+match the TLS implementation type.
+
+FUNCTIONS
+---------
+
+*Function: coap_get_tls_library_version()*
+
+The *coap_get_tls_library_version*() function returns the TLS implementation
+type and library version in a coap_tls_version_t* structure.
+
+[source, c]
+----
+typedef enum coap_tls_library_t {
+  COAP_TLS_LIBRARY_NOTLS = 0, /* No DTLS library */
+  COAP_TLS_LIBRARY_TINYDTLS,  /* Using TinyDTLS library */
+  COAP_TLS_LIBRARY_OPENSSL,   /* Using OpenSSL library */
+  COAP_TLS_LIBRARY_GNUTLS,    /* Using GnuTLS library */
+  COAP_TLS_LIBRARY_MBEDTLS,   /* Using Mbed TLS library */
+  COAP_TLS_LIBRARY_WOLFSSL,   /* Using wolfSSL library */
+} coap_tls_library_t;
+
+typedef struct coap_tls_version_t {
+  uint64_t version;        /* (D)TLS runtime Library Version */
+  coap_tls_library_t type; /* Library type. One of COAP_TLS_LIBRARY_* */
+  uint64_t built_version;  /* (D)TLS Built against Library Version */
+}
+----
+
+*Function: coap_string_tls_support()*
+
+The *coap_string_tls_support*() function is used to update the provided buffer
+with ascii readable information about what type of PSK, PKI etc. keys the
+current (D)TLS library supports.
+_buffer_ defines the buffer to provide the information and _bufsize_ is the
+size of _buffer_.
+
+*Function: coap_string_tls_version()*
+
+The *coap_string_tls_version*() function is used to update the provided buffer
+with information about the current (D)TLS library that libcoap was built
+against, as well as the current linked version of the (D)TLS library.
+_buffer_ defines the buffer to provide the information and _bufsize_ is the
+size of _buffer_.
+
+*Function: coap_show_tls_version()*
+
+The *coap_show_tls_version*() function is used log information about the
+current (D)TLS library that libcoap was built against, as well as the current
+linked version of the (D)TLS library. _level_ defines the minimum logging level
+for this information to be output using coap_log().
+
+*Function: coap_tls_engine_configure()*
+
+The *coap_tls_engine_configure*() function is used to configure a TLS ENGINE
+(currently only OpenSSL).  It parses the provided configuration in _conf_mem_
+and initializes the ENGINE appropriately. The format of the parameters is
+documented in *coap-tls-engine-conf*(5).
+
+*Function: coap_tls_engine_remove()*
+
+The *coap_tls_engine_remove*() function removes a previously configured TLS
+ENGINE.  This function is called when coap_free_context() is called.
+
+RETURN VALUES
+-------------
+
+*coap_get_tls_library_version*() returns the TLS implementation type
+and library version in a coap_tls_version_t* structure.
+
+*coap_string_tls_version*() and *coap_string_tls_support*() return
+a pointer to the provided buffer.
+
+*coap_tls_engine_configure*() returns 1 if the TLS ENGINE was successfully configured, otherwise 0.
+
+*coap_tls_engine_remove*() returns 1 if the TLS ENGINE was successfully removed, otherwise 0.
+
+EXAMPLES
+--------
+*CoAP Server DTLS PKI Setup with OpenSSL Engine *
+[source, c]
+----
+#include <coap@LIBCOAP_API_VERSION@/coap.h>
+
+#define ENGINE_CONFIG \
+  "engine:pkcs11\n" \
+  "enable-methods:0xffff\n" \
+  "post-cmd:PIN:1234\n"
+
+/*
+ * Set up PKI encryption information
+ */
+static coap_context_t *
+setup_server_context_pki(const char *public_cert_file,
+                         const char *private_key,
+                         const char *ca_file) {
+  coap_endpoint_t *endpoint;
+  coap_address_t listen_addr;
+  coap_dtls_pki_t dtls_pki;
+  coap_context_t *context;
+  coap_str_const_t *engine_conf = coap_make_str_const(ENGINE_CONFIG);
+
+  /* See coap_supported(3) */
+  if (!coap_dtls_is_supported())
+    return NULL;
+
+  context = coap_new_context(NULL);
+  if (!context)
+    return NULL;
+  /* See coap_block(3) */
+  coap_context_set_block_mode(context,
+                              COAP_BLOCK_USE_LIBCOAP | COAP_BLOCK_SINGLE_BODY);
+
+  /* To get full logging of any issues here, you need to
+   *
+   * coap_set_log_level(COAP_LOG_DEBUG);
+   * coap_set_dtls_log_level(COAP_LOG_DEBUG);
+   */
+  if (!coap_tls_engine_configure(engine_conf))
+    return NULL;
+
+  memset(&dtls_pki, 0, sizeof(dtls_pki));
+
+  /* see coap_encryption(3) */
+  dtls_pki.version                 = COAP_DTLS_PKI_SETUP_VERSION;
+  dtls_pki.verify_peer_cert        = 1;
+  dtls_pki.check_common_ca         = 1;
+  dtls_pki.allow_self_signed       = 1;
+  dtls_pki.allow_expired_certs     = 1;
+  dtls_pki.cert_chain_validation   = 1;
+  dtls_pki.cert_chain_verify_depth = 1;
+  dtls_pki.check_cert_revocation   = 1;
+  dtls_pki.allow_no_crl            = 1;
+  dtls_pki.allow_expired_crl       = 1;
+  dtls_pki.pki_key.key_type                      = COAP_PKI_KEY_DEFINE;
+  dtls_pki.pki_key.key.define.ca.s_byte          = ca_file;
+  dtls_pki.pki_key.key.define.public_cert.s_byte = public_cert_file;
+  dtls_pki.pki_key.key.define.private_key.s_byte = private_key;
+  dtls_pki.pki_key.key.define.public_cert_def    = COAP_PKI_KEY_DEF_PEM;
+  dtls_pki.pki_key.key.define.private_key_def    = COAP_PKI_KEY_DEF_ENGINE;
+  dtls_pki.pki_key.key.define.ca_def             = COAP_PKI_KEY_DEF_PEM;
+
+  if (coap_context_set_pki(context, &dtls_pki)) {
+    coap_free_context(context);
+    return NULL;
+  }
+
+  /* See coap_address(3) */
+  coap_address_init(&listen_addr);
+  listen_addr.addr.sa.sa_family = AF_INET;
+  listen_addr.addr.sin.sin_port = htons(5684);
+
+  endpoint = coap_new_endpoint(context, &listen_addr, COAP_PROTO_DTLS);
+  if (!endpoint) {
+    coap_free_context(context);
+    return NULL;
+  }
+
+  /* Initialize resources - See coap_resource(3) init_resources() example */
+
+  return context;
+}
+----
+
+SEE ALSO
+--------
+*coap_encryption*(3) and *coap_supported*(3)
+
+FURTHER INFORMATION
+-------------------
+See
+
+"https://rfc-editor.org/rfc/rfc7252[RFC7252: The Constrained Application Protocol (CoAP)]"
+
+"https://rfc-editor.org/rfc/rfc8323[RFC8323: CoAP (Constrained Application Protocol) over TCP, TLS, and WebSockets]"
+
+for further information.
+
+BUGS
+----
+Please raise an issue on GitHub at
+https://github.com/obgm/libcoap/issues to report any bugs.
+
+Please raise a Pull Request at https://github.com/obgm/libcoap/pulls
+for any fixes.
+
+AUTHORS
+-------
+The libcoap project <libcoap-developers@lists.sourceforge.net>
