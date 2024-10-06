@@ -41,7 +41,8 @@
 
 struct test_kv{
     char name[32];
-    uint8_t value[TEST_KV_VALUE_LEN];
+    char *value;
+    size_t value_len;
     uint32_t addr;
     uint32_t saved_data_size;
     bool is_changed;
@@ -179,13 +180,15 @@ static void test_fdb_create_kv_blob(void)
 static void test_fdb_change_kv_blob(void)
 {
     fdb_err_t result = FDB_NO_ERR;
-    rt_tick_t tick = rt_tick_get(), read_tick;
+    rt_tick_t tick = 0, read_tick;
     size_t read_len;
     struct fdb_blob blob_obj, *blob = &blob_obj;
 
     read_len = fdb_kv_get_blob(&test_kvdb, TEST_KV_BLOB_NAME, fdb_blob_make(&blob_obj, &read_tick, sizeof(read_tick)));
     uassert_int_equal(blob->saved.len, sizeof(read_tick));
     uassert_int_equal(blob->saved.len, read_len);
+    rt_thread_mdelay(1);
+    tick = rt_tick_get();
     uassert_int_not_equal(tick, read_tick);
 
     result = fdb_kv_set_blob(&test_kvdb, TEST_KV_BLOB_NAME, fdb_blob_make(&blob_obj, &tick, sizeof(tick)));
@@ -200,13 +203,15 @@ static void test_fdb_change_kv_blob(void)
 static void test_fdb_del_kv_blob(void)
 {
     fdb_err_t result = FDB_NO_ERR;
-    rt_tick_t tick = rt_tick_get(), read_tick;
+    rt_tick_t tick = 0, read_tick;
     size_t read_len;
     struct fdb_blob blob;
 
     read_len = fdb_kv_get_blob(&test_kvdb, TEST_KV_BLOB_NAME, fdb_blob_make(&blob, &read_tick, sizeof(read_tick)));
     uassert_int_equal(blob.saved.len, sizeof(read_tick));
     uassert_int_equal(blob.saved.len, read_len);
+    rt_thread_mdelay(1);
+    tick = rt_tick_get();
     uassert_int_not_equal(tick, read_tick);
 
     result = fdb_kv_set_blob(&test_kvdb, TEST_KV_BLOB_NAME, fdb_blob_make(&blob, NULL, 0));
@@ -236,12 +241,14 @@ static void test_fdb_create_kv(void)
 static void test_fdb_change_kv(void)
 {
     fdb_err_t result = FDB_NO_ERR;
-    rt_tick_t tick = rt_tick_get(), read_tick;
+    rt_tick_t tick = 0, read_tick;
     char value_buf[14], *read_value;
 
     read_value = fdb_kv_get(&test_kvdb, TEST_KV_NAME);
     uassert_not_null(read_value);
     read_tick = atoi(read_value);
+    rt_thread_mdelay(1);
+    tick = rt_tick_get();
     uassert_int_not_equal(tick, read_tick);
 
     snprintf(value_buf, sizeof(value_buf), "%" PRIu32, tick);
@@ -264,12 +271,14 @@ static void fdb_reboot(void)
 static void test_fdb_del_kv(void)
 {
     fdb_err_t result = FDB_NO_ERR;
-    rt_tick_t tick = rt_tick_get(), read_tick;
+    rt_tick_t tick = 0, read_tick;
     char *read_value;
 
     read_value = fdb_kv_get(&test_kvdb, TEST_KV_NAME);
     uassert_not_null(read_value);
     read_tick = atoi(read_value);
+    rt_thread_mdelay(1);
+    tick = rt_tick_get();
     uassert_int_not_equal(tick, read_tick);
 
     result = fdb_kv_del(&test_kvdb, TEST_KV_NAME);
@@ -303,10 +312,11 @@ static int iter_all_kv(fdb_kvdb_t db, struct test_kv *kv_tbl, size_t len)
         rt_strncpy(kv_tbl[index].name, cur_kv->name, 32);
         kv_tbl[index].saved_data_size = data_size;
         kv_tbl[index].addr = cur_kv->addr.start;
+        kv_tbl[index].value = (char *)rt_malloc(data_size);
+        if (kv_tbl[index].value == NULL)
+            RT_ASSERT(0 && "no memory for value");
         /* read data */
-        fdb_blob_read((fdb_db_t)db, fdb_kv_to_blob(cur_kv, fdb_blob_make(&fdb_blob, &kv_tbl[index].value, data_size)));
-        uassert_true(kv_tbl[index].saved_data_size <= TEST_KV_VALUE_LEN);
-
+        fdb_blob_read((fdb_db_t)db, fdb_kv_to_blob(cur_kv, fdb_blob_make(&fdb_blob, kv_tbl[index].value, data_size)));
         index++;
     }
 
@@ -315,13 +325,14 @@ static int iter_all_kv(fdb_kvdb_t db, struct test_kv *kv_tbl, size_t len)
 
 static void test_save_fdb_by_kvs(const struct test_kv *kv_tbl, size_t len)
 {
-    struct fdb_blob blob_obj, * blob = &blob_obj;
+    struct fdb_blob blob_obj, *blob = &blob_obj;
 
     for (size_t i = 0; i < len; i++)
     {
         if (kv_tbl[i].is_changed)
         {
-            fdb_kv_set_blob(&test_kvdb, kv_tbl[i].name, fdb_blob_make(blob, kv_tbl[i].value, TEST_KV_VALUE_LEN));
+            int result = fdb_kv_set_blob(&test_kvdb, kv_tbl[i].name, fdb_blob_make(blob, kv_tbl[i].value, kv_tbl[i].value_len));
+            uassert_true(result == FDB_NO_ERR);
         }
     }
 }
@@ -329,6 +340,8 @@ static void test_save_fdb_by_kvs(const struct test_kv *kv_tbl, size_t len)
 static void test_check_fdb_by_kvs(const struct test_kv *kv_tbl, size_t len)
 {
     static struct test_kv saved_kv_tbl[TEST_KV_MAX_NUM] = { 0 };
+
+    RT_ASSERT(len <= FDB_ARRAY_SIZE(saved_kv_tbl));
 
     iter_all_kv(&test_kvdb, saved_kv_tbl, FDB_ARRAY_SIZE(saved_kv_tbl));
 
@@ -387,10 +400,10 @@ static void test_fdb_gc(void)
          * +---------------------------------------------------------+
          */
         static const struct test_kv kv_tbl[] = {
-            {"kv0", "0", 0, 0, 1},
-            {"kv1", "1", 0, 0, 1},
-            {"kv2", "2", 0, 0, 1},
-            {"kv3", "3", 1, 0, 1},
+            {"kv0", "0", TEST_KV_VALUE_LEN, 0, 0, 1},
+            {"kv1", "1", TEST_KV_VALUE_LEN, 0, 0, 1},
+            {"kv2", "2", TEST_KV_VALUE_LEN, 0, 0, 1},
+            {"kv3", "3", TEST_KV_VALUE_LEN, 1, 0, 1},
         };
 
         test_fdb_by_kvs(kv_tbl, FDB_ARRAY_SIZE(kv_tbl));
@@ -423,10 +436,10 @@ static void test_fdb_gc(void)
          * +--------------+-------------+--------------+-------------+
          */
         static const struct test_kv kv_tbl[] = {
-            {"kv1", "1", 0, 0, 0},
-            {"kv2", "2", 0, 0, 0},
-            {"kv0", "00", 1, 0, 1},
-            {"kv3", "33", 1, 0, 1},
+            {"kv1", "1", TEST_KV_VALUE_LEN, 0, 0, 0},
+            {"kv2", "2", TEST_KV_VALUE_LEN, 0, 0, 0},
+            {"kv0", "00", TEST_KV_VALUE_LEN, 1, 0, 1},
+            {"kv3", "33", TEST_KV_VALUE_LEN, 1, 0, 1},
         };
 
         test_fdb_by_kvs(kv_tbl, FDB_ARRAY_SIZE(kv_tbl));
@@ -503,10 +516,10 @@ static void test_fdb_gc(void)
          *
          */
         static const struct test_kv kv_tbl[] = {
-            {"kv0", "000", 2, 0, 1},
-            {"kv1", "111", 2, 0, 1},
-            {"kv2", "222", 2, 0, 1},
-            {"kv3", "333", 3, 0, 1},
+            {"kv0", "000", TEST_KV_VALUE_LEN, 2, 0, 1},
+            {"kv1", "111", TEST_KV_VALUE_LEN, 2, 0, 1},
+            {"kv2", "222", TEST_KV_VALUE_LEN, 2, 0, 1},
+            {"kv3", "333", TEST_KV_VALUE_LEN, 3, 0, 1},
         };
 
         test_fdb_by_kvs(kv_tbl, FDB_ARRAY_SIZE(kv_tbl));
@@ -603,10 +616,10 @@ static void test_fdb_gc(void)
          * +--------------+-------------+--------------+-------------+
          */
         static const struct test_kv kv_tbl[] = {
-            {"kv0", "0000", 3, 0, 1},
-            {"kv1", "1111", 3, 0, 1},
-            {"kv2", "2222", 0, 0, 1},
-            {"kv3", "3333", 0, 0, 1},
+            {"kv0", "0000", TEST_KV_VALUE_LEN, 3, 0, 1},
+            {"kv1", "1111", TEST_KV_VALUE_LEN, 3, 0, 1},
+            {"kv2", "2222", TEST_KV_VALUE_LEN, 0, 0, 1},
+            {"kv3", "3333", TEST_KV_VALUE_LEN, 0, 0, 1},
         };
 
         test_fdb_by_kvs(kv_tbl, FDB_ARRAY_SIZE(kv_tbl));
@@ -617,15 +630,209 @@ static void test_fdb_gc(void)
     }
 }
 
+static void test_fdb_gc2(void)
+{
+    fdb_kv_set_default(&test_kvdb);
+
+    {
+        /*
+         * prepare1: add 4 KVs
+         *
+         * +---------------------------------------------------------+
+         * |   sector0    |   sector1   |   sector2    |   sector3   |
+         * |    using     |    using    |    empty     |    empty    |
+         * +---------------------------------------------------------+
+         * |              |             |              |             |
+         * |    kv0       |    kv3      |              |             |
+         * |    new       |    new      |              |             |
+         * +----------------------------+              |             |
+         * |              |             |              |             |
+         * |    kv1       |             |              |             |
+         * |    new       |             |              |             |
+         * +--------------+             |              |             |
+         * |              |             |              |             |
+         * |    kv2       |             |              |             |
+         * |    new       |             |              |             |
+         * +--------------+             |              |             |
+         * |              |             |              |             |
+         * +---------------------------------------------------------+
+         */
+        static const struct test_kv kv_tbl[] = {
+            {"kv0", "0", TEST_KV_VALUE_LEN, 0, 0, 1},
+            {"kv1", "1", TEST_KV_VALUE_LEN, 0, 0, 1},
+            {"kv2", "2", TEST_KV_VALUE_LEN, 0, 0, 1},
+            {"kv3", "3", TEST_KV_VALUE_LEN, 1, 0, 1},
+        };
+
+        test_fdb_by_kvs(kv_tbl, FDB_ARRAY_SIZE(kv_tbl));
+        uassert_true(RT_ALIGN_DOWN(test_kvdb.parent.oldest_addr, TEST_KVDB_SECTOR_SIZE) == TEST_KVDB_SECTOR_SIZE * 0);
+        fdb_reboot();
+        uassert_true(RT_ALIGN_DOWN(test_kvdb.parent.oldest_addr, TEST_KVDB_SECTOR_SIZE) == TEST_KVDB_SECTOR_SIZE * 0);
+    }
+
+    {
+        /*
+         * prepare2: change kv0 and kv3
+         *
+         * +--------------+-------------+--------------+-------------+
+         * |   sector0    |   sector1   |   sector2    |   sector3   |
+         * |    using     |    using    |    empty     |    empty    |
+         * +---------------------------------------------------------+
+         * |              |             |              |             |
+         * |    kv0       |     kv3     |              |             |
+         * |    delete    |     delete  |              |             |
+         * +----------------------------+              |             |
+         * |              |             |              |             |
+         * |    kv1       |     kv0     |              |             |
+         * |    new       |     new     |              |             |
+         * +----------------------------+              |             |
+         * |              |             |              |             |
+         * |    kv2       |     kv3     |              |             |
+         * |    new       |     new     |              |             |
+         * +----------------------------+              |             |
+         * |              |             |              |             |
+         * +--------------+-------------+--------------+-------------+
+         */
+        static const struct test_kv kv_tbl[] = {
+            {"kv1", "1", TEST_KV_VALUE_LEN, 0, 0, 0},
+            {"kv2", "2", TEST_KV_VALUE_LEN, 0, 0, 0},
+            {"kv0", "00", TEST_KV_VALUE_LEN, 1, 0, 1},
+            {"kv3", "33", TEST_KV_VALUE_LEN, 1, 0, 1},
+        };
+
+        test_fdb_by_kvs(kv_tbl, FDB_ARRAY_SIZE(kv_tbl));
+        uassert_true(RT_ALIGN_DOWN(test_kvdb.parent.oldest_addr, TEST_KVDB_SECTOR_SIZE) == TEST_KVDB_SECTOR_SIZE * 0);
+        fdb_reboot();
+        uassert_true(RT_ALIGN_DOWN(test_kvdb.parent.oldest_addr, TEST_KVDB_SECTOR_SIZE) == TEST_KVDB_SECTOR_SIZE * 0);
+    }
+
+    {
+        /*
+         * prepare3: add big kv4
+         *
+         * +--------------+-------------+--------------+-------------+
+         * |   sector0    |   sector1   |   sector2    |   sector3   |
+         * |    using     |    using    |    using     |    empty    |
+         * +---------------------------------------------------------+
+         * |              |             |              |             |
+         * |    kv0       |     kv3     |              |             |
+         * |    delete    |     delete  |              |             |
+         * +----------------------------+     kv4      |             |
+         * |              |             |     new      |             |
+         * |    kv1       |     kv0     |              |             |
+         * |    new       |     new     |              |             |
+         * +----------------------------+              |             |
+         * |              |             |              |             |
+         * |    kv2       |     kv3     |--------------|             |
+         * |    new       |     new     |              |             |
+         * +----------------------------+              |             |
+         * |              |             |              |             |
+         * +--------------+-------------+--------------+-------------+
+         */
+        static const struct test_kv kv_tbl[] = {
+            {"kv1", "1", TEST_KV_VALUE_LEN, 0, 0, 0},
+            {"kv2", "2", TEST_KV_VALUE_LEN, 0, 0, 0},
+            {"kv0", "00", TEST_KV_VALUE_LEN, 1, 0, 0},
+            {"kv3", "33", TEST_KV_VALUE_LEN, 1, 0, 0},
+            {"kv4", "4", TEST_KV_VALUE_LEN * 3, 2, 0, 1},
+        };
+
+        test_fdb_by_kvs(kv_tbl, FDB_ARRAY_SIZE(kv_tbl));
+        uassert_true(RT_ALIGN_DOWN(test_kvdb.parent.oldest_addr, TEST_KVDB_SECTOR_SIZE) == TEST_KVDB_SECTOR_SIZE * 0);
+        fdb_reboot();
+        uassert_true(RT_ALIGN_DOWN(test_kvdb.parent.oldest_addr, TEST_KVDB_SECTOR_SIZE) == TEST_KVDB_SECTOR_SIZE * 0);
+    }
+
+    {
+        /*
+         * add kv5, trigger GC
+
+         * step1: move kv1 and kv2
+         * +--------------+-------------+--------------+-------------+
+         * |   sector0    |   sector1   |   sector2    |   sector3   |
+         * |    empty     |    using    |    using     |    using    |
+         * +---------------------------------------------------------+
+         * |              |             |              |             |
+         * |              |     kv3     |              |    kv1      |
+         * |              |     delete  |              |    new      |
+         * |              +-------------+     kv4      |-------------|
+         * |              |             |     new      |             |
+         * |              |     kv0     |              |    kv2      |
+         * |              |     new     |              |    new      |
+         * |              +-------------+              |-------------|
+         * |              |             |              |             |
+         * |              |     kv3     |--------------|             |
+         * |              |     new     |              |             |
+         * |              +-------------+              |             |
+         * |              |             |              |             |
+         * +--------------+-------------+--------------+-------------+
+         * 
+         * step2: move kv0 and kv3
+         * +--------------+-------------+--------------+-------------+
+         * |   sector0    |   sector1   |   sector2    |   sector3   |
+         * |    using     |    empty    |    using     |    using    |
+         * +---------------------------------------------------------+
+         * |              |             |              |             |
+         * |     kv3      |             |              |    kv1      |
+         * |     new      |             |              |    new      |
+         * +--------------+             |     kv4      |-------------|
+         * |              |             |     new      |             |
+         * |              |             |              |    kv2      |
+         * |              |             |              |    new      |
+         * |              |             |              |-------------|
+         * |              |             |              |             |
+         * |              |             |--------------|    kv0      |
+         * |              |             |              |    new      |
+         * |              |             |              |-------------|
+         * |              |             |              |             |
+         * +--------------+-------------+--------------+-------------+
+         * 
+         * step3: add kv5
+         * +--------------+-------------+--------------+-------------+
+         * |   sector0    |   sector1   |   sector2    |   sector3   |
+         * |    using     |    empty    |    using     |    using    |
+         * +---------------------------------------------------------+
+         * |              |             |              |             |
+         * |     kv3      |             |              |    kv1      |
+         * |     new      |             |              |    new      |
+         * +--------------+             |              |-------------|
+         * |              |             |      kv4     |             |
+         * |              |             |      new     |    kv2      |
+         * |     kv5      |             |              |    new      |
+         * |     new      |             |              |-------------|
+         * |              |             |              |             |
+         * |              |             |--------------|    kv0      |
+         * |--------------|             |              |    new      |
+         * |              |             |              |-------------|
+         * |              |             |              |             |
+         * +--------------+-------------+--------------+-------------+
+         * 
+         */
+        static const struct test_kv kv_tbl[] = {
+            {"kv3", "33", TEST_KV_VALUE_LEN, 0, 0, 0},
+            {"kv5", "5", TEST_KV_VALUE_LEN * 2, 0, 0, 1},
+            {"kv4", "4", TEST_KV_VALUE_LEN * 3, 2, 0, 0},
+            {"kv1", "1", TEST_KV_VALUE_LEN, 3, 0, 0},
+            {"kv2", "2", TEST_KV_VALUE_LEN, 3, 0, 0},
+            {"kv0", "00", TEST_KV_VALUE_LEN, 3, 0, 0},
+        };
+
+        test_fdb_by_kvs(kv_tbl, FDB_ARRAY_SIZE(kv_tbl));
+        uassert_true(RT_ALIGN_DOWN(test_kvdb.parent.oldest_addr, TEST_KVDB_SECTOR_SIZE) == TEST_KVDB_SECTOR_SIZE * 2);
+        fdb_reboot();
+        uassert_true(RT_ALIGN_DOWN(test_kvdb.parent.oldest_addr, TEST_KVDB_SECTOR_SIZE) == TEST_KVDB_SECTOR_SIZE * 2);
+    }
+}
+
 static void test_fdb_scale_up(void)
 {
     fdb_kv_set_default(&test_kvdb);
 
     static const struct test_kv old_kv_tbl[] = {
-        {"kv0", "0", 0, 0, 1},
-        {"kv1", "1", 0, 0, 1},
-        {"kv2", "2", 0, 0, 1},
-        {"kv3", "3", 1, 0, 1},
+        {"kv0", "0", TEST_KV_VALUE_LEN, 0, 0, 1},
+        {"kv1", "1", TEST_KV_VALUE_LEN, 0, 0, 1},
+        {"kv2", "2", TEST_KV_VALUE_LEN, 0, 0, 1},
+        {"kv3", "3", TEST_KV_VALUE_LEN, 1, 0, 1},
     };
     /* save some data */
     test_save_fdb_by_kvs(old_kv_tbl, FDB_ARRAY_SIZE(old_kv_tbl));
@@ -639,10 +846,10 @@ static void test_fdb_scale_up(void)
 
     /* save some new data */
     static const struct test_kv new_kv_tbl[] = {
-        {"kv4", "4", 4, 0, 1},
-        {"kv5", "5", 4, 0, 1},
-        {"kv6", "6", 4, 0, 1},
-        {"kv7", "7", 5, 0, 1},
+        {"kv4", "4", TEST_KV_VALUE_LEN, 4, 0, 1},
+        {"kv5", "5", TEST_KV_VALUE_LEN, 4, 0, 1},
+        {"kv6", "6", TEST_KV_VALUE_LEN, 4, 0, 1},
+        {"kv7", "7", TEST_KV_VALUE_LEN, 5, 0, 1},
     };
     /* kv4: sector1, kv5: sector1, kv6: sector2, kv7: sector2 */
     test_save_fdb_by_kvs(new_kv_tbl, FDB_ARRAY_SIZE(new_kv_tbl));
@@ -690,6 +897,7 @@ static void testcase(void)
     UTEST_UNIT_RUN(test_fdb_change_kv);
     UTEST_UNIT_RUN(test_fdb_del_kv);
     UTEST_UNIT_RUN(test_fdb_gc);
+    UTEST_UNIT_RUN(test_fdb_gc2);
     UTEST_UNIT_RUN(test_fdb_scale_up);
     UTEST_UNIT_RUN(test_fdb_kvdb_set_default);
     UTEST_UNIT_RUN(test_fdb_kvdb_deinit);
