@@ -1,0 +1,11 @@
+===============================================================================
+This file contains details of any applicable specific extensions, limitations 
+or other variations to the terms of the End User License Agreement that 
+accompanies this release of 'Keil MDK-Middeware'.
+=============================================================================== 
+1) Unless you have a current valid license for the Arm Tool 'Keil MDK
+Professional Edition' or 'Keil MDK Essential Edition' with active support &
+maintenance, your use of MDK-Middleware is restricted to Non-Commercial Use
+only.
+------------------------------------------------------------------------------
+END OF FILE: supplementary_terms.txt
