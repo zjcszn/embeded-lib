@@ -1,6 +1,7 @@
 #ifndef __W25N1XX_H__
 #define __W25N1XX_H__
 
+#include <stdbool.h>
 
 typedef enum {
     W25N1XX_OK,
@@ -11,9 +12,13 @@ typedef enum {
     W25N1XX_EUNCORR,
     W25N1XX_EPARAMS,
     W25N1XX_EPROGRAM,
+    W25N1XX_EBADBLOCK,
 } w25n1xx_status_t;
 
+#define W25N1XX_USE_DMA
+// #define W25N1XX_USE_READBACK
 
+#define W25N1XX_ID                  (uint32_t)(0x00EFAA21)
 
 #define W25N1XX_CMD_JEDEC_ID        0x9F
 #define W25N1XX_CMD_WRITE_ENABLE    0x06
@@ -30,7 +35,7 @@ typedef enum {
 #define W25N1XX_CMD_READ_DATA       0x03
 
 #define W25N1XX_CMD_PROGRAM_EXECUTE     0x10
-#define W25N1XX_CMD_LOAD_PROGRAM_DATA   0x84
+#define W25N1XX_CMD_LOAD_PROGRAM_DATA   0x02
 
 
 #define W25N1XX_SR1_SRP1            (1 << 0)
@@ -58,18 +63,24 @@ typedef enum {
 #define W25N1XX_ECC_2BIT_ERR         0x20
 #define W25N1XX_ECC_2BIT_ERR_MULTI   0x30
 
-
+#define W25N1XX_BLOCK_NUMBER         1024
 #define W25N1XX_PAGE_SHIFT           11     /* Page Size: 2048 + 112 byte */
-#define W25N1XX_PAGE_MEM_SIZE        2048
-#define W25N1XX_PAGE_TOL_SIZE        (2048 + 64)
+#define W25N1XX_PAGE_MEM_SIZE        (2048)
+#define W25N1XX_PAGE_SPARE_SIZE      (64)
+#define W25N1XX_PAGE_TOL_SIZE        (W25N1XX_PAGE_MEM_SIZE + W25N1XX_PAGE_SPARE_SIZE)
 
+#define W25N1XX_ADDR(block, page)    (uint32_t)(((((uint32_t)(block) & 0x3FF) << 6) | ((uint32_t)(page) & 0x3F)) << W25N1XX_PAGE_SHIFT) 
 
-void     w25n1xx_init(void);
+void w25n1xx_reset(void);
+void w25n1xx_wait_ready(void);
+void w25n1xx_write_status_register(uint8_t sr_addr, uint8_t reg_val);
+
+w25n1xx_status_t w25n1xx_init(void);
 uint32_t w25n1xx_read_jedec_id(void);
 uint8_t w25n1xx_read_status_register(uint8_t sr_addr);
-void w25n1xx_write_status_register(uint8_t sr_addr, uint8_t reg_val);
-w25n1xx_status_t w25n1xx_block_erase(uint16_t paddr);
+w25n1xx_status_t w25n1xx_block_erase(uint32_t paddr);
 w25n1xx_status_t w25n1xx_page_read(uint32_t paddr, uint16_t caddr, uint8_t *buffer, uint32_t len);
 w25n1xx_status_t w25n1xx_page_write(uint32_t paddr, uint16_t caddr, uint8_t *buffer, uint32_t len);
+w25n1xx_status_t w25n1xx_chip_erase(void);
 
 #endif
