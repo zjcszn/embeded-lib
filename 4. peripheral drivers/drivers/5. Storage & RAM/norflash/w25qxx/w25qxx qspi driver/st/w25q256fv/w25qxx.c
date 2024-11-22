@@ -791,7 +791,6 @@ w25x_status_t w25qxx_reset(void) {
     cmd.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
     cmd.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
     
-    w25qxx_wait_busy();
     status = HAL_QSPI_Command(&qspi_handle, &cmd, 100);
     if (status != HAL_OK) {
         goto error;
@@ -801,6 +800,8 @@ w25x_status_t w25qxx_reset(void) {
     if (status != HAL_OK) {
         goto error;
     }
+
+    w25qxx_wait_busy();     /* fixed by zjcszn, 20241122, reset, then wait bsy flag clear */
 
     w25qxx_mode = W25QXX_MODE_SPI;
     return W25X_OK;
