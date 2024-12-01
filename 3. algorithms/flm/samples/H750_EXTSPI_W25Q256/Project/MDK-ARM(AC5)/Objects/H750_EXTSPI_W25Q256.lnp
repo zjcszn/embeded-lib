@@ -1,0 +1,17 @@
+--cpu Cortex-M7.fp.dp
+".\objects\flashprg.o"
+".\objects\flashdev.o"
+".\objects\bsp.o"
+".\objects\bsp_qspi_w25q256.o"
+".\objects\w25qxx.o"
+".\objects\stm32h7xx_hal.o"
+".\objects\stm32h7xx_hal_rcc.o"
+".\objects\stm32h7xx_hal_gpio.o"
+".\objects\stm32h7xx_hal_qspi.o"
+".\objects\stm32h7xx_hal_cortex.o"
+".\objects\stm32h7xx_ll_gpio.o"
+".\objects\system_stm32h7xx.o"
+--library_type=microlib --strict --scatter ".\Target.lin"
+--diag_suppress L6305 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list ".\Listings\H750_EXTSPI_W25Q256.map" -o .\Objects\H750_EXTSPI_W25Q256.axf
