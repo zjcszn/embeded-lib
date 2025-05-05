@@ -1,5 +1,0 @@
-CompileFlags:
-  CompilationDatabase: >-
-    f:\Repository\embeded-lib\3.
-    algorithms\dsp\CMSIS-DSP-1.15.0\Testing\cmsis_build\out\test\VHT-Corstone-310\Release
-  Add: []
