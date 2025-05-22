@@ -76,6 +76,8 @@ typedef enum {
 #define W25X_Enter4ByteAddress      0xB7
 #define W25X_Exit4ByteAddress       0xE9
 
+#define W25X_GLOBAL_UNLOCK          0x98
+
 #define W25X_SR1_MASK_BUSY          (1 << 0)
 #define W25X_SR1_MASK_WEL           (1 << 1)
 #define W25X_SR2_MASK_QE            (1 << 1)
@@ -97,6 +99,7 @@ w25x_status_t w25qxx_write_enable(uint8_t en);
 
 w25x_status_t w25qxx_read_jedec_id(uint32_t *id);
 w25x_status_t w25qxx_read_unique_id(void);
+w25x_status_t w25qxx_global_unlock(void);
 
 w25x_status_t w25qxx_write_nocheck(uint8_t *pbuf, uint32_t addr, uint32_t size);
 w25x_status_t w25qxx_read(uint8_t *pbuf, uint32_t addr, uint32_t size);
@@ -108,7 +111,6 @@ w25x_status_t w25qxx_wait_busy(void);
 w25x_status_t w25qxx_reset(void);
 w25x_status_t w25qxx_enter_4_byte_address_mode(void);
 w25x_status_t w25qxx_memory_mapped_enable(void);
-void MX_QUADSPI_Init(void);
 
 w25x_status_t w25qxx_block32k_erase(uint32_t addr);
 w25x_status_t w25qxx_block64k_erase(uint32_t addr);
