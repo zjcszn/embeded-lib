@@ -65,9 +65,12 @@ w25x_status_t w25qxx_init(void) {
         w25qxx_hardware_unprotected(0);
     }
 
-    if ((sr3 & 0x02) == 0) {
+    if ((sr3 & 0x06) != 02) {
+        
+        uint8_t sr3_new = (sr3 & ~((uint8_t)0x04)) | (uint8_t)0x02; /* 清除WPS位，置位ADP */
+        
         w25qxx_write_enable(1);
-        w25qxx_write_sr(3, sr3 | 0x02); /* 置位 ADP, 上电进入4byte地址模式 */
+        w25qxx_write_sr(3, sr3_new); /* 置位 ADP, 上电进入4byte地址模式 */
     }
 
     w25qxx_enter_4_byte_address_mode();
@@ -85,6 +88,38 @@ w25x_status_t w25qxx_init(void) {
 
     return W25X_OK;
 }
+
+
+/*
+* @note Not Test Code
+*
+*/
+w25x_status_t w25qxx_global_unlock(void) {
+    HAL_StatusTypeDef status;
+    QSPI_CommandTypeDef cmd;
+    
+    cmd.InstructionMode = (w25qxx_mode == W25QXX_MODE_QPI) ? QSPI_INSTRUCTION_4_LINES : QSPI_INSTRUCTION_1_LINE;
+    cmd.Instruction = W25X_GLOBAL_UNLOCK;
+    cmd.DataMode = QSPI_DATA_NONE;
+    cmd.DummyCycles = 0;
+    cmd.AddressMode = QSPI_ADDRESS_NONE;
+    cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
+
+    cmd.DdrMode = QSPI_DDR_MODE_DISABLE;
+    cmd.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
+    cmd.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
+    
+    status = HAL_QSPI_Command(&qspi_handle, &cmd, 100);
+    if (status == HAL_OK) {
+        return W25X_OK;
+    }
+    
+    log_e("w25qxx global unlock failed, HAL Status = %u", status);
+    return W25X_ERR;
+
+}
+
+
 
 
 w25x_status_t w25qxx_enter_4_byte_address_mode(void) {
