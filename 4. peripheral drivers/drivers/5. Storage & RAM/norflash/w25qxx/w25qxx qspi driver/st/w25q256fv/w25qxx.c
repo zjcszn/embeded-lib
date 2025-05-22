@@ -6,6 +6,7 @@
  * Change Logs:
  * Date           Author       Notes
  * 2020-09-15     whj4674672   first version
+ * 2025-05-22     zjcszn       recoding for w25q256fv
  */
 
 #define LOG_TAG "W25QXX"
