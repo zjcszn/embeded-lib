@@ -64,12 +64,12 @@ uint8_t onewire_read_byte(void) {
     for (int i = 0; i < 8; i++) {
         byte >>= 1;
         gpio_bit_reset(onewire_handle.gpio, onewire_handle.pin);
-        gpio_bit_set(onewire_handle.gpio, onewire_handle.pin);
         dwt_delay_us(2);
         gpio_init(onewire_handle.gpio, GPIO_MODE_IPU, GPIO_OSPEED_50MHZ, onewire_handle.pin);
         dwt_delay_us(10);
         byte |= (gpio_input_bit_get(onewire_handle.gpio, onewire_handle.pin) << 7);
         gpio_init(onewire_handle.gpio, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, onewire_handle.pin);
+		gpio_bit_set(onewire_handle.gpio, onewire_handle.pin);
         dwt_delay_us(50);
     }
     return byte;
