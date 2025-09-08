@@ -303,7 +303,42 @@ FitStatus FitPowerLM(const double* x, const double* y, int n, int max_iter,
         if (x[i] <= 0.0) return FIT_ERROR_NONPOS_X;
         lnx[i] = log(x[i]);
     }
+	
+	
+    // 快速分支判定，线性回归: y = kx+b
+    double Sx = 0, Sy = 0, Sxx = 0, Sxy = 0, Syy = 0;
+    for (int i = 0; i < n; i++) {
+        Sx += x[i];
+        Sy += y[i];
+        Sxx += x[i] * x[i];
+        Sxy += x[i] * y[i];
+    }
+	
+    double mean_y = Sy / n;
+    for (int i = 0; i < n; i++) {
+        double dy = y[i] - mean_y;
+        Syy += dy * dy;
+    }
+	
+    double denom = Sxx * n - Sx * Sx;
+    if (fabs(denom) > 1e-24) {
+        double k = (n * Sxy - Sx * Sy) / denom;
+        double c0 = (Sy - k * Sx) / n;
+        double sse_lin = 0;
+        for (int i = 0; i < n; i++) {
+            double r = y[i] - (k * x[i] + c0);
+            sse_lin += r * r;
+        }
+        if (sse_lin / (Syy + 1e-30) < 1e-12 || sse_lin < 1e-24) {
+            *a_out = k;
+            *b_out = 1.0;
+            *c_out = c0;
+            if (sse_out) *sse_out = sse_lin;
+            return FIT_OK;
+        }
+    }
 
+	/* 三点精准解 */
     if (n == 3) {
         double aa, bb, cc;
         if (SolvePower3Try(x, y, lnx, &aa, &bb, &cc) == 0) {
@@ -376,7 +411,7 @@ FitStatus FitPowerLM(const double* x, const double* y, int n, int max_iter,
             B = B_new;
             C = C_new;
             prev_sse = sse_new;
-            if (rel_sse < 1e-12 || step_norm < tol || rel_sse < 1e-9) {
+            if (rel_sse < 1e-12 || step_norm < tol) {
                 converged = 1;
                 it++;
                 break;
