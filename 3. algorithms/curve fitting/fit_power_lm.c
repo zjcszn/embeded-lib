@@ -1,7 +1,9 @@
 /* power_fit_lm_mcu.c
  *
- * MCU 友好版本：全局 b 搜索 + Brent 精细化 + LM refine
- * 不使用 malloc，所有缓冲区栈分配
+ * MCU 友好版本（改进版）：
+ * - 全局 b 粗搜索 + 自适应细化 + 改进的 Brent 精细化
+ * - LM refine（缓存 exp，中心化 lnx）
+ * - 不使用 malloc，所有缓冲区栈分配
  * 拟合模型：f(x) = a * x^b + c
  */
 
@@ -20,7 +22,8 @@
 #define TOL_BRENT                   (1e-8)
 #define MAX_IT_BRENT                (100)
 #define TOL_3POINT                  (1e-12)
-#define COARSE_SEARCH_POINTS        (21) // 粗搜索点数 (包括端点)
+#define COARSE_SEARCH_POINTS        (21) // 初始粗采样点数
+#define COARSE_REFINE_POINTS        (11) // 在最小点邻域的细化采样点数
 
 /* 日志输出控制 */
 #define LOG_ENABLED 1
@@ -50,7 +53,7 @@ typedef enum
     SOLVE_ERROR_INVALID = -2 // 无效输入
 } SolveStatus;
 
-/* ------------------ 3x3 线性方程求解 ------------------ */
+/* ------------------ 3x3 线性方程求解（带主元） ------------------ */
 static SolveStatus Solve3x3(double A[3][3], double b[3], double x[3])
 {
     for (int i = 0; i < 3; ++i) {
@@ -73,7 +76,6 @@ static SolveStatus Solve3x3(double A[3][3], double b[3], double x[3])
                 A[i][k] = A[pivot][k];
                 A[pivot][k] = tmp;
             }
-
             double tmp_b = b[i];
             b[i] = b[pivot];
             b[pivot] = tmp_b;
@@ -99,21 +101,22 @@ static SolveStatus Solve3x3(double A[3][3], double b[3], double x[3])
     return SOLVE_OK;
 }
 
-/* ------------------ SSE 计算 ------------------ */
-static double SsePowerWithLnx(const double* lnx, const double* x,
-                              const double* y, int n, double a, double b,
-                              double c)
+/* ------------------ SSE 计算（使用中心化 lnx） ------------------ */
+static double SsePowerWithCenteredLnx(const double* lnx_center, const double* x,
+                                      const double* y, int n, double a_local,
+                                      double b, double c)
 {
     double sse = 0.0;
     for (int i = 0; i < n; ++i) {
-        double xb = exp(b * lnx[i]);
+        double xb = exp(b * lnx_center[i]); // 已减均值，数值更稳定
         if (!isfinite(xb)) { return INFINITY; }
 
-        double fi = a * xb + c;
+        double fi = a_local * xb + c;
         if (!isfinite(fi)) { return INFINITY; }
 
         double residual = y[i] - fi;
         sse += residual * residual;
+        if (!isfinite(sse)) { return INFINITY; } // 溢出检测
     }
     return sse;
 }
@@ -140,24 +143,17 @@ static double CalculateSst(const double* y, int n)
 static double CalculateRSquared(double sse, double sst)
 {
     if (sst == 0.0) {
-        // 如果所有y值相同，则R²定义为1（完美拟合）
         return 1.0;
     }
-
     return 1.0 - (sse / sst);
 }
 
-/* ------------------ 固定 b，解析求 a,c ------------------ */
-/*
- * u_buf 优化分析：
- * 这个缓冲区用于存储中间计算结果 exp(b * lnx[i])，避免重复计算。
- * 由于这个计算在循环中被多次使用，使用缓冲区确实可以提高性能。
- * 对于MCU环境，保持当前设计是合理的，因为它避免了动态内存分配。
- */
-static double SseGivenBWithLnxs(const double* lnx, const double* x,
-                                const double* y, int n, double b,
-                                double* u_buf, double* a_out,
-                                double* c_out)
+/* ------------------ 固定 b，解析求 a_local,c（使用已中心化 lnx） ------------------ */
+/* u_buf: 用于缓存 exp(b * lnx_center[i])，避免重复计算 */
+static double SseGivenBCenteredLnx(const double* lnx_center, const double* x,
+                                  const double* y, int n, double b,
+                                  double* u_buf, double* a_local_out,
+                                  double* c_out)
 {
     if (!isfinite(b)) { return INFINITY; }
 
@@ -167,7 +163,7 @@ static double SseGivenBWithLnxs(const double* lnx, const double* x,
     double sum_uu = 0.0, sum_u = 0.0, sum_uy = 0.0, sum_y = 0.0;
 
     for (int i = 0; i < n; ++i) {
-        double ui = exp(b * lnx[i]);
+        double ui = exp(b * lnx_center[i]);
         if (!isfinite(ui)) { return INFINITY; }
 
         u_buf[i] = ui;
@@ -180,119 +176,143 @@ static double SseGivenBWithLnxs(const double* lnx, const double* x,
     double det = sum_uu * n - sum_u * sum_u;
     if (fabs(det) < EPS_DET) { return INFINITY; }
 
-    double a = (sum_uy * n - sum_u * sum_y) / det;
+    double a_local = (sum_uy * n - sum_u * sum_y) / det;
     double c = (sum_uu * sum_y - sum_u * sum_uy) / det;
 
     double sse = 0.0;
     for (int i = 0; i < n; ++i) {
-        double residual = y[i] - (a * u_buf[i] + c);
+        double residual = y[i] - (a_local * u_buf[i] + c);
         sse += residual * residual;
+        if (!isfinite(sse)) { return INFINITY; }
     }
 
-    if (a_out != NULL) { *a_out = a; }
+    if (a_local_out != NULL) { *a_local_out = a_local; }
     if (c_out != NULL) { *c_out = c; }
 
     return sse;
 }
 
-/* ------------------ Brent 方法搜索 b ------------------ */
+/* ------------------ 改进的 Brent（三点实现：x,w,v） ------------------ */
 static void FindBestBByBrent(const double* x, const double* y,
-                             const double* lnx, int n, double b_min,
-                             double b_max, double* best_b, double* best_a,
+                             const double* lnx_center, int n, double b_min,
+                             double b_max, double* best_b, double* best_a_local,
                              double* best_c, double* best_sse)
 {
     double u_buf[MAX_N];
+    int iterator = 0;
 
-    // 自适应粗搜索：在区间内均匀采样多个点
-    double coarse_best = 0.0, coarse_val = INFINITY;
+    // 第一阶段：粗采样（均匀）
+    double coarse_best = b_min;
+    double coarse_val = INFINITY;
     double step = (b_max - b_min) / (COARSE_SEARCH_POINTS - 1);
 
     for (int i = 0; i < COARSE_SEARCH_POINTS; ++i) {
         double bb = b_min + i * step;
-        double val = SseGivenBWithLnxs(lnx, x, y, n, bb, u_buf, NULL, NULL);
+        double val = SseGivenBCenteredLnx(lnx_center, x, y, n, bb, u_buf, NULL, NULL);
         if (val < coarse_val) {
             coarse_val = val;
             coarse_best = bb;
         }
     }
 
-    double a = b_min, b_val = b_max, c = coarse_best, fc = coarse_val;
-    double d = 0.0, e = 0.0;
+    // 第二阶段：在 coarse_best 邻域再细化采样（自适应半宽）
+    double half_width = step * 2.0;
+    double refine_left = coarse_best - half_width;
+    double refine_right = coarse_best + half_width;
+    if (refine_left < b_min) refine_left = b_min;
+    if (refine_right > b_max) refine_right = b_max;
 
-    double fa = SseGivenBWithLnxs(lnx, x, y, n, a, u_buf, NULL, NULL);
-    double fb = SseGivenBWithLnxs(lnx, x, y, n, b_val, u_buf, NULL, NULL);
-
-    int iter;
-    for (iter = 0; iter < MAX_IT_BRENT; ++iter) {
-        double xm = 0.5 * (a + b_val);
-        double tol1 = TOL_BRENT * fabs(c) + 1e-10;
-        double tol2 = 2.0 * tol1;
-
-        if (fabs(c - xm) <= tol2 - 0.5 * (b_val - a)) { break; }
-
-        double p = 0.0, q = 0.0, r_val = 0.0;
-
-        if (fabs(e) > tol1) {
-            r_val = (c - d) * (fc - fb);
-            q = (c - b_val) * (fc - fa);
-            p = (c - b_val) * q - (c - d) * r_val;
-            q = 2.0 * (q - r_val);
-
-            if (q > 0) { p = -p; }
-
-            if (fabs(p) < fabs(0.5 * q * e) &&
-                p > q * (a - c) &&
-                p < q * (b_val - c)) {
-                d = p / q;
-                double u = c + d;
-
-                if (u - a < tol2 || b_val - u < tol2) { d = (xm - c >= 0 ? tol1 : -tol1); }
-            }
-            else {
-                e = (c >= xm ? a - c : b_val - c);
-                d = GOLDEN_RATIO * e;
-            }
-        }
-        else {
-            e = (c >= xm ? a - c : b_val - c);
-            d = GOLDEN_RATIO * e;
-        }
-
-        double u = (fabs(d) >= tol1 ? c + d : c + (d >= 0 ? tol1 : -tol1));
-        double fu = SseGivenBWithLnxs(lnx, x, y, n, u, u_buf, NULL, NULL);
-
-        if (fu <= fc) {
-            if (u >= c) { a = c; }
-            else { b_val = c; }
-            fa = fc;
-            d = e;
-            e = c;
-            c = u;
-            fc = fu;
-        }
-        else {
-            if (u < c) { a = u; }
-            else { b_val = u; }
+    double refine_step = (refine_right - refine_left) / (COARSE_REFINE_POINTS - 1);
+    for (int i = 0; i < COARSE_REFINE_POINTS; ++i) {
+        double bb = refine_left + i * refine_step;
+        double val = SseGivenBCenteredLnx(lnx_center, x, y, n, bb, u_buf, NULL, NULL);
+        if (val < coarse_val) {
+            coarse_val = val;
+            coarse_best = bb;
         }
     }
 
-    LOG_PRINTF("find best b by brent, iter count = %d\r\n", iter);
+    // 现在以 coarse_best 为初始 c，准备执行标准 Brent（三点）
+    double a = b_min;
+    double b = b_max;
+    double xk = coarse_best; // x
+    double w = xk;           // w
+    double v = xk;           // v
+    double fx = SseGivenBCenteredLnx(lnx_center, x, y, n, xk, u_buf, NULL, NULL);
+    double fw = fx;
+    double fv = fx;
 
-    double abest = 0.0, cbest = 0.0;
-    double ssebest = SseGivenBWithLnxs(lnx, x, y, n, c, u_buf, &abest, &cbest);
+    double d = 0.0, e = 0.0;
+    for (iterator = 0; iterator < MAX_IT_BRENT; ++iterator) {
+        double xm = 0.5 * (a + b);
+        double tol1 = TOL_BRENT * fabs(xk) + 1e-10;
+        double tol2 = 2.0 * tol1;
 
-    *best_b = c;
-    *best_a = abest;
-    *best_c = cbest;
+        // 终止条件
+        if (fabs(xk - xm) <= (tol2 - 0.5 * (b - a))) { break; }
+
+        double p = 0.0, q = 0.0, r = 0.0;
+        if (fabs(e) > tol1) {
+            // 拟合抛物线插值（基于 xk,w,v）
+            r = (xk - w) * (fx - fv);
+            q = (xk - v) * (fx - fw);
+            p = (xk - v) * q - (xk - w) * r;
+            q = 2.0 * (q - r);
+            if (q > 0.0) p = -p;
+            q = fabs(q);
+            double min1 = e;
+            if (fabs(p) < fabs(0.5 * q * min1) && p > q * (a - xk) && p < q * (b - xk)) {
+                d = p / q;
+                double u = xk + d;
+                if (u - a < tol2 || b - u < tol2) {
+                    d = (xm - xk >= 0) ? tol1 : -tol1;
+                }
+            } else {
+                e = (xk >= xm) ? (a - xk) : (b - xk);
+                d = GOLDEN_RATIO * e;
+            }
+        } else {
+            e = (xk >= xm) ? (a - xk) : (b - xk);
+            d = GOLDEN_RATIO * e;
+        }
+
+        double u = (fabs(d) >= tol1) ? xk + d : xk + ((d > 0) ? tol1 : -tol1);
+        double fu = SseGivenBCenteredLnx(lnx_center, x, y, n, u, u_buf, NULL, NULL);
+
+        if (fu <= fx) {
+            if (u >= xk) a = xk; else b = xk;
+            v = w; fv = fw;
+            w = xk; fw = fx;
+            xk = u; fx = fu;
+        } else {
+            if (u < xk) a = u; else b = u;
+            if (fu <= fw || w == xk) {
+                v = w; fv = fw;
+                w = u; fw = fu;
+            } else if (fu <= fv || v == xk || v == w) {
+                v = u; fv = fu;
+            }
+        }
+    }
+
+    LOG_PRINTF("find best b by brent, iterator count = %d\r\n", iterator);
+
+    double a_local = 0.0, c_local = 0.0;
+    double ssebest = SseGivenBCenteredLnx(lnx_center, x, y, n, xk, u_buf, &a_local, &c_local);
+
+    *best_b = xk;
+    *best_a_local = a_local;
+    *best_c = c_local;
     *best_sse = ssebest;
 }
 
-/* ------------------ n=3 精确拟合 ------------------ */
-static double FFor3(double b, double lnx1, double lnx2, double lnx3, double r)
+/* ------------------ n=3 精确拟合（使用中心化 lnx） ------------------ */
+/* 保持和原来一样，但使用 lnx_center（即 ln(x)-mean）以提高数值稳定性 */
+static double FFor3Centered(double b, double l1, double l2, double l3, double r)
 {
-    double u = exp(b * lnx1);
-    double v = exp(b * lnx2);
-    double w = exp(b * lnx3);
+    double u = exp(b * l1);
+    double v = exp(b * l2);
+    double w = exp(b * l3);
 
     if (!isfinite(u) || !isfinite(v) || !isfinite(w)) { return NAN; }
 
@@ -302,21 +322,21 @@ static double FFor3(double b, double lnx1, double lnx2, double lnx3, double r)
     return (u - v) / denom - r;
 }
 
-static FitStatus SolvePower3Try(const double* x, const double* y, const double* lnx,
-                                double* a, double* b, double* c)
+static FitStatus SolvePower3TryCentered(const double* x, const double* y, const double* lnx_center,
+                                        const double lnx_mean, double* a_local, double* b, double* c)
 {
     const double x1 = x[0], x2 = x[1], x3 = x[2];
     const double y1 = y[0], y2 = y[1], y3 = y[2];
 
     if (fabs(y1 - y2) < 1e-15 && fabs(y1 - y3) < 1e-15) {
-        *a = 0.0;
+        *a_local = 0.0;
         *b = 1.0;
         *c = y1;
         return FIT_OK;
     }
 
     double r = (y1 - y2) / (y1 - y3);
-    double lnx1_ = lnx[0], lnx2_ = lnx[1], lnx3_ = lnx[2];
+    double l1 = lnx_center[0], l2 = lnx_center[1], l3 = lnx_center[2];
 
     const double samples[] = {
         -50, -20, -10, -5, -2, -1, -0.5, -0.25, 0, 0.25,
@@ -328,8 +348,8 @@ static FitStatus SolvePower3Try(const double* x, const double* y, const double* 
     double fl = 0.0, fr = 0.0;
 
     for (int i = 0; i < ns - 1; ++i) {
-        double flt = FFor3(samples[i], lnx1_, lnx2_, lnx3_, r);
-        double frt = FFor3(samples[i + 1], lnx1_, lnx2_, lnx3_, r);
+        double flt = FFor3Centered(samples[i], l1, l2, l3, r);
+        double frt = FFor3Centered(samples[i + 1], l1, l2, l3, r);
 
         if (!isfinite(flt) || !isfinite(frt)) { continue; }
 
@@ -345,11 +365,11 @@ static FitStatus SolvePower3Try(const double* x, const double* y, const double* 
     if (br_l == -1) { return FIT_ERROR_NO_SOLUTION; }
 
     double left = samples[br_l], right = samples[br_r];
-    int iter;
+    int iterator;
 
-    for (iter = 0; iter < 200; ++iter) {
+    for (iterator = 0; iterator < 200; ++iterator) {
         double mid = 0.5 * (left + right);
-        double fmid = FFor3(mid, lnx1_, lnx2_, lnx3_, r);
+        double fmid = FFor3Centered(mid, l1, l2, l3, r);
 
         if (!isfinite(fmid)) {
             left += 0.25 * (mid - left);
@@ -374,7 +394,7 @@ static FitStatus SolvePower3Try(const double* x, const double* y, const double* 
         if (fabs(right - left) < TOL_3POINT * (1 + fabs(left))) { break; }
     }
 
-    LOG_PRINTF("solve power 3 point, iter count: %d\r\n", iter);
+    LOG_PRINTF("solve power 3 point, iterator count: %d\r\n", iterator);
     double bb = 0.5 * (left + right);
     double u = pow(x1, bb);
     double v = pow(x2, bb);
@@ -384,7 +404,12 @@ static FitStatus SolvePower3Try(const double* x, const double* y, const double* 
     double aa = (y1 - y2) / (u - v);
     double cc = y1 - aa * u;
 
-    *a = aa;
+    // 注意：这里求得的是原始 a（适用于原始 x），需要把它转换成 center 表示 a_local：
+    // 我们用中心化表示，最终要使用 a_local such that:
+    // a_local * exp(b * (lnx - mean)) = a_orig * exp(b * lnx)
+    // => a_local = a_orig * exp(b * mean)
+    double a_local_val = aa * exp(bb * lnx_mean); // 将 a_orig 转成 a_local（以便保持内部一致）
+    *a_local = a_local_val;
     *b = bb;
     *c = cc;
 
@@ -392,14 +417,14 @@ static FitStatus SolvePower3Try(const double* x, const double* y, const double* 
 }
 
 /* ------------------ 主拟合函数 ------------------ */
-FitStatus FitPowerLM(const double* x, const double* y, int n, int max_iter,
+FitStatus FitPowerLM(const double* x, const double* y, int n, int max_iterator,
                      double tol, double* a_out, double* b_out, double* c_out,
-                     double* r_squared_out, int* n_iter_out)
+                     double* r_squared_out, int* n_iterator_out)
 {
     if (x == NULL || y == NULL || a_out == NULL ||
         b_out == NULL || c_out == NULL || n <= 0 || n > MAX_N) { return FIT_ERROR_INVALID_ARG; }
 
-    if (n_iter_out != NULL) { *n_iter_out = 0; }
+    if (n_iterator_out != NULL) { *n_iterator_out = 0; }
 
     double lnx[MAX_N];
     for (int i = 0; i < n; ++i) {
@@ -407,12 +432,19 @@ FitStatus FitPowerLM(const double* x, const double* y, int n, int max_iter,
         lnx[i] = log(x[i]);
     }
 
+    // 计算 lnx 的均值并做中心化，降低数值范围
+    double lnx_mean = 0.0;
+    for (int i = 0; i < n; ++i) lnx_mean += lnx[i];
+    lnx_mean /= n;
+
+    double lnx_center[MAX_N];
+    for (int i = 0; i < n; ++i) lnx_center[i] = lnx[i] - lnx_mean;
+
     // 计算总平方和 SST
     double sst = CalculateSst(y, n);
 
-    // 快速分支判定，线性回归: y = kx+b
+    // 快速分支判定，线性回归: y = kx+b（作为特殊情况）
     double sum_x = 0.0, sum_y = 0.0, sum_xx = 0.0, sum_xy = 0.0;
-
     for (int i = 0; i < n; i++) {
         sum_x += x[i];
         sum_y += y[i];
@@ -431,57 +463,71 @@ FitStatus FitPowerLM(const double* x, const double* y, int n, int max_iter,
             sse_lin += residual * residual;
         }
 
-        if (sse_lin / (sst + 1e-30) < 1e-12 || sse_lin < 1e-24) {
+        // 放宽阈值以避免遗漏明显的线性情形
+        if (sse_lin / (sst + 1e-30) < 1e-8 || sse_lin < 1e-16) {
             *a_out = k;
             *b_out = 1.0;
             *c_out = c0;
-
             if (r_squared_out != NULL) { *r_squared_out = CalculateRSquared(sse_lin, sst); }
-
             return FIT_OK;
         }
     }
 
-    /* 三点精准解 */
+    /* 三点精准解（使用中心化 lnx） */
     if (n == 3) {
-        double aa, bb, cc;
-        FitStatus status = SolvePower3Try(x, y, lnx, &aa, &bb, &cc);
+        double a_local, bb, cc;
+        FitStatus status = SolvePower3TryCentered(x, y, lnx_center, lnx_mean, &a_local, &bb, &cc);
         if (status == FIT_OK) {
-            *a_out = aa;
+            // 将局部 a_local 转换回原始尺度 a_orig = a_local * exp(-b * lnx_mean)
+            double a_orig = a_local * exp(-bb * lnx_mean);
+            *a_out = a_orig;
             *b_out = bb;
             *c_out = cc;
-
-            if (r_squared_out != NULL) {
-                // 三点精确拟合，SSE为0，R²为1
-                *r_squared_out = 1.0;
-            }
-
+            if (r_squared_out != NULL) { *r_squared_out = 1.0; }
             return FIT_OK;
         }
     }
 
-    double A0, B0, C0, S0;
-    FindBestBByBrent(x, y, lnx, n, B_SEARCH_MIN, B_SEARCH_MAX,
-                     &B0, &A0, &C0, &S0);
+    double A_local0, B0, C0, S0;
+    FindBestBByBrent(x, y, lnx_center, n, B_SEARCH_MIN, B_SEARCH_MAX,
+                     &B0, &A_local0, &C0, &S0);
 
-    if (!isfinite(B0) || !isfinite(A0) || !isfinite(C0)) { return FIT_ERROR_OVERFLOW; }
+    if (!isfinite(B0) || !isfinite(A_local0) || !isfinite(C0)) { return FIT_ERROR_OVERFLOW; }
 
-    double A = A0, B = B0, C = C0;
+    double A_local = A_local0, B = B0, C = C0;
     double lambda = 1e-3;
-    double prev_sse = SsePowerWithLnx(lnx, x, y, n, A, B, C);
+    double prev_sse = SsePowerWithCenteredLnx(lnx_center, x, y, n, A_local, B, C);
+    if (!isfinite(prev_sse)) return FIT_ERROR_OVERFLOW;
+
     int it = 0;
     int converged = 0;
 
-    for (it = 0; it < max_iter; ++it) {
+    double u_buf[MAX_N];
+
+    for (it = 0; it < max_iterator; ++it) {
+        // 在每次迭代开始时缓存 u_buf = exp(B * lnx_center[i])
+        int valid_count = 1;
+        for (int i = 0; i < n; ++i) {
+            double ui = exp(B * lnx_center[i]);
+            if (!isfinite(ui)) { valid_count = 0; break; }
+            u_buf[i] = ui;
+        }
+        if (!valid_count) {
+            // 如果 u_buf 无效，缩小步长并继续
+            lambda *= 2.0;
+            if (lambda > 1e20) break;
+            continue;
+        }
+
         double JTJ[3][3] = {{0.0}}, JTr[3] = {0.0};
 
         for (int i = 0; i < n; ++i) {
-            double xb = exp(B * lnx[i]);
-            if (!isfinite(xb)) { continue; }
-
-            double fi = A * xb + C;
+            double xb = u_buf[i]; // 已缓存
+            double fi = A_local * xb + C;
             double residual = y[i] - fi;
-            double Ja = xb, Jb = A * xb * lnx[i], Jc = 1.0;
+            double Ja = xb;
+            double Jb = A_local * xb * lnx_center[i];
+            double Jc = 1.0;
 
             JTJ[0][0] += Ja * Ja;
             JTJ[0][1] += Ja * Jb;
@@ -502,23 +548,23 @@ FitStatus FitPowerLM(const double* x, const double* y, int n, int max_iter,
         double d1 = (fabs(JTJ[1][1]) > 0) ? fabs(JTJ[1][1]) : 1.0;
         double d2 = (fabs(JTJ[2][2]) > 0) ? fabs(JTJ[2][2]) : 1.0;
 
+        // 加上阻尼项
         JTJ[0][0] += lambda * d0;
         JTJ[1][1] += lambda * d1;
         JTJ[2][2] += lambda * d2;
 
         double delta[3] = {0.0};
         double Acpy[3][3];
-
-        for (int r = 0; r < 3; r++) { for (int c = 0; c < 3; c++) { Acpy[r][c] = JTJ[r][c]; } }
+        for (int r = 0; r < 3; r++) for (int c = 0; c < 3; c++) Acpy[r][c] = JTJ[r][c];
 
         SolveStatus solve_status = Solve3x3(Acpy, JTr, delta);
         if (solve_status != SOLVE_OK) {
-            lambda *= 10.0;
+            lambda *= 2.0;
             if (lambda > 1e20) { break; }
             else { continue; }
         }
 
-        double A_new = A + delta[0];
+        double A_new_local = A_local + delta[0];
         double B_new = B + delta[1];
         double C_new = C + delta[2];
 
@@ -527,40 +573,49 @@ FitStatus FitPowerLM(const double* x, const double* y, int n, int max_iter,
         if (B_new < B_CLAMP_MIN) { B_new = B_CLAMP_MIN; }
         if (B_new > B_CLAMP_MAX) { B_new = B_CLAMP_MAX; }
 
-        double sse_new = SsePowerWithLnx(lnx, x, y, n, A_new, B_new, C_new);
+        // 计算 sse_new：注意要使用中心化 lnx
+        double sse_new = SsePowerWithCenteredLnx(lnx_center, x, y, n, A_new_local, B_new, C_new);
+        if (!isfinite(sse_new)) {
+            lambda *= 2.0;
+            if (lambda > 1e20) break;
+            continue;
+        }
+
         double step_norm = sqrt(delta[0] * delta[0] +
             delta[1] * delta[1] +
             delta[2] * delta[2]);
         double rel_sse = fabs(prev_sse - sse_new) / (1.0 + prev_sse);
 
-        if (isfinite(sse_new) && sse_new < prev_sse) {
-            A = A_new;
+        if (sse_new < prev_sse) {
+            // 接受更新，且降低 lambda（更平滑）
+            A_local = A_new_local;
             B = B_new;
             C = C_new;
             prev_sse = sse_new;
 
-            if (rel_sse < 1e-12 || step_norm < tol) {
+            if (rel_sse < 1e-9 || step_norm < tol) {
                 converged = 1;
                 it++;
                 break;
             }
 
-            lambda *= 0.3;
-            if (lambda < 1e-20) { lambda = 1e-20; }
-        }
-        else {
-            lambda *= 10.0;
+            lambda *= 0.7;
+            if (lambda < 1e-20) lambda = 1e-20;
+        } else {
+            // 未改善，增加 lambda
+            lambda *= 2.0;
             if (lambda > 1e20) { break; }
         }
     }
 
-    *a_out = A;
+    // 将本地 a_local 转换回原始尺度 a_orig = a_local * exp(-B * lnx_mean)
+    double a_final = A_local * exp(-B * lnx_mean);
+    *a_out = a_final;
     *b_out = B;
     *c_out = C;
 
     if (r_squared_out != NULL) { *r_squared_out = CalculateRSquared(prev_sse, sst); }
-
-    if (n_iter_out != NULL) { *n_iter_out = it; }
+    if (n_iterator_out != NULL) { *n_iterator_out = it; }
 
     return converged ? FIT_OK : FIT_PARTIAL;
 }
@@ -569,41 +624,55 @@ FitStatus FitPowerLM(const double* x, const double* y, int n, int max_iter,
 int main(void)
 {
     double a, b, c, r_squared;
-    int iters;
+    int iterators;
     FitStatus ret;
+
+    LOG_PRINTF("================= Fitting Power Test ================= \n");
+
 
     /* Dataset1 */
     const double x1[] = {300.0, 600.0, 2000.0};
-    const double y1[] = {300, 600, 2000};
+    const double y1[] = {300.0, 700.0, 2000.0};
 
-    LOG_PRINTF("Dataset1\n");
-    ret = FitPowerLM(x1, y1, 3, LM_MAX_IT, 1e-12, &a, &b, &c, &r_squared, &iters);
-    LOG_PRINTF("  ret=%d, a=%.12g, b=%.12g, c=%.12g, R^2=%.12g, iters=%d\n",
-               ret, a, b, c, r_squared, iters);
+    LOG_PRINTF("Dataset.1\n");
+    ret = FitPowerLM(x1, y1, sizeof(x1) / sizeof(x1[0]), LM_MAX_IT, 1e-12, &a, &b, &c, &r_squared, &iterators);
+    LOG_PRINTF("\tret=%d, f(x) = %.12g * x ^ %.12g + (%.12g),  R^2 = %.12g, iteratorator count = %d\n", ret, a, b, c, r_squared, iterators);
 
     for (int i = 0; i < sizeof(x1) / sizeof(x1[0]); i++) {
         double fi = a * pow(x1[i], b) + c;
-        LOG_PRINTF("    x=%.0f, y=%.12f, f=%.12f, r=%.12f\n",
-                   x1[i], y1[i], fi, y1[i] - fi);
+        LOG_PRINTF("\t\tx = %.6f, y = %.6f, f(x) = %.12f, r = %.12f\n", x1[i], y1[i], fi, y1[i] - fi);
     }
 
+    LOG_PRINTF("\r\n");
     /* Dataset2 */
     const double x2[] = {300.0, 600.0, 800.0, 2000.0};
-    const double y2[] = {
-        -0.005904406213615, -0.002741179358446,
-        -0.002156558016386, -0.000645620903348
-    };
+    const double y2[] = {-0.005904406213615, -0.002741179358446, -0.002156558016386, -0.000645620903348};
 
-    LOG_PRINTF("Dataset2:\n");
-    ret = FitPowerLM(x2, y2, 4, LM_MAX_IT, 1e-12, &a, &b, &c, &r_squared, &iters);
-    LOG_PRINTF("  ret=%d, a=%.12g, b=%.12g, c=%.12g, R^2=%.12g, iters=%d\n",
-               ret, a, b, c, r_squared, iters);
+    LOG_PRINTF("Dataset.2\n");
+    ret = FitPowerLM(x2, y2, sizeof(x2) / sizeof(x2[0]), LM_MAX_IT, 1e-12, &a, &b, &c, &r_squared, &iterators);
+    LOG_PRINTF("\tret=%d, f(x) = %.12g * x ^ %.12g + (%.12g),  R^2 = %.12g, iteratorator count = %d\n", ret, a, b, c, r_squared, iterators);
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < sizeof(x2) / sizeof(x2[0]); i++) {
         double fi = a * pow(x2[i], b) + c;
-        LOG_PRINTF("    x=%.0f, y=%.12f, f=%.12f, r=%.12f\n",
-                   x2[i], y2[i], fi, y2[i] - fi);
+        LOG_PRINTF("\t\tx = %.6f, y = %.6f, f(x) = %.12f, r = %.12f\n", x2[i], y2[i], fi, y2[i] - fi);
     }
+
+    /* Dataset3 */
+    const double x3[] = {300.0, 600.0, 2000.0};
+    const double y3[] = {300.0, 600.0, 2000.0};
+
+    LOG_PRINTF("Dataset.3\n");
+    ret = FitPowerLM(x3, y3, sizeof(x3) / sizeof(x3[0]), LM_MAX_IT, 1e-12, &a, &b, &c, &r_squared, &iterators);
+    LOG_PRINTF("\tret=%d, f(x) = %.12g * x ^ %.12g + (%.12g),  R^2 = %.12g, iteratorator count = %d\n", ret, a, b, c, r_squared, iterators);
+
+    for (int i = 0; i < sizeof(x3) / sizeof(x3[0]); i++) {
+        double fi = a * pow(x3[i], b) + c;
+        LOG_PRINTF("\t\tx = %.6f, y = %.6f, f(x) = %.12f, r = %.12f\n", x3[i], y3[i], fi, y3[i] - fi);
+    }
+
+
+    LOG_PRINTF("======================= End ======================= \n");
+
 
     return 0;
 }
