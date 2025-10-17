@@ -3,7 +3,7 @@ CANopenNode
 
 CANopenNode is free and open source CANopen protocol stack.
 
-CANopen is the internationally standardized (EN 50325-4) ([CiA301](http://can-cia.org/standardization/technical-documents)) higher-layer protocol for embedded control system built on top of CAN. For more information on CANopen see http://www.can-cia.org/
+CANopen is the internationally standardized (EN 50325-4) ([CiA301](https://www.can-cia.org/cia-groups/technical-documents)) higher-layer protocol for embedded control system built on top of CAN. For more information on CANopen see http://www.can-cia.org/
 
 CANopenNode is written in ANSI C in object-oriented way. It runs on different microcontrollers, as standalone application or with RTOS.
 
@@ -17,19 +17,19 @@ This is version 4 of CANopenNode with new Object Dictionary implementation. For 
 Characteristics
 ---------------
 ### CANopen
- - [Object Dictionary](https://www.can-cia.org/can-knowledge/canopen/device-architecture/) offers clear and flexible organisation of any variables. Variables can be accessed directly or via read/write functions.
- - [NMT](https://www.can-cia.org/can-knowledge/canopen/network-management/) slave to start, stop, reset device. Simple NMT master.
- - [Heartbeat](https://www.can-cia.org/can-knowledge/canopen/error-control-protocols/) producer/consumer error control for monitoring of CANopen devices. An older alternative, 'node guarding', is also available.
- - [PDO](https://www.can-cia.org/can-knowledge/canopen/pdo-protocol/) for broadcasting process data with high priority and no protocol overhead. Variables from Object Dictionary can be dynamically mapped to the TPDO, which is then transmitted according to communication rules and received as RPDO by another device.
- - [SDO](https://www.can-cia.org/can-knowledge/canopen/sdo-protocol/) server enables expedited, segmented and block transfer access to all Object Dictionary variables inside CANopen device.
- - [SDO](https://www.can-cia.org/can-knowledge/canopen/sdo-protocol/) client can access any Object Dictionary variable on any CANopen device inside the network.
- - [Emergency](https://www.can-cia.org/can-knowledge/canopen/special-function-protocols/) message producer/consumer.
- - [Sync](https://www.can-cia.org/can-knowledge/canopen/special-function-protocols/) producer/consumer enables network synchronized transmission of the PDO objects, etc.
- - [Time-stamp](https://www.can-cia.org/can-knowledge/canopen/special-function-protocols/) producer/consumer enables date and time synchronization in millisecond resolution.
- - [LSS](https://www.can-cia.org/can-knowledge/canopen/cia305/) CANopen node-id and bitrate setup, master and slave, LSS fastscan.
- - [CANopen gateway](https://www.can-cia.org/can-knowledge/canopen/cia309/), CiA309-3 Ascii command interface for NMT master, LSS master and SDO client.
- - CANopen Safety, EN 50325-5, CiA304, "PDO like" communication in safety-relevant networks
- - [CANopen Conformance Test Tool](https://www.can-cia.org/services/test-center/conformance-test-tool/) passed.
+ - [Object Dictionary](https://www.can-cia.org/can-knowledge/canopen-internal-device-architecture/) offers clear and flexible organisation of any variables. Variables can be accessed directly or via read/write functions.
+ - [NMT](https://www.can-cia.org/can-knowledge/network-management/) slave to start, stop, reset device. Simple NMT master.
+ - [Heartbeat](https://www.can-cia.org/can-knowledge/error-control-protocols) producer/consumer error control for monitoring of CANopen devices. An older alternative, 'node guarding', is also available.
+ - [PDO](https://www.can-cia.org/can-knowledge/pdo-protocol/) for broadcasting process data with high priority and no protocol overhead. Variables from Object Dictionary can be dynamically mapped to the TPDO, which is then transmitted according to communication rules and received as RPDO by another device.
+ - [SDO](https://www.can-cia.org/can-knowledge/sdo-protocol/) server enables expedited, segmented and block transfer access to all Object Dictionary variables inside CANopen device.
+ - [SDO](https://www.can-cia.org/can-knowledge/sdo-protocol/) client can access any Object Dictionary variable on any CANopen device inside the network.
+ - [Emergency](https://www.can-cia.org/can-knowledge/special-function-protocols/) message producer/consumer.
+ - [Sync](https://www.can-cia.org/can-knowledge/special-function-protocols/) producer/consumer enables network synchronized transmission of the PDO objects, etc.
+ - [Time-stamp](https://www.can-cia.org/can-knowledge/special-function-protocols/) producer/consumer enables date and time synchronization in millisecond resolution.
+ - [LSS](https://www.can-cia.org/can-knowledge/cia-305-layer-setting-services-lss/) CANopen node-id and bitrate setup, master and slave, LSS fastscan.
+ - [CANopen gateway](https://www.can-cia.org/can-knowledge/cia-309-series-accessing-canopen-via-tcp/), CiA309-3 Ascii command interface for NMT master, LSS master and SDO client.
+ - [CANopen Safety](https://standards.globalspec.com/std/1284438/en-50325-5), EN 50325-5, CiA304, "PDO like" communication in safety-relevant networks
+ - [CANopen Conformance Test Tool](https://www.can-cia.org/services/canopen-conformance-test-tool/) passed.
 
 ### Other
  - [Suitable for 16-bit microcontrollers and above](#device-support)
@@ -57,7 +57,7 @@ Documentation, support and contributions
 ----------------------------------------
 All code is documented in the source header files. Some additional documents are in `doc` directory.
 
-To generate complete html documentation, run [doxygen](http://www.doxygen.nl/) in the project base directory: `sudo apt install doxygen graphviz pdf2svg; doxygen > /dev/null`
+To generate complete html documentation, run [doxygen](https://www.doxygen.nl/index.html) in the project base directory: `sudo apt install doxygen graphviz pdf2svg; doxygen > /dev/null`
 
 Complete generated documentation is also available online: https://canopennode.github.io
 
@@ -65,10 +65,9 @@ Tutorial, demo device and tests are available in [CANopenDemo](https://github.co
 
 Report issues on https://github.com/CANopenNode/CANopenNode/issues
 
-Older discussion group is on Sourceforge: http://sourceforge.net/p/canopennode/discussion/387151/
+Contributions are welcome. Best way to contribute your code is to fork a project, modify it and then send a pull request. Please follow the [Recommended C style and coding rules](https://github.com/MaJerle/c-code-style), use .clang-format file for automatic code formatting.
 
-Contributions are welcome. Best way to contribute your code is to fork a project, modify it and then send a pull request. Please follow the [Recommended C style and coding rules](https://github.com/MaJerle/c-code-style), like indentation of 4 spaces, etc. There is also a `codingStyle` file with example.
-
+The CANopenNode files conform to the [MISRA C:2012](https://www.misra.org.uk) guidelines, with some noted exceptions, as indicated in [MISRA.md](MISRA.md).
 
 CANopenNode flowchart
 ---------------------
@@ -137,7 +136,7 @@ File structure
    - **crc16-ccitt.h/.c** - Calculation of CRC 16 CCITT polynomial.
  - **303/** - CANopen Recommendation
    - **CO_LEDs.h/.c** - CANopen LED Indicators
- - **304/** - CANopen Safety (Implemented only in v1.3, not updated for the latest version).
+ - **304/** - CANopen Safety Related Data Object, as specified by EN 50325-5:2010
    - **CO_SRDO.h/.c** - CANopen Safety-relevant Data Object protocol.
    - **CO_GFC.h/.c** - CANopen Global Failsafe Command (producer and consumer).
  - **305/** - CANopen layer setting services (LSS) and protocols.
@@ -168,9 +167,9 @@ File structure
    - **CANopenNode.png** - Little icon.
    - **html** - Directory with documentation - must be generated by Doxygen.
  - **CANopen.h/.c** - Initialization and processing of CANopen objects, suitable for common configurations.
- - **codingStyle** - Example of the coding style.
  - **Doxyfile** - Configuration file for the documentation generator *doxygen*.
  - **LICENSE** - License.
+ - **MISRA.md** - MISRA C:2012 conformance information.
  - **README.md** - This file.
 
 
@@ -178,7 +177,7 @@ Object dictionary editor
 ------------------------
 Object Dictionary is one of the most essential parts of CANopen.
 
-To customize the Object Dictionary it is necessary to use external application: [CANopenEditor](https://github.com/CANopenNode/CANopenEditor). Latest pre-compiled [binaries](https://github.com/CANopenNode/CANopenEditor/archive/refs/heads/build.zip) are also available. Just extract the zip file and run the `EDSEditor.exe`. In Linux it runs with mono, which is available by default on Ubuntu. Just set file permissions to "executable" and then execute the program.
+To customize the Object Dictionary it is necessary to use external application: [CANopenEditor](https://github.com/CANopenNode/CANopenEditor). Binaries are also available there. In Linux it runs with mono, which is available by default on Ubuntu.
 
 In program, in preferences, set exporter to "CANopenNode_V4". Then start new project or open the existing project file.
 

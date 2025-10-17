@@ -1,0 +1,90 @@
+name: unit tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@v3
+
+    - name: lint
+      run: CHECK_FORMAT=1 ./tools/run_clang_format.sh
+      continue-on-error: true
+
+    - name: run unit tests
+      run: bazel test //test:all --test_tag_filters=-vcan
+
+    - name: run coverage
+      run: |
+        bazel coverage \
+        --combined_report=lcov \
+        --instrumentation_filter='^//:(iso14229)$' \
+        --experimental_collect_code_coverage_for_generated_files \
+        //test:test_client_tp_mock \
+        //test:test_server_tp_mock \
+        //test:test_tp_isotp_compliance_mock
+        cp $(bazel info output_path)/_coverage/_coverage_report.dat coverage.lcov
+        sed -E -i 's#^SF:bazel-out/.*/iso14229.c#SF:iso14229.c#' coverage.lcov
+        sed -E -i 's#^SF:bazel-out/.*/iso14229.h#SF:iso14229.h#' coverage.lcov
+        ls -l coverage.lcov
+    
+    - name: upload coverage to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        files: coverage.lcov          # point directly at the Bazel LCOV
+        disable_search: true          # don’t look for anything else
+        name: iso14229-coverage
+        fail_ci_if_error: true
+        token: ${{ secrets.CODECOV_TOKEN }}
+    
+    - name: run ultra_strict
+      run: bazel build --config=x86_64_clang //test:ultra_strict
+    
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@v3
+
+    - name: run unit tests
+      run: bazel test //test:all --verbose_failures --test_output=all 
+
+
+  build-arduino:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@v3
+
+    - name: Install Arduino CLI
+      uses: arduino/setup-arduino-cli@v2
+
+    - name: build
+      run: |
+        arduino-cli core install arduino:samd
+        arduino-cli lib install CAN
+        arduino-cli -b arduino:samd:mkrwifi1010 compile examples/arduino_server/main 
+
+
+  build-esp32:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@v3
+
+    - name: esp-idf build
+      uses: espressif/esp-idf-ci-action@v1
+      with:
+        esp_idf_version: v5.2
+        target: esp32
+        path: 'examples/esp32_server'
