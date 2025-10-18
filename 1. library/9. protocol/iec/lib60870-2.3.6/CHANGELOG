@@ -1,0 +1,243 @@
+Changes to version 2.3.6
+------------------------
+
+- fixed wrong size calculation when decoding FileDirectory(F_DR_TA_1) type (#179)
+- CS104 Slave/CS101 Slave: fixed handling of test commands to be compliant with conformance test case (LIB8705-128)
+- CS104_Connection: fixed possible application crash when application is trying to send a message after connection is closed (LIB8705-127)
+- fixed all unchecked results from calls to CS101_ASDU_getElement/CS101_ASDU_getElementEx (#178) -> fixes vulnerability GHSA-75pr-rr3v-j6px (possible NULL pointer dereference when invalid test command is received by CS 104 server)
+- code format updates
+
+
+Changes to version 2.3.5
+------------------------
+
+- fixed MessageQueue_isAsduAvailable to solve CPU usage problem in CS104 server (LIB8705-123)
+- fixed problem in normalized value handling (LIB8705-122)
+
+Changes to version 2.3.4
+------------------------
+
+- removed internal calls to CS101_ASDU_createFromBuffer to avoid dynamic memory allocation while handling received ASDUs
+- added CS101_ASDU_createFromBuffer to API
+- added ability to change config defines from make command (#169)
+- Time(Linux): always use clock_gettime; cleanup cmake files to remove checks for clock_gettime (#162)
+- Time(windows): fixed - Hal_getMonotonicTimeInMs() doesn't call GetTickCount64 correctly (#163)
+
+Changes to version 2.3.3
+------------------------
+
+- TLS: support for TLS 1.3 (when using mbedtls 3.6)
+- TLS: support to select TLS cipher suites 
+- CS104 slave: check IOA of received commands where IOA is fixed to 0 (LIB8705-101)
+- CS 104 slave: only send S message after receiving STOPDT-ACT when there are unconfirmed outstanding I messages to be compliant with test case IEC 60870-5-604:2016-5.3.2.70 (LIB8705-97)
+- fixed bug in test pattern for TestCommand (I651CL-25)
+- fixed initialization problem in StepCommand_create (I651CL-22)
+- disable support for C_TS_NA_1 for CS104 by default
+- use monotonic time for timers when supported by platform (LIB8705-87)
+- CS101 slave: updated behavior in unbalanced mode when FCB bit did not change (LIB8705-104)
+- fixed - k parameter from user configuration is not used
+- added handling of pending unconfirmed stopped state (LIB8705-83)
+- CS104_Connection: call connection handler only outside of connection lock to avoid deadlocks in user code (LIB8705-62)
+- CS104 connection: fixed potential race condition when connection is closed by peer (#147)
+- CS104 slave: fixed - lock not released in error case (#138)
+- fixed - CS 104 server: invalid read - when MasterConnection_deactivate is called after MasterConnection_deinit (LIB8705-54)
+- fixed - CS 104 server: connection is closed by server when receiving S message in inactive state (LIB8705-55)
+- fixed - CS104_Connection deadlock when sending commands/ASDUs (#134)(LIB8705-52)
+
+
+Changes to version 2.3.2
+------------------------
+
+- TLS support now requires mbedtls 2.28
+- updated HAL layer
+- Added new IEC 62351-3 related TLS features (session resumption, alarms, ...)
+- CS101 balanced link layer: Send request-status-of-link before calling reset-of-remote-link
+- CS101 unbalanced master: Send request-status-of-link before calling reset-of-remote-link, added delay before repeating request-status-of-link
+- added function CS101_ASDU_clone
+- fixed - TLS: configured CRL are ignored (#117)
+- integrated code to serve files
+- other small bug fixes and improvements
+- CS104 client: added connection event when connect failed
+
+
+Changes to version 2.3.1
+------------------------
+
+- TLS support now requires mbedtls 2.16.12
+- CS104 client/master: add support to specify local interface/IP address
+- Macos HAL layer: replaced semaphores by mutex
+- updated HAL layer
+- fix - Possible buffer overflow when formatting IPv6 addresses (#96)
+- fixed - write to queueEntry is not protected (#99)
+- fixed bug in CS101_ASDU_setNumberOfElements (#91)
+- CS104 slave: fixed problem in TEST-FR con timeout handling
+- CS101 master: fixed problem not sending broadcast messages (#88)
+- CS101 slave: fixed potential crash when application layer parameters don't match
+- CS104 server: fixed - receiving I or S frame while in STOPDT should close connection
+
+
+Changes to version 2.3.0
+------------------------
+- CS104 slave: send time sync response only to requesting client (#87)
+- fixed a bug in StatusAndStatusChangeDetection type decoding
+- fixed problem in TLS integration layer
+- fixed wrong type in return value of TestCommandWithCP56Time2a_getCounter
+- CS104 slave: close all open connections when server is stopped in non-treaded mode
+- added QueryLog (F_SC_NB_1) information object type
+- CS 101 slave: release plugin list in destroy function (#80)
+- CS104 client: Added function CS104_Connection_sendTestCommandWithTimestamp to send C_TS_TA_1 test command
+- CS104 slave: added support to handle test command C_TS_TA_1
+- added missing value for IEC60870_QCC_FRZ_COUNTER_RESET (#78)
+- CS104 slave: remove message from queue when confirmation received (see #77)
+- CS104 master: confirm all received I messages before sending STOPDT ACT or closing the connection
+- CS 104 slave: fixed bugs when TLS connection initilization fails (#75)
+- fixed potential memory leak in CS104_Connection_connectAsync
+- fixed wrong argument type of StepCommandWithCP56Time2a_destroy (#74)
+- single point and double point information objects ignore invalid quality flags (#72)
+
+Changes to version 2.2.1
+------------------------
+- CS104 slave: fixed problems in queue handling (#67)
+- added missing return statement in CS101_ASDU_addPayload(#68)
+- CS101_ASDU_addInformationObject now checks for correct object type
+- windows socket driver: fixed - fail to detect peer close when read from socket
+- fixed bug in BitString32 encoding (see #65)
+- fixed - null pointer access when calling CS104_Slave_destroy without server running before (issue #64)
+- added Bitstring32X_createEx functions to keep API backward compatible and allow setting of quality (issue #63)
+
+Changes to version 2.2.0
+------------------------
+- CS 101/104 slave: improved stability when receiving corrupted messages
+- CS 101/104 slave: added plugin interface
+- CS101 master: fixed setting of own address in balanced mode (#51)
+- CS101 slave: fixed bug in queue size initialization
+- Socket HAL (linux/bsd): set default backlog to 2 (see #50)
+- Socket HAL (linux/bsd): Socket_read detects closed socket
+- fixed bugs in file handling messages
+- fixed bug in OA decoding
+- add support to create and handle private or not supported ASDU types
+- CS104 master/slave: improved socket handling
+- CS104 slave: improved memory handling and memory consumption
+- removed CONFIG_CS104_SLAVE_POOL (and related) configuration option
+
+
+Changes to version 2.1.1
+------------------------
+- CS 104 slave: added functions IMasterConnection_getPeerAddress and IMasterConnection_close
+- CS 101/CS 104 slave: set P/N=1 (negative) when sending COT=44 or COT=45
+- improved compatibility with VxWorks
+- CS 104 slave: fixed bug in counter interrogation command handling - free stack allocated memory
+- fixed some include file problems
+
+
+Changes to version 2.1.0
+------------------------
+- CS104 slave: added support for multiple redundancy groups
+- added non-threaded moded for CS 104 slave
+- separated thread and semaphore support for CS 104 slave
+- CS101 unbalanced link layer (master): automatically send request UD 1 when ACD bit is set in received frame
+- added CS101_ASDU_getElementEx function to avoid dynamic memory allocation
+- added support for static ASDU object allocation
+- fixed length check when parsing M_EP_TD_1
+- CS101 unbalanced master: fixed state machine problem with multiple slaves (some responses don't change state and master keeps locked on the slave)
+- optionally compile library without HAL to simply using together with libiec61850
+
+
+Changes to version 2.0.2
+------------------------
+- CS104 slave: added new CS104_ConnectionEventHandler to track connection events
+- CS104 master/slave: added callback handlers to log raw messages
+- CS101 master/slave: added callback handlers to log raw messages
+
+
+Changes to version 2.0.1
+------------------------
+- fixed problems to compile code with C++
+- CS101: added functions to better control link layer addresses
+- CS101 master: added function to modify default link layer parameters
+- link layer: fixed problem in test function handling
+- application layer: allow configuration of maximum size of ASDU
+- CS104 master: added new function CS104_Master_sendProcessCommandEx
+- CS104: fixed timeout T2 problem
+- and other small fixes
+
+
+Changes to version 2.0.0
+------------------------
+- added support for CS 101 balanced and unbalanced serial link layer
+- added serial port abstraction layer and implementations for linux and windows
+- seperated lib60870-C and lib60870.NET into separate projects. Removed all .NET code from the lib60870 main branch
+- added TLS support for CS 104
+- API redesign. Not compatible with old API.
+- updated and extended user guide
+- added doxygen based API reference documentation
+- added more examples
+
+Changes to version 0.9.5
+------------------------
+- lib60870.NET: add support for server allowing multiple clients using the application layer (ServerMode.CONNECTION_IS_REDUNDANCY_GROUP)
+- lib60870-C: add support for server allowing multiple clients using the application layer (new mode where each client connection is a redundancy group)
+- lib60870-C: limit the number of allowed client connection (T104Slave_setMaxOpenConnections)
+- lib60870-C: only accept single active connection in ServerMode == SINGLE_REDUNDANCY_GROUP
+- lib60870-C: enhanced big endian platform detection
+- lib60870-C: CS104 slave/server: added support for ConnectionRequestHandler
+- lib60870-C: Socket_getPeerAddress replaced by Socket_getPeerAddressStatic to avoid dynamic memory allocation
+- lib60870.NET: server support for multiple clients with separate ASDU queues (added ServerMode property)
+- lib60870.NET: server - added MaxOpenConnections property
+- lib60870.NET: server - added ConnectionRequestHandler
+- lib60870.NET: Added RawValue properties to SetpointCommandNormalized and MeasuredValueNormalized, additional constructors with short values
+- lib60870.NET: ScaledValue adds proporty to get/set short value
+- lib60870.NET: fixed tests project dependencies
+- lib60870.NET: fixed bug in BitString32
+- lib60870-C: fixed month bug in CP56Time2a conversion functions
+
+Changes to version 0.9.4
+------------------------
+- added length check when adding information objects to ASDUs --> changed signature of ASDU_addInformationObject
+- lib60870-C: added TARGET=UCLINUX-XPORT to compile for Lantronix XPORT PRO
+- lib60870-C: added CauseOfTransmission_toString function
+- lib60870.NET: fixed bug in parsing of MeasuredValueNormalizedWithoutQuality when SEQ = 1
+- added all missing timeout handling for master and slave side
+- lib60870.NET: added client side ConnectionStatistics
+- lib60870.NET: client socket uses Poll instead of read timeout
+- lib60870.NET: added TestCommand ASDU
+- lib60870.NET: client - some refactoring - added ASDU queue for congestion handling
+- lib60870.NET: fixed constructors for StepPosition information objects (added quality)
+- lib60870.NET: Added missing GetEncodedSize in SinglePointWithCPxxx objects
+- lib60870.NET: added constructors and set properties for CP24Time2a
+- lib60870-C: implemented BufferFrame to enable ASDU and IO encoding to arbitrary memory buffers
+- lib60870-C: slave - replaced ASDU queue by queue consisiting of buffers of encoded ASDUs
+- lib60870.NET: fixed bug in encoding of sequence of information objects
+- lib60870.NET: fixed bug in EventOfProtectionEquipment
+- lib60870.NET: added public constructor for CP16Time2a
+- lib60870.NET: added encoding tests (with maximum number of information objects in ASDU w/wo sequence of information objects)
+- lib60870.NET: fixed bug in StatusAndStatusChangeDetection
+- lib60870.NET: ASDU parser - added header length check
+
+
+Changes to version 0.9.3
+------------------------
+- lib60870.NET: changed visibility of InformationObject.Encode method to internal
+- lib60870.NET: added public Constructor Encoding functions for PackedOutputCircuitInfo, PackedStartEventsOfProtectionEquipment, EventOfProtectionEquipment
+- lib60870.NET/lib60870-C: Added parsing support for sequence for information objects for all data messages in monitoring direction (despite the fact that this should not happen according to IEC 60870-5-101) 
+
+Changes to version 0.9.2
+------------------------
+- lib60870-C: changed to select based read at client side
+- lib60870.NET: extended STARTDT/STOPDT handling
+- lib60870.NET: changed signature of ConnectionHandler
+- lib60870-C: added functions to bind to local IP address and TCP port
+- lib60870-C: default bind to address "0.0.0.0"
+- lib60780-C: fixed StopDT bug
+- lib60870-C: fixed C99 incompatibilities in cpXXtime2a.c
+- lib60870-C: added support for M_EI_NA_1 message (end of initialization)
+- lib60870-C: DoublePointWithCP56Time2a_getFromBuffer corrected parsing of time stamp
+- lib60870-C: SingleCommandWithCP56Time2a_getFromBuffer corrected parsing of time stamp
+- lib60870-C: SinglePointWithCP56Time2a_getFromBuffer corrected parsing of time stamp
+- lib60870-C: StepPositionWithCP56Time2a_getFromBuffer corrected parsing of time stamp
+- lib60870-C: DoublePointWithCP24Time2a_getFromBuffer corrected parsing of time stamp
+- lib60870-C: SinglePointWithCP24Time2a_getFromBuffer corrected parsing of time stamp
+- lib60870-C: corrected parsing of double point information
+- lib60870-C: corrected parsing of some data types when sent as sequence of information objects
+- lib60870-C: client/master: extended STARTDT/STOPDT handling; changed connection handler signature to indicate STARTDT_CON/STOPDT_CON messages
+

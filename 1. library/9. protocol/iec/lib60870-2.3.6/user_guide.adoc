@@ -1,0 +1,847 @@
+= lib60870 - IEC 60870-5-101/104 C Source Code Library User Guide - Version 2.3.6
+Copyright 2020 MZ Automation GmbH
+
+== Introduction
+
+lib60870 is a feature rich and field proven implementation of the IEC 60870-5-101/104 protocol for client (master station) and server (slave or controlled station). The library implements all data types of the IEC 60870-5-101/104 specifications. *lib60870* is implemented in standard C and is compatible with the C99 standard. It is designed to be as easy to use as possible.
+
+The client/server API is strictly asynchronous. You send the requests with non-blocking functions and will have to handle the responses and other events in callback functions.
+
+Here is a list of supported features:
+
+* CS 101 (IEC 60870-5-101) balanced and unbalanced serial modes
+* CS 104 (IEC 60870-5-104) client and server TCP/IP communication
+* CS 104 supports encrypted and authenticated TLS communication
+* CS 104 uses the CS 101 application layer
+* CS 104 slave: support for redundancy groups
+* Master/Client supports sending system commands, process commands, parameter commands, and data messages in reverse direction.
+* Slave/Server supports sending data messages in monitoring direction and commands in reverse direction
+* The list of supported ASDU types can be found in the annex
+* The library supports user defined private ASDU types
+* Plugin interface for library extensions
+
+*NOTE:* CS stands for "companion standard" and specifies variants of the communication protocols and services defined in the IEC 60870-5 standard series.
+
+The library uses an "object-oriented" programming style. It is based on abstract data types (ADT) and functions
+that operate on these data types. In general the actual implementations of the data types (the data structures that hold the data) is hidden from the API user. In almost all cases it is not required (and also not recommended) that the API user accesses these data structures directly.
+
+== Application layer messages
+
+This programming style will be explained by the example of the *_CS101_ASDU_* ADT that is a central part of the
+library API. This data type represents an application layer message of the CS101/CS104 protocols. The abbreviation ASDU stands for "Application Service Data Unit". To create a new ASDU object the _CS101_ASDU_create_ function has to be used as a constructor of the object.
+
+  CS101_ASDU newAsdu = CS101_ASDU_create(alParams, false, CS101_COT_INTERROGATED_BY_STATION,
+        0, 1, false, false);
+
+This function has various parameters to reflect the different properties of an ASDU. Here is the signature of the _CS101_ASDU_create_ function:
+
+[[app-listing]]
+[source, c]
+----
+CS101_ASDU
+CS101_ASDU_create(CS101_AppLayerParameters parameters, bool isSequence, CS101_CauseOfTransmission cot,
+                  int oa, int ca, bool isTest, bool isNegative);
+----
+
+The first parameter if another object of type _CS101_AppLayerParameters_ that represents the application layer parameters that are shared
+between master and slave on agreement. If both side don't have the identical parameters they will not
+be able to understand the ASDUs from the other side.
+
+The second parameter _isSequence_ indicates that the ASDU contains a sequence of consecutive information objects (if _true_) or one or more independent information objects (if _false_). A sequence of consecutive information objects means that the ASDU only contains a single information object address (IOA). The consecutive information objects then have addresses IOA, IOA + 1, IOA + 2, ...
+
+The third parameters indicates the cause of transmission (COT). It is to tell the other side the reason for sending the messages. Possible values could be _CS101_COT_PERIODIC_ for periodic messages, _CS101_COT_SPONTANEOUS_ for spontaneous messages.
+
+The other parameters are _oa_ for the originator address, _ca_ for the common address of the ASDU, _isTest_ to indicate that the message is a test message, and _isNegative_ to indicate that the message is a negative confirmation of another message.
+
+With the handle of the new ASDU object (in our case _newAsdu_) we can call one of the various functions to
+get or set data of the ASDU. For example you can get or set the test flag values with the _CS101_ASDU_isTest_ or _CS101_ASDU_setTest_ functions. The first parameter of these functions is always the handle of the ASDU object.
+
+  bool isTest = CS101_ASDU_isTest(newAsdu);
+
+An important function to create usable ASDU objects is the _CS101_ASDU_addInformationObject_ functions. With this function you can add information object instances to the ASDU.
+
+[[app-listing]]
+[source, c]
+----
+InformationObject io = (InformationObject) MeasuredValueScaled_create(NULL, 100, -1,
+                       IEC60870_QUALITY_GOOD);
+
+CS101_ASDU_addInformationObject(newAsdu, io);
+----
+
+This function can be called multiple times to add more information objects to the ASDU object. It has a boolean return values that indicates if the information object has been added successfully (return value _true_). Adding an information object can fail when the ASDU payload is already full. In this case the function will return _false_.
+
+Finally, when the application created an ASDU object and it is no longer needed it has to be released with
+with the _CS101_ASDU_destroy_ function.
+
+  CS101_ASDU_destroy(newAsdu);
+
+== Master (client) side programming
+
+For master side programming the following abstract data types and APIs can be used:
+
+* *CS101_Master* for CS 101 compliant _balanced mode_ and _unbalanced mode_ serial connections.
+* *CS104_Connection* for a CS 104 compliant TCP/IP connection.
+
+
+=== Create a connection to a CS 104 server
+
+Since an IEC 60870-5-104 connection is based on a TCP client/server connection the connection will be established by the client(master). The server(slave or outstation) is usually passively waiting for connections.
+
+A new connection is simple created by calling a the _CS104_Connection_create_ function of the CS104_Connection type:
+
+  CS104_Connection con = CS104_Connection_create("127.0.0.1", 2404);
+
+This creates a new CS104_Connection object that is ready to connect to the server. The parameters are the hostname or IP address of the server and the TCP/IP port (usually 2404). For the port parameter you can also
+set -1 to use the default port.
+
+After the connection object is created you can now simply call the _CS104_Connection_connect_ function to connect to the server:
+
+  CS104_Connection_connect(con);
+
+The parameter _con_ is the reference to the connection object created above.
+
+When the connection has been established correctly you can use the connection object to send commands and receive data.
+
+When you finished using the connection object you have to call
+
+  CS104_Connection_destroy(con);
+
+To release all resources allocated by the object. After using the _destroy_ function you cannot use any
+functions with the _con_ reference!
+
+=== Preparing a CS 101 connection to one or more slaves
+
+CS 101 provides two link layer modes for master/slave connections.
+
+*Balanced mode* supports communication between a single master and a single slave using a
+dedicated serial line. This mode is "balanced" in the sense that both ends can spontaneously
+send messages at any time.
+
+*Unbalanced mode* supports communication between a single master and multiple slaves on a
+serial bus. Each slave is addressed by its unique link layer address. Slaves are not allowed
+to send messages spontaneously. They only respond following a request from the master.
+The master can address multiple slaves at once by using a broadcast address.
+
+==== Configuring the serial port
+
+For both modes first the serial port has to be configured and initialized. The following
+code shows an example how to prepare the serial port for usage with the library:
+
+[[app-listing]]
+[source, c]
+----
+  SerialPort port = SerialPort_create("/dev/ttsS0", 9600, 8, 'E', 1);
+----
+
+==== Create and use a new unbalanced master instances
+
+For balanced and unbalanced communication modes the *CS101_Master* type has to be used.
+
+The following code creates a new unbalanced master instance using the serial port
+defined above. The _CS101_Master_setASDUReceivedHandler_ function provides a callback handler for received ASDUs. The _CS101_Master_addSlave_ function will create a new slave specific state machine to handle all communication with the slave with link layer address 1.
+
+[[app-listing]]
+[source, c]
+----
+CS101_Master master = CS101_Master_create(port, NULL, NULL, IEC60870_LINK_LAYER_UNBALANCED);
+
+CS101_Master_setASDUReceivedHandler(master, asduReceivedHandler, NULL);
+
+CS101_Master_addSlave(master, 1);
+----
+
+The link layer parameters and application layer parameters are optional parameters. If not set default instances of the parameter objects are created and used. The
+parameters can also be modified later.
+
+Before sending any command or other request to a specific slave the slave address has to be set with the _CS101_Master_useSlaveAddress_ function.
+
+[[app-listing]]
+[source, c]
+----
+CS101_Master_useSlaveAddress(master, 1);
+CS101_Master_sendProcessCommand(master, CS101_COT_ACTIVATION, 1, sc);
+----
+
+==== Balanced master
+
+The balanced master is created the same way. Just the link layer mode parameter is different. The _CS101_Master_useSlaveAddress_ is used to set the slave address. In
+the balanced master case it has only to be set one time, as there exists only
+
+[[app-listing]]
+[source, c]
+----
+CS101_Master master = CS101_Master_create(port, NULL, NULL, IEC60870_LINK_LAYER_BALANCED);
+
+CS101_Master_useSlaveAddress(master, 3);
+CS101_Master_setASDUReceivedHandler(master, asduReceivedHandler, NULL);
+----
+
+==== Setting the link layer parameters
+
+Setting the link layer parameters is an optional step. When not explicitly set a default set of parameters will be used for the new master instance. The parameters
+can be given with the constructor _CS101_Master_create_ or modified later.
+
+[[app-listing]]
+[source, c]
+.Example: Disable usage of single char ACKs
+----
+LinkLayerParameters llParams = CS101_Master_getLinkLayerParameters(master);
+llParams->useSingleCharACK = false;
+----
+
+=== Sending requests and receiving responses from the slave
+
+In general an application is concerned with sending application layer messages (ASDUs) to the slave. The master side API supports generic and specialized functions to send messages to the slave. When sending system commands or process commands it is recommended to use the specialized functions because they help to
+create ASDUs that comply to the standards. These specialized functions are explained in the following sections. They exist generally in two variants for CS101 and CS104.
+
+For the general case it is possible to send arbitrary ASDUs by using the _CS101_Master_sendASDU_ or _CS104_Connection_sendASDU_ functions.
+
+For receiving application layer messages the application has to implement the _CS101_ASDUReceivedHandler_ callback.
+
+[[app-listing]]
+[source, c]
+.Example for processing received ASDUs in the CS101_ASDUReceivedHandler
+----
+static bool
+asduReceivedHandler (void* parameter, int address, CS101_ASDU asdu)
+{
+    printf("RECVD ASDU type: %s(%i) elements: %i\n",
+            TypeID_toString(CS101_ASDU_getTypeID(asdu)),
+            CS101_ASDU_getTypeID(asdu),
+            CS101_ASDU_getNumberOfElements(asdu));
+
+    if (CS101_ASDU_getTypeID(asdu) == M_ME_TE_1) {
+
+        printf("  measured scaled values with CP56Time2a timestamp:\n");
+
+        int i;
+
+        for (i = 0; i < CS101_ASDU_getNumberOfElements(asdu); i++) {
+
+            MeasuredValueScaledWithCP56Time2a io =
+                    (MeasuredValueScaledWithCP56Time2a) CS101_ASDU_getElement(asdu, i);
+
+            printf("    IOA: %i value: %i\n",
+                    InformationObject_getObjectAddress((InformationObject) io),
+                    MeasuredValueScaled_getValue((MeasuredValueScaled) io)
+            );
+
+            MeasuredValueScaledWithCP56Time2a_destroy(io);
+        }
+    }
+    else if (CS101_ASDU_getTypeID(asdu) == M_SP_NA_1) {
+        printf("  single point information:\n");
+
+        int i;
+
+        for (i = 0; i < CS101_ASDU_getNumberOfElements(asdu); i++) {
+
+            SinglePointInformation io =
+                    (SinglePointInformation) CS101_ASDU_getElement(asdu, i);
+
+            printf("    IOA: %i value: %i\n",
+                    InformationObject_getObjectAddress((InformationObject) io),
+                    SinglePointInformation_getValue((SinglePointInformation) io)
+            );
+
+            SinglePointInformation_destroy(io);
+        }
+    }
+
+    return true;
+}
+----
+
+This callback handler has to be installed with the _CS104_Connection_setASDUReceivedHandler_ or _CS101_Master_setASDUReceivedHandler_ function.
+
+  CS101_Master_setASDUReceivedHandler(master, asduReceivedHandler, NULL);
+
+All callback handler have a generic reference parameter with the name "parameter" in its function signatures. This parameter can be used by the user to provide application specific context information to the callback
+handler. This parameter will be set with the install function of the callback handler (like _CS101_Master_setASDUReceivedHandler_ in the example above). If not used this parameter can be set to _NULL_.
+
+.Master side callback handler types
+[width="90%",cols="n,10,1,1",frame="topbot",options="header"]
+|==========================
+| callback type | event | CS 101 | CS 104
+| CS101_ASDUReceivedHandler | ASDU received but not handled by one of the other callback handlers | + | +
+| IEC60870_LinkLayerStateChangedHandler | link layer state changed event | + | -
+| CS104_ConnectionHandler | CS104 APCI event | - | +
+|==========================
+
+
+=== Sending a read request
+
+The IEC 60870 documents don't recommend this service (cyclical data requests or polling) but it is an easy way to get the required data. You just need to know the common address (CA) and the information object address (IOA) to create the proper request.
+
+  CS104_Connection_sendReadCommand(con, 1 /* CA */, 2001 /* IOA */);
+
+This call is non-blocking. You have to evaluate the response in the _CS101_ASDUReceivedHandler_ callback function.
+
+Typically it is expected that the server response contains only the basic data type without timestamps (that is using the message types for a specific data type that does not contain the timestamps)!
+
+=== Interrogation
+
+It is also possible to request a group of data items from a slave with a single request. On the master (client) side you can simply use the _sendInterrogationCommand_ function of the Connection object:
+
+  CS104_Connection_sendInterrogationCommand (con, CS101_COT_ACTIVATION, /* CA */ 1, /* QOI */ 20);
+
+The client/master side method signature looks like this:
+
+  bool
+  CS104_Connection_sendInterrogationCommand(CS104_Connection self, CS101_CauseOfTransmission cot, int ca, QualifierOfInterrogation qoi)
+
+The parameter ca is the common address (CA) as in the other methods. The parameter qoi is the "Qualifier of interrogation" (QOI). The value "20" (indicating "station interrogation") for the QOI indicates that it is an request for all data points. Other values for QOI will indicate that the client (master) only wants to receive data from a specific interrogation group.
+
+=== Clock synchronization procedure
+
+For the clock synchronization procedure the controlling station (master) sends a C_CS_NA_1 ACT message to the controlled station (slave) containing the current valid time information as a CP56Time2a typed time value. The controlled station has to update its internal time and respond with a C_CS_NA_1 ACT_CON message after all queued time-tagged PDUs have been sent.
+
+Clock synchronization of the controlled station can be done with the _CS104_Connection_sendClockSyncCommand_ function for CS104 or the _CS101_Master_sendClockSyncCommand_ for CS101.
+
+First a CP56Time2a timestamp has to be created and initialized:
+
+  struct sCP56Time2a currentTime;
+  CP56Time2a_createFromMsTimestamp(&currentTime, Hal_getTimeInMs());
+  CS104_Connection_sendClockSyncCommand(con, 1 /* CA */, &currentTime);
+
+Or when using dynamic memory allocation and CS 101:
+
+  CP56Time2a currentTime = CP56Time2a_createFromMsTimestamp(NULL, Hal_getTimeInMs());
+  CS101_Master_sendClockSyncCommand(master, 1 /* CA */, currentTime);
+
+*NOTE*: The _Hal_getTimeInMs_ function is platform independent way to get the current time
+as milliseconds since 00:00:00 1. January 1970 UTC. You can also use your own function to get
+the time.
+
+=== Command procedures
+
+Commands are used to set set points, parameters or trigger some actions at the controlled station.
+
+The following command types (data types are available for commands):
+
+* C_SC (single command) - to control binary data (switch...)
+* C_DC (double command) - to control binary data with transition state (moving switch...)
+* S_RC (step position command) - to control a step position
+* S_SE (setpoint command) - to control a set point (scaled value, normalized value, floating point values) - may also be used to set parameters, alarm limits etc.
+
+These command types are also available in a version with a time tag (CP56TIme2a).
+
+There are two different command procedures available. The *direct operate* command procedure and the *select before operate* command procedure.
+
+To send a command for the direct operate command procedure you have to send an ACTIVATION APDU to the controlled station.
+
+[[app-listing]]
+[source, c]
+.Send a process command to the controlled station
+----
+
+  InformationObject sc = (InformationObject)
+        SingleCommand_create(NULL, 5000, true, false, 0);
+
+  CS101_Master_sendProcessCommand(master, CS101_COT_ACTIVATION, 1, sc);
+
+  InformationObject_destroy(sc);
+----
+
+The constructor of SingleCommand data type has the following signature:
+
+[[app-listing]]
+[source, c]
+----
+  SingleCommand
+  SingleCommand_create(SingleCommand self, int ioa, bool command, bool selectCommand, int qu);
+----
+
+In order to send a direct operate command the _selectCommand_ parameter should be false. The qualifier (_qu_) should in general be set to 0.
+
+For *select before operate* the command has to be sent with the _selectCommand_ parameter set to true to select the control output. In the next step an additional command with _selectCommand_ set to false has to be sent to cause the actual command execution.
+
+If the command has been successful the outstation will answer with an ACT_CON response message with the _negative flag_ not set. In case the outstation cannot execute the command it will also answer with an ACT_CON response but with the _negative flag_ set. You can check if this flag is set with the _CS101_ASDU_isNegative_ function used with the received _CS101_ASDU_ instance.
+
+For a CS 104 master a command can be sent the same way by using the _CS104_Master_sendProcessCommandEx_ function.
+
+
+== Slave (server) side programming
+
+=== CS104 (TCP/IP) Server configuration and setup
+
+To configure and setup an IEC 60870-5-104 server/slave an instance of the _CS104_Slave_ data type is required.
+
+  CS104_Slave slave = CS104_Slave_create(100, 100);
+
+After the server instance is created it can be configured
+
+=== CS104 Server mode
+
+The server provides three different modes concerning the support of redundant connections and event queue handling:
+
+The default mode (_CS104_MODE_SINGLE_REDUNDANCY_GROUP_) allows only a *single active client connection*. An active client connection is a connection
+where ASDUs (application data units) are sent. All other connections are only standby connections that don't send application layer data.
+There is a single queue for events. Events are also stored when no client is connected or when no connection is active.
+
+
+The second mode (_CS104_MODE_CONNECTION_IS_REDUNDANCY_GROUP_) allows *multiple active client connections*. Every connection has its own event queue.
+The event queue will be deleted when the client connection is closed. This mode can be used when more than one client has to access the
+application data. This mode is easy to use. But the drawback of this mode is that events are lost when no client is connected.
+
+The third mode (_CS104_MODE_MULTIPLE_REDUNDANCY_GROUPS_) allows *multiple active client connections* while preserving events when no client is
+connected. In this mode clients can be assigned to specific redundancy groups. The assignment is based on the IP address of the client.
+A redundancy group can have multiple simultaneous connections but only one of these connections can be active. The number of activated
+connections is restricted by the number of redundancy groups. Each redundancy group has a dedicated event queue.
+
+
+The server mode can be set with the _CS104_Slave_setServerMode_ function:
+
+  CS104_Slave_setServerMode(slave, CS104_MODE_MULTIPLE_REDUNDANCY_GROUPS);
+
+=== CS104: Defining multiple redundancy groups
+
+Redundancy groups only have to be created explicitly when using the servermode _CS104_MODE_MULTIPLE_REDUNDANCY_GROUPS_. You can assign multiple
+IP addresses to a redundancy group. Incoming connections from one of these IP addresses will then automatically be assigned to this specific
+redundancy group.
+
+When a redundancy group has no assigned IP address it works as a "catch all" group. This means that all incoming connections that
+are not assigned to one of the other groups will end up in this group.
+
+[[app-listing]]
+[source, c]
+.Example how to define multipe redundancy groups
+----
+CS104_Slave_setServerMode(slave, CS104_MODE_MULTIPLE_REDUNDANCY_GROUPS);
+
+CS104_RedundancyGroup redGroup1 = CS104_RedundancyGroup_create("red-group-1");
+CS104_RedundancyGroup_addAllowedClient(redGroup1, "192.168.2.9");
+
+CS104_RedundancyGroup redGroup2 = CS104_RedundancyGroup_create("red-group-2");
+CS104_RedundancyGroup_addAllowedClient(redGroup2, "192.168.2.223");
+CS104_RedundancyGroup_addAllowedClient(redGroup2, "192.168.2.222");
+
+CS104_RedundancyGroup redGroup3 = CS104_RedundancyGroup_create("catch-all");
+
+CS104_Slave_addRedundancyGroup(slave, redGroup1);
+CS104_Slave_addRedundancyGroup(slave, redGroup2);
+CS104_Slave_addRedundancyGroup(slave, redGroup3);
+----
+
+=== CS101 (serial) slave configuration and setup
+
+Similar to the master side the CS101 slave side can also be configured for one of the two link layer modes (_balanced_ or _unbalanced_). A CS101 slave is represented by a _CS101_SLave_ object.
+
+Before a _CS101_Slave_ object can be created a _SerialPort_ object is required. The _SerialPort_ object
+represents the serial interface and its configuration.
+
+  SerialPort port = SerialPort_create(serialPort, 9600, 8, 'E', 1);
+
+The created _SerialPort_ object is required for the _CS101_Slave_create_ function:
+
+  CS101_Slave slave = CS101_Slave_create(port, NULL, NULL, IEC60870_LINK_LAYER_UNBALANCED);
+
+This function has the following signature:
+
+[[app-listing]]
+[source, c]
+----
+CS101_Slave
+CS101_Slave_create(SerialPort serialPort, LinkLayerParameters llParameters, CS101_AppLayerParameters alParameters, IEC60870_LinkLayerMode linkLayerMode)
+----
+
+Optionally the link layer parameters and application layer parameters can be specified. If the
+default values should be used these parameters can be skipped (set to _NULL_). The last parameter specifies
+if the _balanced_ or _unbalanced_ mode is used.
+
+For the serial slave it is also required to set a link layer address:
+
+  CS101_Slave_setLinkLayerAddress(slave, 1);
+
+=== Setting the callback handler functions
+
+Before starting or running the server it is recommended to set the callback functions to
+handle slave events. The following callback handler types are available (please the the API
+reference manual for function signature details). Some of them are only available for CS 104 servers and some only for CS101 slaves.
+
+.Slave side callback handler types
+[width="90%",cols="n,10,1,1",frame="topbot",options="header"]
+|==========================
+| callback type | event | CS 101 | CS 104
+| CS101_InterrogationHandler | interrogation requests | + | +
+| CS101_CounterInterrogationHandler | counter interrogation requests | + | +
+| CS101_ReadHandler | read requests for single information objects | + | +
+| CS101_ClockSynchronizationHandler | clock synchronization message received | + | +
+| CS101_ResetProcessHandler | reset process request received | + | +
+| CS101_DelayAcquisitionHandler | delay acquisition request received | + | -
+| CS101_ASDUHandler | ASDU received but not handled by one of the other callback handlers | + | +
+| CS101_ResetCUHandler | a link layer message of type reset CU (communication unit) has been received | + | -
+| CS104_ConnectionRequestHandler | a new TCP/IP client tries to connect | - | +
+|==========================
+
+[[app-listing]]
+[source, c]
+.Setting some callback functions for the CS101 slave
+----
+/* set the callback handler for the clock synchronization command */
+CS101_Slave_setClockSyncHandler(slave, clockSyncHandler, NULL);
+
+/* set the callback handler for the interrogation command */
+CS101_Slave_setInterrogationHandler(slave, interrogationHandler, NULL);
+
+/* set handler for other message types */
+CS101_Slave_setASDUHandler(slave, asduHandler, NULL);
+
+/* set handler for reset CU (reset communication unit) message */
+CS101_Slave_setResetCUHandler(slave, resetCUHandler, (void*) slave);
+----
+
+=== CS104 Starting/Stopping the server
+
+After the server is configured it can be started with the _CS104_Slave_start_ function. This function
+starts a new background thread that is listening for incoming client connections.
+
+  CS104_Slave_start(slave);
+
+To deactivate the IEC 60870-5-104 service the server can be stopped with the _CS104_Slave_stop_ function.
+
+  CS104_Slave_stop(slave);
+
+=== Spontaneous or periodic transmission of messages
+
+For spontaneous or periodic message transmission on the server/slave side the API user has to allocate a _CS101_ASDU_ object that represents a single ASDU, add Information Objects to the ASDU, and finally put the ASDU into the transmission queue. The transmission queue is a FIFO (first in first out) list. If the queue is full the oldest message will be deleted and replaced by the newly added message. Messages will only be sent if the there is an active client connection or working link layer connection. Otherwise the messages will remain in the queue until a connection is activated.
+
+*CS 104:* In the CS 104 slave the queue size is determined by the *maxLowPrioQueueSize* parameter of the *CS104_Slave_create* function. If the _maxLowPrioQueueSize_ parameter is set to zero the queue will always have the size defined with by _CONFIG_SLAVE_MESSAGE_QUEUE_SIZE_. The second parameter *maxHighPrioQueueSize* determines the size of the high priority data queue. Messages that are put into this queue bypass the messages of the low priority queue. The high priority queue is used for request responses in library callback handlers.
+
+The following steps have to be done to send spontaneous or periodic messages:
+
+1. Step: Create a new _CS101_ASDU_ instance (use _CS101_COT_PERIODIC_ for periodic data and _CS101_COT_SPONTANEOUS_ for spontaneous data)
+
+  CS101_ASDU newAsdu = CS101_ASDU_create(alParameters, false, CS101_COT_PERIODIC, 0, 1, false, false);
+
+2. Step: Create a new information object instance containing the data to send
+
+  InformationObject io = (InformationObject) MeasuredValueScaled_create(NULL, 110, scaledValue, IEC60870_QUALITY_GOOD);
+
+3. Step: Add the new information object to the ASDU
+
+  CS101_ASDU_addInformationObject(newAsdu, io);
+
+4. Step: Release the information object memory
+
+  InformationObject_destroy(io);
+
+5. Step: Put the ASDU into the class 2 data queue for transmission
+
+  CS101_Slave_enqueueUserDataClass2(slave, newAsdu);
+
+6. Step: Release the ASDU memory
+
+  CS101_ASDU_destroy(newAsdu);
+
+*NOTE:* For _CS 104_ you have to use the _CS104_Slave_enqueueASDU_ function in step 5:
+
+  CS104_Slave_enqueueASDU(slave, newAsdu);
+
+
+=== Handling of interrogation requests
+
+On the server side you should use the InterrogationHandler callback function to handle the Interrogation request. Depending on the QOI (_Qualifier of interrogation_) value you can return different information objects. For a simple system it is enough to only handle station interrogation requests (QOI = 20). The QOI values 21-36 are used for the interrogation groups (1-16). It is up to the slave implementer to assign information objects to interrogation groups.
+
+According to the specification the server has to respond the ACTIVATION request from the client with the ACT_CON response followed by ASDUs containing the information objects with _CS101_COT_INTERROGATED_BY_STATION_ for a station interrogation or COT that represent the respective interrogation group (e.g. _CS101_COT_INTERROGATED_BY_GROUP_1_ for interrogation group 1). After sending all information objects the server has to send the initial interrogation command message with COT = _CS101_COT_ACTIVATION_TERMINATION_ to indicate that the transmission of the interrogation data is finished.
+
+[[app-listing]]
+[source, c]
+.Example how to implement an interrogation handler
+----
+static bool
+interrogationHandler(void* parameter, IMasterConnection connection, CS101_ASDU asdu, uint8_t qoi)
+{
+    if (qoi == 20) { /* only handle station interrogation */
+
+        CS101_AppLayerParameters alParams = IMasterConnection_getApplicationLayerParameters(connection);
+
+        IMasterConnection_sendACT_CON(connection, asdu, false);
+
+        CS101_ASDU newAsdu = CS101_ASDU_create(alParams, false, CS101_COT_INTERROGATED_BY_STATION,
+                0, 1, false, false);
+
+        InformationObject io = (InformationObject) MeasuredValueScaled_create(NULL, 100, -1, IEC60870_QUALITY_GOOD);
+
+        CS101_ASDU_addInformationObject(newAsdu, io);
+
+        CS101_ASDU_addInformationObject(newAsdu, (InformationObject)
+            MeasuredValueScaled_create((MeasuredValueScaled) io, 101, 23, IEC60870_QUALITY_GOOD));
+
+        CS101_ASDU_addInformationObject(newAsdu, (InformationObject)
+            MeasuredValueScaled_create((MeasuredValueScaled) io, 102, 2300, IEC60870_QUALITY_GOOD));
+
+        InformationObject_destroy(io);
+
+        IMasterConnection_sendASDU(connection, newAsdu);
+
+        CS101_ASDU_destroy(newAsdu);
+
+        IMasterConnection_sendACT_TERM(connection, asdu);
+    }
+    else {
+        IMasterConnection_sendACT_CON(connection, asdu, true);
+    }
+
+    return true;
+}
+----
+
+Inside of the interrogation handler the IMasterConnection interface can be used to send the interrogated data
+back to the client/master. The _CS101_ASDU_ and _InformationObject_ instances created inside the interrogation handler are in the responsibility of the user and have to be released with the appropriate functions (_CS101_ASDU_destroy_ and _InformationObject_destroy_) when they have been allocated dynamically before.
+
+=== Handling of read commands (C_RD_NA_1) ===
+
+The read command C_RD_NA_1(102) can be used by the client/master to read the value of a particular data point in monitoring direction.
+
+The most convenient way to handle read commands at the server/slave side is to implement the callback function type _CS101_ReadHandler_. The read handler can be installed by the _CS104_Slave_setReadHandler_ or _CS101_Slave_setReadHandler_ functions for a CS 104 server or CS 101 slave.
+
+In the read handler you have either to send the same read command but with a COT that indicates an error. Or you have to create the ASDU of the proper type for the data point and send this back to the client/master. When doing the latter you have to use the COT _CS101_COT_REQUEST_ to indicate that the message was caused by a read request.
+
+[[app-listing]]
+[source, c]
+.Simple implementation of a read handler (pseudo code)
+----
+static bool
+readHandler(void* parameter, IMasterConnection connection, CS101_ASDU asdu, int ioa)
+{
+	if (request failed) {
+	   /* send error reponse- e.g. unknown */
+	   CS101_ASDU_setCOT(asdu, CS101_COT_UNKNOWN_CA);
+	   CS101_ASDU_setNegative(asdu, true);
+	   IMasterConnection_sendASDU(connection, asdu);
+	}
+	else {
+	
+		CS101_AppLayerParameters alParams = CS104_Slave_getAppLayerParameters(cs104Slave);
+		
+		sCS101_StaticASDU _asdu;
+		CS101_ADSU newAsdu = CS101_ASDU_initializeStatic(_asdu, alParams, false, CS101_COT_REQUEST,
+		        0, 1, false, false);
+		
+		CS101_ASDU_addInformationObject(newAsdu, io);
+		
+		IMasterConnection_sendASDU(connection, newAsdu);
+	}
+
+   /* return true to indicate that the request ASDU is handled here */
+	return true;   
+}
+----
+
+=== CS104 (TCP/IP) specific issues
+
+==== Server mode
+
+The server provides three different modes:
+
+The default mode (_CS104_MODE_SINGLE_REDUNDANCY_GROUP_) allows only a *single active client connection*. An active client connection is a connection where ASDUs are sent. All other connections are standby connections. There is a single queue for events. Events are also stored when no client is connected or when no connection is active.
+
+The second mode (_CS104_MODE_CONNECTION_IS_REDUNDANCY_GROUP_) allows *multiple active client connections*. Every connection has its own event queue. The event queue will be deleted when the client connection is closed. This mode has to be used when more then one client has to access the application data.
+
+The third mode (_CS104_MODE_MULTIPLE_REDUNDANCY_GROUPS_) is the most flexible mode and allows to define specific _redundancy groups_. These redundany groups are groups of clients that share the same event queue. For each redundancy group there is a seperate event queue instance.
+
+The server mode can be set with the _CS104_Slave_setServerMode_ function.
+
+      CS104_Slave_setServerMode(slave, CS104_MODE_CONNECTION_IS_REDUNDANCY_GROUP);
+
+==== Restrict the number of client connections
+
+The number of clients can be restricted with the _CS104_Slave_setMaxOpenConnections_ function.
+
+  CS104_Slave_setMaxOpenConnections(slave, 2);
+
+In this case the server will only allow two concurrent client connections.
+
+==== Setting local port and IP address
+
+The default TCP port for IEC 60870-5-104 is 2404. The port can be changed with the _CS104_Slave_setLocalPort_ function.
+
+  CS104_Slave_setLocalPort(slave, 2405);
+
+By default the server listens to all local IP addresses. With the _CS104_Slave_setLocalAddress_ function it is possible to restrict the server to listen to a single local IP address.
+
+  CS104_Slave_setLocalAddress(slave, "192.168.1.50");
+
+With this setting the CS104 server will only listen on the local interface with the assigned IP address 192.168.1.50.
+
+==== Set a connection request handler to restrict the access and track connections
+
+The _CS104_ConnectionRequestHandler_ can be used to restrict the access to the server. With the return value the application can allow or deny the connection attempts of a client.
+
+A _CS104_ConnectionRequestHandler_ can be set with the _CS104_Slave_setConnectionRequestHandler_ function. The second parameter is an arbitrary user provided object that will be passed to the handler when it is called. If not needed it can be set to _NULL_.
+
+  CS104_Slave_setConnectionRequestHandler(slave, connectionRequestHandler, NULL);
+
+In the handler you can optionally check the client IP address against a whitelist of allowed clients or implement a blacklist.
+
+[[app-listing]]
+[source, c]
+.Example how to implement a ConnectionRequestHandler
+----
+static bool connectionRequestHandler(void* parameter, const char* ipAddress)
+{
+  /* Allow only known IP addresses! */
+  /* You can implement your allowed client whitelist here */
+  if (strcmp(ipAddress, "127.0.0.1") == 0) {
+    return true;
+  else
+    return false;
+}
+----
+
+
+
+==== Create a secure connection with TLS
+
+The CS 104 standard can also be used with TLS to realize secure and authenticated connections.
+
+In order to use TLS, the related parameters, certificates, and private keys have to be configured.
+
+The configuration is stored in a _TLSConfiguration_ object. A new configuration object can be created with the _TLSConfiguration_create_ function.
+
+[[app-listing]]
+[source, c]
+.Example how to create a CS 104 slave with TLS support
+----
+TLSConfiguration tlsConfig = TLSConfiguration_create();
+
+TLSConfiguration_setChainValidation(tlsConfig, false);
+TLSConfiguration_setAllowOnlyKnownCertificates(tlsConfig, true);
+
+TLSConfiguration_setOwnKeyFromFile(tlsConfig, "server-key.pem", NULL);
+TLSConfiguration_setOwnCertificateFromFile(tlsConfig, "server.cer");
+TLSConfiguration_addCACertificateFromFile(tlsConfig, "root.cer");
+
+TLSConfiguration_addAllowedCertificateFromFile(tlsConfig, "client1.cer");
+
+/* create a new slave/server instance */
+CS104_Slave slave = CS104_Slave_createSecure(100, 100, tlsConfig);
+----
+
+== lib60870-C specific topics
+
+=== Debug output
+
+The debug output to the console can be enabled by setting _CONFIG_DEBUG_OUTPUT_ to 1. This will enable the debug output by default. The debug output can be disabled my using the function *Lib60870_enableDebugOutput*. The default implementation of the debug output function will print to the console (using printf). If you need to redirect the output the most easy way would be to change the implementation of the debug output *lib60870_debug_print* function in _lib60870_common.c_.
+
+=== Big endian platforms
+
+The library contains a C header file to determine the platform byte order (_src/inc/internal/platform_endian.h_) when using the GCC compiler. This depends on defines that are provided by the C compiler. On some older big endian platforms like PowerPC or Coldfire depending on the compiler this may fail. You may have to define
+
+  PLATFORM_IS_BIGENDIAN 1
+
+when compiling the library code.
+
+E.g. put
+
+  -DPLATFORM_IS_BIGENDIAN=1
+
+on the GCC command line when the platform byte order is big endian.
+
+=== Configuration options at library compile time
+
+Some configuration options are fixed at compile time of the library code. These options can be found in the file *lib60870_config.h*.
+
+Compile time options include the support for specific CS 104 redundancy modes, support for threads and semaphores (required when the library uses threads), maximum number of TCP connections for CS 104 slave, and others.
+
+== Reference information
+
+=== Supported message types
+
+The library supports the following ASDU (application service data unit) types.
+
+.IEC 60870-5-101/104 message types
+[width="90%",cols="n,10,1,1",frame="topbot",options="header"]
+|===
+| Message type | Description | C | C#
+| M_SP_NA_1(1) | Single point information (BOOLEAN)  | + | +
+| M_SP_TA_1(2) | Single point information (BOOLEAN) with CP24Time2a | + | +
+| M_DP_NA_1(3) | Double point information (ON/OFF/transient)  | + | +
+| M_DP_TA_1(4) | Double point information (ON/OFF/transient) with CP24Time2a  | + | +
+| M_ST_NA_1(5) | Step position information (-64 ... 63, is transient)  | + | +
+| M_ST_TA_1(6) | Step position information (-64 ... 63, is transient) with CP24Time2a | + | +
+| M_BO_NA_1(7) | Bitstring32 (32 bit bitstring)  | + | +
+| M_BO_TA_1(8) | Bitstring32 (32 bit bitstring) with CP24Time2a | + | +
+| M_ME_NA_1(9) | Normalized measured value (-1.0 ... +1.0)  | + | +
+| M_ME_TA_1(10) | Normalized measured value (-1.0 ... +1.0) with CP24Time2a | + | +
+| M_ME_NB_1(11) | Scaled measured value (-32768 ... +32767)  | + | +
+| M_ME_TB_1(12) | Scaled measured value (-32768 ... +32767) with CP24Time2a | + | +
+| M_ME_NC_1(13) | Short measured value (FLOAT32)  | + | +
+| M_ME_TC_1(14) | Short measured value (FLOAT32) with CP24Time2a | + | +
+| M_IT_NA_1(15) | Integrated totals (INT32 with quality indicators)  | + | +
+| M_IT_TA_1(16) | Integrated totals (INT32 with quality indicators) with CP24Time2a | + | +
+| M_EP_TA_1(17) | Event of protection equipment | + | +
+| M_EP_TB_1(18) | Packed start events of protection equipment | + | +
+| M_EP_TC_1(19) | Packed output circuit info | + | +
+| M_PS_NA_1(20) | Packed single point with SCD | + | +
+| M_ME_ND_1(21) | Normalized measured value (-1.0 ... +1.0) without quality | + | +
+| M_SP_TB_1(30) | Single point information (BOOLEAN) with CP56Time2a | + | +
+| M_DP_TB_1(31) | Double point information (ON/OFF/transient) with CP56Time2a  | + | +
+| M_ST_TB_1(32) | Step position information (-64 ... 63, is transient) with CP56Time2a  | + | +
+| M_BO_TB_1(33) | Bitstring32 (32 bit bitstring) with CP56Time2a | + | +
+| M_ME_TD_1(34) | Normalized measured value (-1.0 ... +1.0) with CP56Time2a | + | +
+| M_ME_TE_1(35) | Scaled measured value (-32768 ... +32767) with CP56Time2a | + | +
+| M_ME_TF_1(36) | Short measured value (FLOAT32) with CP56Time2a | + | +
+| M_IT_TB_1(37) | Integrated totals (INT32 with quality indicators) with CP56Time2a | + | +
+| M_EP_TD_1(38) | Event of protection equipment with CP56Time2a | + | +
+| M_EP_TE_1(39) | Packed start events of protection equipment with CP56Time2a | + | +
+| M_EP_TF_1(40) | Packed output circuit info with CP56Time2a | + | +
+| C_SC_NA_1(45) | Single command (BOOLEAN) | + | +
+| C_DC_NA_1(46) | Double command (ON/OFF/transient) | + | +
+| C_RC_NA_1(47) | Step command | + | +
+| C_SE_NA_1(48) | Setpoint command, normalized value (-1.0 ... +1.0)| + | +
+| C_SE_NB_1(49) | Setpoint command, scaled value (-32768 ... +32767) | + | +
+| C_SE_NC_1(50) | Setpoint command, short value (FLOAT32)| + | +
+| C_BO_NA_1(51) | Bitstring command (32 bit bitstring)  | + | +
+
+| C_SC_TA_1(58) | Single command (BOOLEAN) with CP56Time2a | + | +
+| C_DC_TA_1(59) | Double command (ON/OFF/transient) with CP56Time2a | + | +
+| C_RC_TA_1(60) | Step command with CP56Time2a | + | +
+| C_SE_TA_1(61) | Setpoint command, normalized value (-1.0 ... +1.0) with CP56Time2a| + | +
+| C_SE_TB_1(62) | Setpoint command, scaled value (-32768 ... +32767) with CP56Time2a | + | +
+| C_SE_TC_1(63) | Setpoint command, short value (FLOAT32) with CP56Time2a| + | +
+| C_BO_TA_1(64) | Bitstring command (32 bit bitstring) with CP56Time2a | + | +
+
+| M_EI_NA_1(70) | End of initialization  | + | +
+
+| C_IC_NA_1(100) | Interrogation command | + | +
+| C_CI_NA_1(101) | Counter interrogation command | + | +
+| C_RD_NA_1(102) | Read command | + | +
+| C_CS_NA_1(103) | Clock synchronization command | + | +
+| C_TS_NA_1(104) | Test command | + | +
+| C_RP_NA_1(105) | Reset process command | + | +
+| C_CD_NA_1(106) | Delay acquisition command | + | +
+| C_TS_TA_1(107) | Test command with CP56Time2a | + | +
+
+| P_ME_NA_1(110) | Parameter of measured values, normalized value | + | +
+| P_ME_NB_1(111) | Parameter of measured values, scaled value  | + | +
+| P_ME_NC_1(112) | Parameter of measured values, short floating point number | + | +
+| P_AC_NA_1(113) | Parameter for activation | + | +
+
+| F_FR_NA_1(120) | File ready | + | +
+| F_SR_NA_1(121) | Section ready | + | +
+| F_SC_NA_1(122) | Call/Select directory/file/section | + | +
+| F_LS_NA_1(123) | Last segment/section | + | +
+| F_AF_NA_1(124) | ACK file/section | + | +
+| F_SG_NA_1(125) | File segment | + | +
+| F_DR_TA_1(126) | File directory | + | +
+| F_SC_NB_1(127) | Query log | + | +
+|===
+
+=== CS 104 specific parameters
+
+The following parameters are stored in *CS104_ConnectionParameters* objects.
+
+.IEC 60870-5-104 parameters
+[width="90%",cols="n,10",frame="topbot",options="header"]
+|===
+|Parameter        |Description
+|k       |Number of unconfirmed APDUs in I format. Sender will stop transmission after k unconfirmed I messages.
+|w       |Number of unconfirmed APDUs in I format. Receiver will confirm latest after w messages
+|t0      |Timeout for connection establishment (in s)
+|t1      |Timeout for transmitted APDUs in I/U format (in s). When timeout elapsed without confirmation the connection will be closed. This is used by the sender to determine if the receiver has failed to confirm a message.
+|t2      |Timeout to confirm messages (in s). This timeout is used by the receiver to determine the time when the message confirmation has to be sent.
+|t3      |Timeout to send test telegrams in case of an idle connection
+|===
