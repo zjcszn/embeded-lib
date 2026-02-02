@@ -52,7 +52,7 @@ static volatile uint32_t g_last_run_tick = 0;
 int task_func_a(void *arg) {
     g_task_a_cnt++;
     /* 记录最后一次运行的时间 */
-    g_last_run_tick = task_get_tick(); 
+    g_last_run_tick = task_tick_get(); 
     // TEST_LOG("Task A Executed at tick: %u", g_last_run_tick);
     return 0; // 继续运行
 }

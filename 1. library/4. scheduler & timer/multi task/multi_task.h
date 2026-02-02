@@ -39,7 +39,7 @@ typedef int (*task_func_t)(void *arg);
 
 /* 核心 API */
 void          task_system_init(void);
-uint32_t      task_get_tick(void);
+uint32_t      task_tick_get(void);
 void          task_tick_update(void);
 task_status_t task_create(task_func_t func, void *arg, uint32_t delay_ms, uint32_t period_ms);
 task_status_t task_delete(task_func_t func);
