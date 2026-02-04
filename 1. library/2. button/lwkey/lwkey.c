@@ -1,269 +1,388 @@
+/**
+ * @file    lwkey.c
+ * @brief   轻量级按键管理模块 - 核心实现
+ */
 
 #include "lwkey.h"
 
-/******************************** macro definition ********************************/
+/* ===========================================================================
+ * 内部类型定义
+ * ===========================================================================*/
 
-#define TICKS_INTERVAL          ( 10U)        // ticks interval
-#define TICKS_FILTER            (  2U)        // ticks of button filter
-#define TICKS_PRESS_REPEAT      ( 20U)        // ticks of repeat press
-#define TICKS_LONG_PRESS        (100U)        // ticks of long press
-#define TICKS_LONG_PRESS_HOLD   (  5U)        // ticks of long press hold
+/** 软件按键状态 */
+typedef enum {
+    STATE_IDLE = 0,     /**< 空闲 */
+    STATE_PRESS,        /**< 按下中 */
+    STATE_RELEASE_WAIT, /**< 等待双击 */
+    STATE_PRESS_AGAIN,  /**< 二次按下 */
+    STATE_LONG_PRESS,   /**< 长按中 */
+    STATE_BREAK,        /**< 被中断 */
+    STATE_BLOCKED,      /**< 阻塞 (其他键先按下) */
+} skey_state_t;
 
-#define IDLE_LEVEL_L            (  0U)        // low  level when button actived
-#define IDLE_LEVEL_H            (  1U)        // high level when button actived
+/** 按键动作类型 */
+typedef enum {
+    ACTION_UP = 0, /**< 释放 */
+    ACTION_DOWN,   /**< 按下 */
+    ACTION_BREAK,  /**< 被其他键中断 */
+} skey_action_t;
 
-#define HKEY_MASK(i)            (1U << (i))
-#define HKEY_ALL_MASK           (~((~((hkey_status_t)0ULL)) << HKEY_COUNT))
-#define HKEY_GET_STATUS(i)      ((hkey_status >> (i)) & 1U)
+/** 硬件按键运行时数据 */
+typedef struct {
+    uint8_t filter_cnt; /**< 消抖计数器 */
+} hkey_rt_t;
 
-/**************************** key msg fifo configure ******************************/
+/** 软件按键运行时数据 */
+typedef struct {
+    uint8_t state;  /**< 当前状态 */
+    uint16_t ticks; /**< 计时器 */
+} skey_rt_t;
 
-#define KEY_MSG_FIFO_SIZE       (16U)
-#define KEY_MSG_FIFO_MASK       (KEY_MSG_FIFO_SIZE - 1)
+/* ===========================================================================
+ * 模块上下文 (所有状态变量集中管理)
+ * ===========================================================================*/
 
 static struct {
-  key_msg_t msg_buf[KEY_MSG_FIFO_SIZE];      // buffer
-  volatile uint8_t r;                        // pointer of read
-  volatile uint8_t w;                        // pointer of write
-} key_msg_fifo = {0};
+    /* 配置信息 (只读) */
+    const lwkey_hkey_cfg_t *hkey_cfg; /**< 硬件按键配置表 */
+    const lwkey_skey_cfg_t *skey_cfg; /**< 软件按键配置表 */
+    uint8_t hkey_count;               /**< 硬件按键数量 */
+    uint8_t skey_count;               /**< 软件按键数量 */
+    lwkey_read_fn_t read_fn;          /**< GPIO 读取函数 */
 
-static inline uint8_t fifo_used(void) {
-    return (key_msg_fifo.w - key_msg_fifo.r);
+    /* 硬件层状态 */
+    hkey_rt_t hkey_rt[LWKEY_HKEY_MAX]; /**< 硬件按键运行时数据 */
+    uint32_t hkey_status;              /**< 硬件按键状态位图 */
+
+    /* 软件层状态 */
+    skey_rt_t skey_rt[LWKEY_SKEY_MAX]; /**< 软件按键运行时数据 */
+
+#if LWKEY_USE_CALLBACK
+    /* 回调函数表 */
+    lwkey_callback_fn_t callbacks[LWKEY_SKEY_MAX + 1]; /**< +1 用于全局回调 */
+#endif
+
+#if LWKEY_USE_FIFO
+    /* 消息队列 */
+    lwkey_msg_t fifo_buf[LWKEY_FIFO_SIZE];
+    volatile uint8_t fifo_r;
+    volatile uint8_t fifo_w;
+#endif
+
+    /* 初始化标志 */
+    bool initialized;
+} ctx;
+
+/* ===========================================================================
+ * 内部辅助函数
+ * ===========================================================================*/
+
+/** 获取硬件按键状态 (从位图) */
+static inline uint8_t hkey_get_status(uint8_t id) {
+    return (ctx.hkey_status >> id) & 1U;
 }
 
-static inline int fifo_is_empty(void) {
-    return (key_msg_fifo.w == key_msg_fifo.r);
+/** 设置硬件按键状态 (翻转位图) */
+static inline void hkey_toggle_status(uint8_t id) {
+    ctx.hkey_status ^= (1U << id);
 }
 
-static inline int fifo_is_full(void) {
-    return (fifo_used() == KEY_MSG_FIFO_SIZE);
+/** 检查硬件按键电平是否变化 */
+static inline bool hkey_level_changed(uint8_t id) {
+    uint8_t level = ctx.read_fn(id);
+    uint8_t active = (level != ctx.hkey_cfg[id].idle_level);
+    return (hkey_get_status(id) != active);
 }
 
-/**
- * @brief write button event to fifo buffer
- *
- * @param btn_id  button id
- * @param btn_event button event
- * @return int success on 1 | failed on 0
- */
-bool lwkey_message_post(uint8_t id, uint8_t event) {
-    if (fifo_is_full())
-        return false;
-    key_msg_t *msg = &key_msg_fifo.msg_buf[key_msg_fifo.w & KEY_MSG_FIFO_MASK];
-    msg->id = id;
-    msg->event = event;
-    key_msg_fifo.w++;
-    return true;
+/* ===========================================================================
+ * 事件分发
+ * ===========================================================================*/
+
+static void event_dispatch(uint8_t skey_id, lwkey_event_t event) {
+    if (event == LWKEY_EVT_NONE) {
+        return;
+    }
+
+#if LWKEY_USE_CALLBACK
+    /* 按键专属回调 */
+    if (ctx.callbacks[skey_id] != NULL) {
+        ctx.callbacks[skey_id](skey_id, event);
+    }
+    /* 全局回调 */
+    if (ctx.callbacks[SKEY_COUNT] != NULL) {
+        ctx.callbacks[SKEY_COUNT](skey_id, event);
+    }
+#endif
+
+#if LWKEY_USE_FIFO
+    /* SPSC 无锁 FIFO: 生产者只写 fifo_w */
+    uint8_t used = (uint8_t) (ctx.fifo_w - ctx.fifo_r);
+    if (used < LWKEY_FIFO_SIZE) {
+        lwkey_msg_t *msg = &ctx.fifo_buf[ctx.fifo_w & (LWKEY_FIFO_SIZE - 1)];
+        msg->id = skey_id;
+        msg->event = (uint8_t) event;
+        ctx.fifo_w++;
+    }
+#endif
 }
 
-/**
- * @brief read button event from fifo buffer
- *
- * @param buf pointer of recv buffer
- * @return int success on 1 | failed on 0
- */
-bool lwkey_message_fetch(key_msg_t *buf) {
-    if (fifo_is_empty())
-        return false;
-    key_msg_t *msg = &key_msg_fifo.msg_buf[key_msg_fifo.r & KEY_MSG_FIFO_MASK];
-    buf->id = msg->id;
-    buf->event = msg->event;
-    key_msg_fifo.r++;
-    return true;
-}
+/* ===========================================================================
+ * 硬件层处理 - 消抖滤波
+ * ===========================================================================*/
 
-/****************************** hardware configure ******************************/
-
-static hardkey_t hkey_list[HKEY_COUNT] = {
-    // [hkey id]   = {filter ticks， action level}
-    [KEY0] = {0, IDLE_LEVEL_H},
-    [KEY1] = {0, IDLE_LEVEL_H},
-    [KEY2] = {0, IDLE_LEVEL_H},
-    [WKUP] = {0, IDLE_LEVEL_L},
-};
-
-// hkey count <= sizeof(hkey_status_t) * 8
-static volatile hkey_status_t hkey_status;
-static uint8_t (*hkey_input_read)(hardkey_id_t hkey_id);
-
-/****************************** software configure ******************************/
-
-// button list
-static softkey_t skey_list[SKEY_COUNT] = {
-    // [button id]  = {button id， button type， initval of key state ， hkey 1， hkey 2， initval of ticks}
-    [SKEY_KEY0] = {SKEY_KEY0, KEY_TYPE_NORMAL, KEY_STATE_IDLE, KEY0, NULL, 0},
-    [SKEY_KEY1] = {SKEY_KEY1, KEY_TYPE_NORMAL, KEY_STATE_IDLE, KEY1, NULL, 0},
-    [SKEY_KEY2] = {SKEY_KEY2, KEY_TYPE_NORMAL, KEY_STATE_IDLE, KEY2, NULL, 0},
-    [SKEY_WKUP] = {SKEY_WKUP, KEY_TYPE_NORMAL, KEY_STATE_IDLE, WKUP, NULL, 0},
-    
-    [SKEY_COM1] = {SKEY_COM1, KEY_TYPE_COMPOSITE, KEY_STATE_IDLE, WKUP, KEY0, 0},
-    [SKEY_COM2] = {SKEY_COM2, KEY_TYPE_COMPOSITE, KEY_STATE_IDLE, WKUP, KEY2, 0},
-};
-
-
-/************************** function implementatio ******************************/
-
-/**
- * @brief check hkey status
- *
- * @param hkey_id hkey id
- * @return int status changed on true | status unchanged on false
- */
-static bool check_hkey_status_update(hardkey_id_t hkey_id) {
-    int newstat;
-    newstat = (hkey_input_read(hkey_id) != hkey_list[hkey_id].idle_level);
-    return (HKEY_GET_STATUS(hkey_id) != newstat);
-}
-
-/**
- * @brief update hardware layer button status
- * 
- * @param 
- */
-static void hardkey_handler(void) {
-    for (int i = 0; i < HKEY_COUNT; i++) {
-        if (check_hkey_status_update(i) == true) {
-            if (++(hkey_list[i].filter_cnt) >= TICKS_FILTER) {
-                // reverse hkey status
-                hkey_status ^= HKEY_MASK(i);
-                hkey_list[i].filter_cnt = 0;
+static void hkey_scan_handler(void) {
+    for (uint8_t i = 0; i < ctx.hkey_count; i++) {
+        if (hkey_level_changed(i)) {
+            if (++ctx.hkey_rt[i].filter_cnt >= LWKEY_TICKS_DEBOUNCE) {
+                hkey_toggle_status(i);
+                ctx.hkey_rt[i].filter_cnt = 0;
             }
         } else {
-            hkey_list[i].filter_cnt = 0;
+            ctx.hkey_rt[i].filter_cnt = 0;
         }
     }
-    hkey_status &= HKEY_ALL_MASK;
 }
 
-/**
- * @brief get button action
- * 
- * @param  
- * @return int press up on 0 | press down on 1 | press break on 2
- */
-static softkey_status_t get_softkey_status(softkey_t *key) {
-    if (key->type == KEY_TYPE_NORMAL) {
-        // single button: if other button press down, will break target button action
-        if (hkey_status & ~(HKEY_MASK(key->hkey1))) {
-            return KEY_BREAK;
-        } else {
-            return HKEY_GET_STATUS(key->hkey1);
+/* ===========================================================================
+ * 软件层处理 - 按键动作获取
+ * ===========================================================================*/
+
+static skey_action_t skey_get_action(uint8_t skey_id) {
+    const lwkey_skey_cfg_t *cfg = &ctx.skey_cfg[skey_id];
+
+    if (cfg->type == LWKEY_TYPE_NORMAL) {
+        /* 普通按键: 其他键按下时中断 */
+        uint32_t other_mask = ctx.hkey_status & ~(1U << cfg->hkey1);
+        if (other_mask != 0) {
+            return ACTION_BREAK;
         }
+        return hkey_get_status(cfg->hkey1) ? ACTION_DOWN : ACTION_UP;
     } else {
-        // composite button: only when hkey 1 press down, can trigger combo button action
-        if (hkey_status & ~(HKEY_MASK(key->hkey1) | HKEY_MASK(key->hkey2))) {
-            return KEY_BREAK;
-        } else {
-            if (HKEY_GET_STATUS(key->hkey1)) {
-                return HKEY_GET_STATUS(key->hkey2);
-            }
-            if (HKEY_GET_STATUS(key->hkey2)) {
-                return KEY_BREAK;
-            }
-            return KEY_UP;
+        /* 组合按键: 非相关键按下时中断 */
+        uint32_t combo_mask = (1U << cfg->hkey1) | (1U << cfg->hkey2);
+        uint32_t other_mask = ctx.hkey_status & ~combo_mask;
+        if (other_mask != 0) {
+            return ACTION_BREAK;
         }
+        /* 主键必须先按下 */
+        if (hkey_get_status(cfg->hkey1)) {
+            return hkey_get_status(cfg->hkey2) ? ACTION_DOWN : ACTION_UP;
+        }
+        /* 仅副键按下 -> 中断 */
+        if (hkey_get_status(cfg->hkey2)) {
+            return ACTION_BREAK;
+        }
+        return ACTION_UP;
     }
 }
 
-/**
- * @brief update state of button fsm
- * 
- * @param btn pointer of button
- */
-static void softkey_state_handler(softkey_t *key) {
-    int key_stat = get_softkey_status(key);
+/* ===========================================================================
+ * 软件层处理 - 状态机
+ * ===========================================================================*/
 
-    switch (key->state) {
+static void skey_fsm_handler(uint8_t skey_id) {
+    skey_rt_t *rt = &ctx.skey_rt[skey_id];
+    skey_action_t action = skey_get_action(skey_id);
 
-        case KEY_STATE_BLOCK:
-            if (key_stat == KEY_UP) {
-                key->state = KEY_STATE_IDLE;
+    switch ((skey_state_t) rt->state) {
+        case STATE_IDLE:
+            if (action == ACTION_DOWN) {
+                event_dispatch(skey_id, LWKEY_EVT_PRESS);
+                rt->ticks = 0;
+                rt->state = STATE_PRESS;
+            } else if (action == ACTION_BREAK) {
+                rt->state = STATE_BLOCKED;
             }
             break;
 
-        case KEY_STATE_IDLE:
-            if (key_stat == KEY_BREAK) {
-                key->state = KEY_STATE_BLOCK;
-            } else if (key_stat == KEY_DOWN) {
-                lwkey_message_post(key->id, KEY_EVENT_PRESS_DOWN);
-                key->ticks = 0;
-                key->state = KEY_STATE_PRESS_DOWN;
-            }
-            break;
-        
-        case KEY_STATE_PRESS_DOWN:
-            if (key_stat == KEY_BREAK) {
-                key->state = KEY_STATE_PRESS_BREAK;
-            } else if (key_stat == KEY_DOWN) {
-                if (++key->ticks >= TICKS_LONG_PRESS) {
-                    lwkey_message_post(key->id, KEY_EVENT_LONG_PRESS_START);
-                    key->ticks = 0;
-                    key->state = KEY_STATE_LONG_PRESS;
+        case STATE_PRESS:
+            if (action == ACTION_BREAK) {
+                rt->state = STATE_BREAK;
+            } else if (action == ACTION_UP) {
+                /* 检查按键是否启用双击 */
+                if (ctx.skey_cfg[skey_id].flags & LWKEY_FLAG_DOUBLE_CLICK) {
+                    rt->ticks = 0;
+                    rt->state = STATE_RELEASE_WAIT;
+                } else {
+                    event_dispatch(skey_id, LWKEY_EVT_CLICK);
+                    event_dispatch(skey_id, LWKEY_EVT_RELEASE);
+                    rt->state = STATE_IDLE;
                 }
             } else {
-                lwkey_message_post(key->id, KEY_EVENT_RELEASE);
-                key->state = KEY_STATE_IDLE;
-            }
-            break;
-        
-        case KEY_STATE_LONG_PRESS:
-            if (key_stat == KEY_BREAK) {
-                key->state = KEY_STATE_PRESS_BREAK;
-            } else if (key_stat == KEY_DOWN) {
-                if (++key->ticks >= TICKS_LONG_PRESS_HOLD) {
-                    lwkey_message_post(key->id, KEY_EVENT_LONG_PRESS_HOLD);
-                    key->ticks = 0;
+                if (++rt->ticks >= LWKEY_TICKS_LONG_PRESS) {
+                    event_dispatch(skey_id, LWKEY_EVT_LONG_PRESS);
+                    rt->ticks = 0;
+                    rt->state = STATE_LONG_PRESS;
                 }
+            }
+            break;
+
+        case STATE_RELEASE_WAIT:
+            if (action == ACTION_DOWN) {
+                rt->ticks = 0;
+                rt->state = STATE_PRESS_AGAIN;
+            } else if (++rt->ticks >= LWKEY_TICKS_DOUBLE_CLICK) {
+                event_dispatch(skey_id, LWKEY_EVT_CLICK);
+                event_dispatch(skey_id, LWKEY_EVT_RELEASE);
+                rt->state = STATE_IDLE;
+            }
+            break;
+
+        case STATE_PRESS_AGAIN:
+            if (action == ACTION_BREAK) {
+                rt->state = STATE_BREAK;
+            } else if (action == ACTION_UP) {
+                event_dispatch(skey_id, LWKEY_EVT_DOUBLE_CLICK);
+                event_dispatch(skey_id, LWKEY_EVT_RELEASE);
+                rt->state = STATE_IDLE;
             } else {
-                lwkey_message_post(key->id, KEY_EVENT_RELEASE);
-                key->state = KEY_STATE_IDLE;
+                if (++rt->ticks >= LWKEY_TICKS_LONG_PRESS) {
+                    event_dispatch(skey_id, LWKEY_EVT_LONG_PRESS);
+                    rt->ticks = 0;
+                    rt->state = STATE_LONG_PRESS;
+                }
             }
             break;
-        
-        case KEY_STATE_PRESS_BREAK:
-            if (key_stat == KEY_UP) {
-                lwkey_message_post(key->id, KEY_EVENT_RELEASE);
-                key->state = KEY_STATE_IDLE;
+
+        case STATE_LONG_PRESS:
+            if (action == ACTION_BREAK) {
+                rt->state = STATE_BREAK;
+            } else if (action == ACTION_UP) {
+                event_dispatch(skey_id, LWKEY_EVT_RELEASE);
+                rt->state = STATE_IDLE;
+            } else {
+#if LWKEY_USE_LONG_HOLD
+                if (++rt->ticks >= LWKEY_TICKS_LONG_HOLD) {
+                    event_dispatch(skey_id, LWKEY_EVT_LONG_HOLD);
+                    rt->ticks = 0;
+                }
+#endif
             }
             break;
-        
+
+        case STATE_BREAK:
+            if (action == ACTION_UP) {
+                event_dispatch(skey_id, LWKEY_EVT_RELEASE);
+                rt->state = STATE_IDLE;
+            }
+            break;
+
+        case STATE_BLOCKED:
+            if (ctx.hkey_status == 0) {
+                rt->state = STATE_IDLE;
+            }
+            break;
+
         default:
+            rt->state = STATE_IDLE;
             break;
     }
 }
 
-static void softkey_handler(void) {
-    for (int i = 0; i < SKEY_COUNT; i++) {
-        softkey_state_handler(&skey_list[i]);
+static void skey_scan_handler(void) {
+    for (uint8_t i = 0; i < ctx.skey_count; i++) {
+        skey_fsm_handler(i);
     }
 }
 
-/**
- * @brief init function
- *
- * @param hkey_read pointer of callback function
- */
-void lwkey_init(hkey_read_func_t hkey_read) {
+/* ===========================================================================
+ * 公共 API 实现
+ * ===========================================================================*/
 
-    hkey_input_read = hkey_read;
-    
-    // To Do: init key message queue for rtos.
+bool lwkey_init(const lwkey_cfg_t *cfg) {
+    /* 参数校验 */
+    if (cfg == NULL || cfg->read_fn == NULL) {
+        return false;
+    }
+    if (cfg->hkey_count == 0 || cfg->hkey_count > LWKEY_HKEY_MAX) {
+        return false;
+    }
+    if (cfg->skey_count == 0 || cfg->skey_count > LWKEY_SKEY_MAX) {
+        return false;
+    }
+    if (cfg->hkey_table == NULL || cfg->skey_table == NULL) {
+        return false;
+    }
+
+    /* 保存配置 */
+    ctx.hkey_cfg = cfg->hkey_table;
+    ctx.skey_cfg = cfg->skey_table;
+    ctx.hkey_count = cfg->hkey_count;
+    ctx.skey_count = cfg->skey_count;
+    ctx.read_fn = cfg->read_fn;
+
+    /* 清零运行时状态 */
+    ctx.hkey_status = 0;
+    for (uint8_t i = 0; i < LWKEY_HKEY_MAX; i++) {
+        ctx.hkey_rt[i].filter_cnt = 0;
+    }
+    for (uint8_t i = 0; i < LWKEY_SKEY_MAX; i++) {
+        ctx.skey_rt[i].state = STATE_IDLE;
+        ctx.skey_rt[i].ticks = 0;
+    }
+
+#if LWKEY_USE_CALLBACK
+    for (uint8_t i = 0; i <= SKEY_COUNT; i++) {
+        ctx.callbacks[i] = NULL;
+    }
+#endif
+
+#if LWKEY_USE_FIFO
+    ctx.fifo_r = 0;
+    ctx.fifo_w = 0;
+#endif
+
+    ctx.initialized = true;
+    return true;
 }
 
-/**
- * @brief lwkey task function
- *
- */
-void lwkey_task(void* args) {
-    (void)args;
+void lwkey_scan(void) {
+    if (!ctx.initialized) {
+        return;
+    }
+    hkey_scan_handler();
+    skey_scan_handler();
+}
 
-    // TickType_t xLastWakeTime = xTaskGetTickCount();
+#if LWKEY_USE_RTOS
+void lwkey_task(void *arg) {
+    (void) arg;
     while (1) {
-        hardkey_handler();
-        softkey_handler();
-
-        // vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(TICKS_INTERVAL));
+        lwkey_scan();
+        LWKEY_DELAY_MS(LWKEY_SCAN_PERIOD_MS);
     }
 }
+#endif
 
+#if LWKEY_USE_FIFO
+bool lwkey_msg_fetch(lwkey_msg_t *msg) {
+    if (msg == NULL) {
+        return false;
+    }
+    /* SPSC 无锁 FIFO: 消费者只写 fifo_r */
+    if (ctx.fifo_r == ctx.fifo_w) {
+        return false;
+    }
+    lwkey_msg_t *src = &ctx.fifo_buf[ctx.fifo_r & (LWKEY_FIFO_SIZE - 1)];
+    msg->id = src->id;
+    msg->event = src->event;
+    ctx.fifo_r++;
+    return true;
+}
 
+uint8_t lwkey_msg_count(void) {
+    return (uint8_t) (ctx.fifo_w - ctx.fifo_r);
+}
+
+void lwkey_msg_clear(void) {
+    ctx.fifo_r = ctx.fifo_w; /* 单条赋值为原子操作 */
+}
+#endif
+
+#if LWKEY_USE_CALLBACK
+void lwkey_set_callback(uint8_t skey_id, lwkey_callback_fn_t callback) {
+    if (skey_id <= SKEY_COUNT) {
+        ctx.callbacks[skey_id] = callback;
+    }
+}
+#endif
