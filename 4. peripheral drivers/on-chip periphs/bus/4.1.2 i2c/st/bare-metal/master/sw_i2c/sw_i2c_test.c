@@ -2,6 +2,12 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef USE_HAL_DRIVER
+#include "stm32h7xx_ll_bus.h"
+#include "stm32h7xx_ll_gpio.h"
+
+#endif
+
 #include "sw_i2c_port.h"
 
 /* Defines -------------------------------------------------------------------*/
@@ -201,18 +207,16 @@ void sw_i2c_test_clock_stretch_api(sw_i2c_t *i2c_dev) {
 sw_i2c_err_t sw_i2c_test_init_example(void) {
     sw_i2c_t my_i2c_dev;
 
-    // Define configuration
-    sw_i2c_port_cfg_t cfg = {
+    // Define configuration (Must be static or persistent!)
+    static sw_i2c_port_cfg_t cfg = {
         .scl_port = GPIOB,  // Use actual GPIO_TypeDef* if available or void* cast
         .scl_pin = 0x0040,  // Example PIN_6
         .sda_port = GPIOB,
         .sda_pin = 0x0080,  // Example PIN_7
-        .freq_khz = 400,
-        .sys_clk_hz = 0  // Auto-detect
     };
 
     // Initialize
-    if (sw_i2c_init_default(&my_i2c_dev, &cfg) != SOFT_I2C_OK) {
+    if (sw_i2c_init_default(&my_i2c_dev, &cfg, 400, 0) != SOFT_I2C_OK) {
         printf("[I2C] Init Failed\n");
         return SOFT_I2C_ERR_BUS;
     }

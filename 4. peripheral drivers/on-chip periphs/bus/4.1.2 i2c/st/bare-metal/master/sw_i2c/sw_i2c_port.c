@@ -10,18 +10,12 @@
 /* Internal Context ----------------------------------------------------------*/
 
 /* Internal Context ----------------------------------------------------------*/
-
-typedef struct {
-    void *scl_port;
-    uint32_t scl_pin;
-    void *sda_port;
-    uint32_t sda_pin;
-} i2c_gpio_ctx_t;
+// Using sw_i2c_port_cfg_t as internal context
 
 /* Private functions ---------------------------------------------------------*/
 
 static void i2c_gpio_set_scl(void *handle, uint8_t state) {
-    i2c_gpio_ctx_t *ctx = (i2c_gpio_ctx_t *) handle;
+    sw_i2c_port_cfg_t *ctx = (sw_i2c_port_cfg_t *) handle;
     if (state) {
         LL_GPIO_SetOutputPin((GPIO_TypeDef *) ctx->scl_port, ctx->scl_pin);
     } else {
@@ -30,7 +24,7 @@ static void i2c_gpio_set_scl(void *handle, uint8_t state) {
 }
 
 static void i2c_gpio_set_sda(void *handle, uint8_t state) {
-    i2c_gpio_ctx_t *ctx = (i2c_gpio_ctx_t *) handle;
+    sw_i2c_port_cfg_t *ctx = (sw_i2c_port_cfg_t *) handle;
     if (state) {
         LL_GPIO_SetOutputPin((GPIO_TypeDef *) ctx->sda_port, ctx->sda_pin);
     } else {
@@ -39,12 +33,12 @@ static void i2c_gpio_set_sda(void *handle, uint8_t state) {
 }
 
 static uint8_t i2c_gpio_get_scl(void *handle) {
-    i2c_gpio_ctx_t *ctx = (i2c_gpio_ctx_t *) handle;
+    sw_i2c_port_cfg_t *ctx = (sw_i2c_port_cfg_t *) handle;
     return LL_GPIO_IsInputPinSet((GPIO_TypeDef *) ctx->scl_port, ctx->scl_pin);
 }
 
 static uint8_t i2c_gpio_get_sda(void *handle) {
-    i2c_gpio_ctx_t *ctx = (i2c_gpio_ctx_t *) handle;
+    sw_i2c_port_cfg_t *ctx = (sw_i2c_port_cfg_t *) handle;
     return LL_GPIO_IsInputPinSet((GPIO_TypeDef *) ctx->sda_port, ctx->sda_pin);
 }
 
@@ -82,23 +76,14 @@ static void soft_i2c_gpio_clk_enable(GPIO_TypeDef *gpio_x) {
 /**
  * @brief  Helper to initialize a default I2C instance using the default GPIO implementation
  */
-sw_i2c_err_t sw_i2c_init_default(sw_i2c_t *i2c_dev, const sw_i2c_port_cfg_t *cfg) {
+/**
+ * @brief  Helper to initialize a default I2C instance using the default GPIO implementation
+ */
+sw_i2c_err_t sw_i2c_init_default(sw_i2c_t *i2c_dev, const sw_i2c_port_cfg_t *cfg, uint32_t freq_khz,
+                                 uint32_t sys_clk_hz) {
     if (!i2c_dev || !cfg) {
         return SOFT_I2C_ERR_PARAM;
     }
-
-    static i2c_gpio_ctx_t pool[4];
-    static uint8_t pool_idx = 0;
-
-    if (pool_idx >= 4) {
-        return SOFT_I2C_ERR_BUS;  // Out of instances
-    }
-
-    i2c_gpio_ctx_t *ctx = &pool[pool_idx++];
-    ctx->scl_port = cfg->scl_port;
-    ctx->scl_pin = cfg->scl_pin;
-    ctx->sda_port = cfg->sda_port;
-    ctx->sda_pin = cfg->sda_pin;
 
     // Init GPIO hardware
     soft_i2c_gpio_clk_enable((GPIO_TypeDef *) cfg->scl_port);
@@ -116,8 +101,6 @@ sw_i2c_err_t sw_i2c_init_default(sw_i2c_t *i2c_dev, const sw_i2c_port_cfg_t *cfg
     GPIO_InitStruct.Pin = cfg->sda_pin;
     LL_GPIO_Init((GPIO_TypeDef *) cfg->sda_port, &GPIO_InitStruct);
 
-    uint32_t sys_clk_hz = cfg->sys_clk_hz;
-
     // Auto-detect system clock if user passes 0
     if (sys_clk_hz == 0) {
         // Assume SystemCoreClock is available in STM32 environment
@@ -126,7 +109,9 @@ sw_i2c_err_t sw_i2c_init_default(sw_i2c_t *i2c_dev, const sw_i2c_port_cfg_t *cfg
         sys_clk_hz = SystemCoreClock;
     }
 
-    return sw_i2c_init(i2c_dev, &i2c_gpio_ops, ctx, cfg->freq_khz, sys_clk_hz);
+    // Cast const away since the core might need mutable user_data in theory,
+    // though our ops don't modify it. We rely on user keeping cfg valid.
+    return sw_i2c_init(i2c_dev, &i2c_gpio_ops, (void *) cfg, freq_khz, sys_clk_hz);
 }
 
 #endif

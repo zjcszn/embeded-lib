@@ -43,24 +43,30 @@ sw_i2c_init(&i2c_dev, &my_ops, &my_param, 400, 168000000);
 - **freq_khz**: 目标 I2C 频率（如 100, 400）。
 - **sys_clk_hz**: 系统主频（用于计算延时循环次数）。
 
-如果您使用的是 STM32 且包含了 `sw_i2c_port.h`，可以使用辅助函数：
-
-```c
-sw_i2c_port_cfg_t cfg = {
-    .scl_port = GPIOB,
-    .scl_pin  = LL_GPIO_PIN_6,
-    .sda_port = GPIOB,
-    .sda_pin  = LL_GPIO_PIN_7,
-    .freq_khz = 400,
-    .sys_clk_hz = 0
-};
-sw_i2c_init_default(&i2c_dev, &cfg);
-```
-
 ---
 
 ## 3. 基本操作 (Basic Operations)
 
+### 3.1 初始化 (Initialization)
+使用 `sw_i2c_init_default` 初始化 I2C 总线，需通过 `sw_i2c_port_cfg_t` 结构体传递参数。
+
+**注意：** 配置结构体指针将被直接保存到 I2C 设备句柄中，因此**必须保证配置结构体的生命周期覆盖整个 I2C 使用周期**（通常建议定义为全局变量或 `static` 变量，**不要**使用局部自动变量）。
+
+```c
+#include "sw_i2c_port.h"
+
+sw_i2c_t i2c_dev;
+
+// 1. 定义端口配置 (必须是 static 或全局变量)
+static sw_i2c_port_cfg_t cfg = {
+    .scl_port = GPIOB,
+    .scl_pin  = LL_GPIO_PIN_6,
+    .sda_port = GPIOB,
+    .sda_pin  = LL_GPIO_PIN_7
+};
+
+// 2. 初始化
+// params: dev, config, freq_khz, sys_clk_hz (0=auto)
 ### 3.1 扫描设备 (Scan)
 扫描总线上是否存在设备（调试用）：
 
