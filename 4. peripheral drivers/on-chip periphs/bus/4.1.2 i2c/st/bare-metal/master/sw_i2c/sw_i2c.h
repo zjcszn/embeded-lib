@@ -6,7 +6,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-
 /* Exported macro ------------------------------------------------------------*/
 
 // Default to no log/assert if not defined externally
@@ -92,9 +91,19 @@ typedef struct {
      *   Useful for preventing Master blocking in bare-metal systems with faulty slaves.
      */
     bool enable_clock_stretch;  // Enable/Disable Clock Stretching support
+
+    float cycles_per_loop;    // Runtime calibrated cycles per loop (float for precision)
+    uint32_t ticks_overhead;  // Fixed overhead ticks
 } sw_i2c_t;
 
 /* Exported function declaration ---------------------------------------------*/
+
+/**
+ * @brief  Raw delay function used by the driver.
+ *         Exported for calibration purposes.
+ * @param  loops Number of loops to spin
+ */
+void sw_i2c_delay_ticks(uint32_t loops);
 
 /**
  * @brief Initialize Software I2C instance

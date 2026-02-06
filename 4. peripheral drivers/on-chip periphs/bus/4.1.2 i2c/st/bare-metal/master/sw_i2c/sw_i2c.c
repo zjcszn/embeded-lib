@@ -1,8 +1,19 @@
 
+/* Includes ------------------------------------------------------------------*/
 #include "sw_i2c.h"
 
 /* Private macro definition --------------------------------------------------*/
 #define LOG_TAG "I2C_SW"
+
+// Auto-detect Cortex-M if not defined
+#ifndef SW_I2C_IS_CORTEX_M
+#if defined(__ARM_ARCH_7EM__) || defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_6M__) || \
+    defined(__ARM_ARCH_8M_BASE__) || defined(__ARM_ARCH_8M_MAIN__) || defined(__CORTEX_M)
+#define SW_I2C_IS_CORTEX_M 1
+#else
+#define SW_I2C_IS_CORTEX_M 0
+#endif
+#endif
 
 #if SOFT_I2C_USE_LOG
 #include "elog.h"
@@ -14,14 +25,81 @@
 #endif
 
 // Default Timeout in ms
-#define SW_I2C_TIMEOUT_MS  1
+#define SW_I2C_TIMEOUT_MS 1
+
+// Calibration Loop Counts
+#ifndef SW_I2C_CALIB_POINT1_LOOPS
+#define SW_I2C_CALIB_POINT1_LOOPS 1000
+#endif
+
+#ifndef SW_I2C_CALIB_POINT2_LOOPS
+#define SW_I2C_CALIB_POINT2_LOOPS 11000
+#endif
 
 // Estimated Cycles per Polling Loop (Read SCL + Branch + Decrement)
 // Conservative estimate for Cortex-M
 #define SW_I2C_POLL_CYCLES 40
 
 #ifndef SW_I2C_CYCLES_PER_LOOP
+// Use compiler macros for reliable architecture detection
+#if defined(__ARM_ARCH_7EM__) && defined(__ARM_FEATURE_DSP)
+// Cortex-M7 (ARMv7E-M with DSP, typical for M7)
+// Dual-issue pipeline executes simple loops much faster (~2 cycles/loop)
+#define SW_I2C_CYCLES_PER_LOOP 2
+#else
+// Cortex-M0/M3/M4/M33 (Standard 3-stage or equivalent pipeline) -> ~5 cycles/loop
 #define SW_I2C_CYCLES_PER_LOOP 5
+#endif
+#endif
+
+/* Private type definition ---------------------------------------------------*/
+
+// [Decoupled] SysTick Register Definitions for Cortex-M
+// Address is fixed at 0xE000E010 for all Cortex-M cores
+#if SW_I2C_IS_CORTEX_M
+
+typedef struct {
+    volatile uint32_t CTRL;
+    volatile uint32_t LOAD;
+    volatile uint32_t VAL;
+    volatile uint32_t CALIB;
+} SW_I2C_SysTick_Type;
+
+#define SW_I2C_SysTick_BASE               0xE000E010UL
+#define SW_I2C_SysTick                    ((SW_I2C_SysTick_Type *) SW_I2C_SysTick_BASE)
+
+/* SysTick Control Register Definitions */
+#define SW_I2C_SysTick_CTRL_ENABLE_Pos    0U
+#define SW_I2C_SysTick_CTRL_ENABLE_Msk    (1UL << SW_I2C_SysTick_CTRL_ENABLE_Pos)
+#define SW_I2C_SysTick_CTRL_CLKSOURCE_Pos 2U
+#define SW_I2C_SysTick_CTRL_CLKSOURCE_Msk (1UL << SW_I2C_SysTick_CTRL_CLKSOURCE_Pos)
+
+/* Compiler Intrinsics for Interrupt Control */
+#if defined(__GNUC__) || defined(__clang__)
+
+static inline void __attribute__((always_inline)) __disable_irq(void) {
+    __asm__ volatile("cpsid i" : : : "memory");
+}
+
+static inline uint32_t __attribute__((always_inline)) __get_PRIMASK(void) {
+    uint32_t result;
+    __asm__ volatile("mrs %0, primask" : "=r"(result));
+    return result;
+}
+
+static inline void __attribute__((always_inline)) __set_PRIMASK(uint32_t priMask) {
+    __asm__ volatile("msr primask, %0" : : "r"(priMask) : "memory");
+}
+
+#elif defined(__CC_ARM)
+/* Keil ARMCC (v5) typically provides these as intrinsics.
+ * If not, they are register-based. Assuming Standard Library is available.
+ * If zero-dependency is strictly required for ARMCC, we would add __asm here.
+ */
+#elif defined(__ICCARM__)
+#include <intrinsics.h>
+#endif
+
 #endif
 
 /* Private inline function definition ----------------------------------------*/
@@ -30,7 +108,7 @@
  * @brief  Delay loops using assembly to prevent optimization
  *         Approx cycles = loops * SW_I2C_CYCLES_PER_LOOP
  */
-static void __attribute__((noinline)) i2c_delay_ticks(uint32_t loops) {
+void __attribute__((noinline)) sw_i2c_delay_ticks(uint32_t loops) {
     if (loops == 0) {
         return;
     }
@@ -57,15 +135,15 @@ static void __attribute__((noinline)) i2c_delay_ticks(uint32_t loops) {
 }
 
 static inline void i2c_delay_hold(sw_i2c_t *dev) {
-    i2c_delay_ticks(dev->ticks_hold);
+    sw_i2c_delay_ticks(dev->ticks_hold);
 }
 
 static inline void i2c_delay_setup(sw_i2c_t *dev) {
-    i2c_delay_ticks(dev->ticks_setup);
+    sw_i2c_delay_ticks(dev->ticks_setup);
 }
 
 static inline void i2c_delay_high(sw_i2c_t *dev) {
-    i2c_delay_ticks(dev->ticks_high);
+    sw_i2c_delay_ticks(dev->ticks_high);
 }
 
 static inline void i2c_scl_write(sw_i2c_t *dev, uint8_t state) {
@@ -119,6 +197,77 @@ static int i2c_scl_high_check(sw_i2c_t *dev) {
 }
 
 /* Private function ----------------------------------------------------------*/
+
+static void sw_i2c_calibration(sw_i2c_t *i2c_dev) {
+#if SW_I2C_IS_CORTEX_M
+    // 1. Check if SysTick is effectively enabled and running
+    uint32_t ctrl_before = SW_I2C_SysTick->CTRL;
+    uint32_t load_before = SW_I2C_SysTick->LOAD;
+
+    // 2. Disable interrupts to ensure atomic measurement
+    uint32_t primask = __get_PRIMASK();
+    __disable_irq();
+
+    // 3. Configure SysTick if not already running correctly
+    // We need 24-bit max range to measure long delays
+    SW_I2C_SysTick->LOAD = 0x00FFFFFF;
+    SW_I2C_SysTick->VAL = 0UL;
+    SW_I2C_SysTick->CTRL = SW_I2C_SysTick_CTRL_CLKSOURCE_Msk | SW_I2C_SysTick_CTRL_ENABLE_Msk;
+
+    // 4. Measure Point 1: N1
+    uint32_t n1 = SW_I2C_CALIB_POINT1_LOOPS;
+    uint32_t start_tick = SW_I2C_SysTick->VAL;
+    sw_i2c_delay_ticks(n1);
+    uint32_t end_tick = SW_I2C_SysTick->VAL;
+
+    // Correct down-counter delta calculation
+    uint32_t t1 = (start_tick >= end_tick) ? (start_tick - end_tick)
+                                           : (start_tick + (0x00FFFFFF - end_tick) + 1);
+
+    // 5. Measure Point 2: N2
+    uint32_t n2 = SW_I2C_CALIB_POINT2_LOOPS;
+    start_tick = SW_I2C_SysTick->VAL;
+    sw_i2c_delay_ticks(n2);
+    end_tick = SW_I2C_SysTick->VAL;
+    uint32_t t2 = (start_tick >= end_tick) ? (start_tick - end_tick)
+                                           : (start_tick + (0x00FFFFFF - end_tick) + 1);
+
+    // 6. Restore SysTick/Interrupts
+    SW_I2C_SysTick->LOAD = load_before;
+    SW_I2C_SysTick->VAL = 0UL;  // Clear value to force reload
+    SW_I2C_SysTick->CTRL = ctrl_before;
+    __set_PRIMASK(primask);
+
+    // 7. Calculate: CPL = (T2 - T1) / (N2 - N1)
+    // Note: On high-performance cores (e.g., H7) with dual-issue/superscalar usage,
+    // the loop may execute in ~1-2 cycles. Result is stored as float for precision.
+    uint32_t delta_n = n2 - n1;
+    float cpl = (float) (t2 - t1) / delta_n;
+
+    // Sanity check
+    if (cpl < 0.1f) {
+        cpl = 1.0f;
+    }
+
+    // 8. Calculate: Overhead = T1 - (N1 * CPL)
+    // Overhead = b = y - kx
+    float pure_cost = n1 * cpl;
+    uint32_t overhead = 0;
+    if (t1 > pure_cost) {
+        overhead = (uint32_t) (t1 - pure_cost);
+    }
+    // Removed 8-bit cap for overhead
+
+    i2c_dev->cycles_per_loop = cpl;
+    i2c_dev->ticks_overhead = overhead;
+#else
+    // Non-Cortex-M: Use defaults
+    if (i2c_dev->cycles_per_loop == 0.0f) {
+        i2c_dev->cycles_per_loop = (float) SW_I2C_CYCLES_PER_LOOP;
+    }
+    i2c_dev->ticks_overhead = 0;
+#endif
+}
 
 static void i2c_start(sw_i2c_t *dev) {
     i2c_sda_write(dev, 1);
@@ -257,8 +406,14 @@ sw_i2c_err_t sw_i2c_init(sw_i2c_t *i2c_dev, const sw_i2c_ops_t *ops, void *user_
     }
 
     // Default to Disabled as per user request (safer for bare-metal)
+    // Default to Disabled as per user request (safer for bare-metal)
     i2c_dev->enable_clock_stretch = false;
 
+    // Auto-calibration if cycles_per_loop is 0 or if explicitly requested
+    // We choose to ALWAYS run calibration if it's not pre-set, to ensure overhead is calculated
+    sw_i2c_calibration(i2c_dev);
+
+    // Calculate timing parameters
     if (sw_i2c_set_speed(i2c_dev, freq_khz) != SOFT_I2C_OK) {
         return SOFT_I2C_ERR_PARAM;
     }
@@ -279,8 +434,15 @@ sw_i2c_err_t sw_i2c_set_speed(sw_i2c_t *i2c_dev, uint32_t freq_khz) {
     // Convert ns to cycles: cycles = ns * (sys_clk_hz / 1000000000)
     // Avoid overflow: cycles = sys_clk_hz / freq_hz
     uint32_t total_cycles = i2c_dev->sys_clk_hz / (freq_khz * 1000);
+    uint32_t overhead = i2c_dev->ticks_overhead;
 
-    if (total_cycles < SW_I2C_CYCLES_PER_LOOP * 4) {
+    // Minimum cycles check: must be at least overhead + some loops
+    if (total_cycles <= overhead) {
+        // Frequency too high for the overhead
+        return SOFT_I2C_ERR_PARAM;
+    }
+
+    if ((total_cycles - overhead) < (uint32_t) (i2c_dev->cycles_per_loop * 4)) {
         return SOFT_I2C_ERR_PARAM;
     }
 
@@ -291,32 +453,57 @@ sw_i2c_err_t sw_i2c_set_speed(sw_i2c_t *i2c_dev, uint32_t freq_khz) {
      *   -> Setup: 25% (or maximal)
      */
 
+    // Distribute Total Cycles
     uint32_t cycles_high = total_cycles / 2;
     uint32_t cycles_low = total_cycles - cycles_high;
     uint32_t cycles_hold, cycles_setup;
 
-    // Convert cycles to loop counts
-    uint32_t loops_high = cycles_high / SW_I2C_CYCLES_PER_LOOP;
-
-    if (loops_high == 0) {
-        loops_high = 1;
+    float cpl = i2c_dev->cycles_per_loop;
+    if (cpl < 0.1f) {
+        cpl = (float) SW_I2C_CYCLES_PER_LOOP;  // Safety fallback
     }
 
-    // Low period distribution
+    // --- High Period Calculation ---
+    // Effective High Cycles = Target - Overhead
+    uint32_t eff_cycles_high = (cycles_high > overhead) ? (cycles_high - overhead) : 0;
+    uint32_t loops_high = (uint32_t) (eff_cycles_high / cpl);
+
+    if (loops_high == 0) {
+        loops_high = 1;  // Ensure at least 1 loop if possible, though overhead might dominate
+    }
+
+    // --- Low Period Distribution ---
     if (freq_khz >= 400) {
         // High Speed: Minimal Hold, Max Setup
-        cycles_hold = SW_I2C_CYCLES_PER_LOOP;  // Min 1 loop
-        cycles_setup =
-            (cycles_low > cycles_hold) ? (cycles_low - cycles_hold) : SW_I2C_CYCLES_PER_LOOP;
+        // Hold is typically short, often just overhead is enough.
+        // We reserve minimal loops for Hold.
+
+        // Calculate Hold Target (Minimal)
+        // Let's target approx 1 * CPL + Overhead for Hold if possible,
+        // essentially just function call overhead + 1 loop
+        cycles_hold = (uint32_t) (cpl) + overhead;
+
+        // But we shouldn't exceed reasonable part of low period
+        if (cycles_hold > cycles_low / 2) {
+            cycles_hold = cycles_low / 2;
+        }
+
+        cycles_setup = cycles_low - cycles_hold;
     } else {
-        // Low Speed: Symmetric
+        // Low Speed: Symmetric Hold/Setup
         cycles_hold = cycles_low / 2;
         cycles_setup = cycles_low - cycles_hold;
     }
 
-    uint32_t loops_hold = cycles_hold / SW_I2C_CYCLES_PER_LOOP;
-    uint32_t loops_setup = cycles_setup / SW_I2C_CYCLES_PER_LOOP;
+    // --- Hold Period Calculation ---
+    uint32_t eff_cycles_hold = (cycles_hold > overhead) ? (cycles_hold - overhead) : 0;
+    uint32_t loops_hold = (uint32_t) (eff_cycles_hold / cpl);
 
+    // --- Setup Period Calculation ---
+    uint32_t eff_cycles_setup = (cycles_setup > overhead) ? (cycles_setup - overhead) : 0;
+    uint32_t loops_setup = (uint32_t) (eff_cycles_setup / cpl);
+
+    // Apply safety minimums
     if (loops_hold == 0) {
         loops_hold = 1;
     }
