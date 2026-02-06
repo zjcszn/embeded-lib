@@ -1,10 +1,9 @@
-#ifndef __SOFT_I2C_H__
-#define __SOFT_I2C_H__
+#ifndef __SW_I2C_H__
+#define __SW_I2C_H__
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdbool.h>
 #include <stdint.h>
-
 
 /* Exported macro ------------------------------------------------------------*/
 
@@ -78,6 +77,19 @@ typedef struct {
     uint32_t ticks_setup;    // Ticks before SCL rising edge
     uint32_t ticks_high;     // Ticks for SCL High period
     uint32_t ticks_timeout;  // Ticks/Loops for Clock Stretching Timeout
+
+    /**
+     * @brief Enable/Disable Clock Stretching support
+     *
+     * - true (Default): Fully supports clock stretching. If Slave holds SCL Low,
+     *   Master waits up to 'ticks_timeout' loop cycles.
+     *
+     * - false: Minimal support. Master only waits for 'ticks_setup' (approx 1/4 cycle)
+     *   to allow for physical rise time. If SCL remains Low after this short period,
+     *   it considers the bus stuck/error and returns immediately.
+     *   Useful for preventing Master blocking in bare-metal systems with faulty slaves.
+     */
+    bool enable_clock_stretch;  // Enable/Disable Clock Stretching support
 } sw_i2c_t;
 
 /* Exported function declaration ---------------------------------------------*/
@@ -126,4 +138,19 @@ sw_i2c_err_t sw_i2c_master_read(sw_i2c_t *i2c_dev, uint8_t *data, uint16_t len);
 sw_i2c_err_t sw_i2c_master_mem_read(sw_i2c_t *i2c_dev, uint32_t mem_addr, uint16_t addr_len,
                                     uint8_t *data, uint16_t len);
 
-#endif /* __SOFT_I2C_H__ */
+/**
+ * @brief  Check if I2C bus is stuck (SDA Low when SCL High)
+ * @param  i2c_dev I2C device handle
+ * @return sw_i2c_err_t SOFT_I2C_ERR_BUS if stuck, SOFT_I2C_OK otherwise
+ */
+sw_i2c_err_t sw_i2c_check_stuck(sw_i2c_t *i2c_dev);
+
+/**
+ * @brief  Attempt to unlock the I2C bus by toggling SCL
+ *         to clock out stuck data bits from slave.
+ * @param  i2c_dev I2C device handle
+ * @return sw_i2c_err_t
+ */
+sw_i2c_err_t sw_i2c_unlock(sw_i2c_t *i2c_dev);
+
+#endif /* __SW_I2C_H__ */

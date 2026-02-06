@@ -1,5 +1,5 @@
 
-#include "bsp_i2c_sw.h"
+#include "sw_i2c.h"
 
 /* Private macro definition --------------------------------------------------*/
 #define LOG_TAG "I2C_SW"
@@ -14,7 +14,7 @@
 #endif
 
 // Default Timeout in ms
-#define SW_I2C_TIMEOUT_MS  10
+#define SW_I2C_TIMEOUT_MS  1
 
 // Estimated Cycles per Polling Loop (Read SCL + Branch + Decrement)
 // Conservative estimate for Cortex-M
@@ -88,7 +88,24 @@ static inline uint8_t i2c_scl_read(sw_i2c_t *dev) {
  */
 static int i2c_scl_high_check(sw_i2c_t *dev) {
     i2c_scl_write(dev, 1);
+
+    // Check if SCL is actually High
     if (dev->ops.get_scl) {
+        // If Clock Stretching is disabled, we still need to allow some time for
+        // the SCL line to physically rise due to bus capacitance.
+        // We use 'ticks_setup' (approx 1/4 period) as a reasonable "Rise Time" allowance.
+        // This prevents false positives due to IO hysteresis or slow rise times.
+        if (!dev->enable_clock_stretch) {
+            uint32_t timeout = dev->ticks_setup;
+            while (i2c_scl_read(dev) == 0) {
+                if (--timeout == 0) {
+                    SW_I2C_LOG("Clock stretching detected but disabled!\r\n");
+                    return 1;  // Error
+                }
+            }
+            return 0;  // OK
+        }
+
         // Use calculated timeout ticks
         uint32_t timeout = dev->ticks_timeout;
         while (i2c_scl_read(dev) == 0) {
@@ -231,6 +248,9 @@ sw_i2c_err_t sw_i2c_init(sw_i2c_t *i2c_dev, const sw_i2c_ops_t *ops, void *user_
     i2c_dev->ticks_timeout = timeout_cycles / SW_I2C_POLL_CYCLES;
     if (i2c_dev->ticks_timeout == 0)
         i2c_dev->ticks_timeout = 1000;  // Safety floor
+
+    // Default to Enabled for backward compatibility
+    i2c_dev->enable_clock_stretch = true;
 
     if (sw_i2c_set_speed(i2c_dev, freq_khz) != SOFT_I2C_OK) {
         return SOFT_I2C_ERR_PARAM;
@@ -452,4 +472,58 @@ sw_i2c_err_t sw_i2c_master_mem_read(sw_i2c_t *i2c_dev, uint32_t mem_addr, uint16
 error:
     i2c_stop(i2c_dev);
     return (sw_i2c_err_t) ret;
+}
+
+sw_i2c_err_t sw_i2c_check_stuck(sw_i2c_t *i2c_dev) {
+    if (!i2c_dev)
+        return SOFT_I2C_ERR_PARAM;
+
+    // 1. Set SCL High
+    i2c_scl_write(i2c_dev, 1);
+    i2c_delay_high(i2c_dev);
+
+    // 2. Check if SCL is actually High (Clock Stretching check)
+    if (i2c_scl_read(i2c_dev) == 0) {
+        // SCL is stuck Low, likely master or another master holding it?
+        // Or extreme clock stretching.
+        return SOFT_I2C_ERR_BUS;
+    }
+
+    // 3. Check SDA
+    if (i2c_sda_read(i2c_dev) == 0) {
+        // SDA is Low while SCL is High -> Stuck
+        return SOFT_I2C_ERR_BUS;
+    }
+
+    return SOFT_I2C_OK;
+}
+
+sw_i2c_err_t sw_i2c_unlock(sw_i2c_t *i2c_dev) {
+    if (!i2c_dev)
+        return SOFT_I2C_ERR_PARAM;
+
+    // Try up to 9 clocks to clear stuck data (slave might be outputting Low bit)
+    for (int i = 0; i < 9; i++) {
+        // Check if released
+        if (sw_i2c_check_stuck(i2c_dev) == SOFT_I2C_OK) {
+            // Generate STOP to reset slave state machine
+            i2c_stop(i2c_dev);
+            return SOFT_I2C_OK;
+        }
+
+        // Toggle SCL
+        i2c_scl_write(i2c_dev, 0);
+        i2c_delay_hold(i2c_dev);
+        i2c_delay_setup(i2c_dev);
+        i2c_scl_write(i2c_dev, 1);
+        i2c_delay_high(i2c_dev);
+    }
+
+    // Final check
+    if (sw_i2c_check_stuck(i2c_dev) == SOFT_I2C_OK) {
+        i2c_stop(i2c_dev);
+        return SOFT_I2C_OK;
+    }
+
+    return SOFT_I2C_ERR_BUS;
 }

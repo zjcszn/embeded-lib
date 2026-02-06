@@ -1,7 +1,7 @@
-#ifndef __BSP_I2C_SW_PORT_H__
-#define __BSP_I2C_SW_PORT_H__
+#ifndef __SW_I2C_PORT_H__
+#define __SW_I2C_PORT_H__
 
-#include "bsp_i2c_sw.h"
+#include "sw_i2c.h"
 
 #ifdef USE_HAL_DRIVER
 #include "stm32h7xx_ll_gpio.h"
@@ -22,4 +22,4 @@ sw_i2c_err_t sw_i2c_init_default(sw_i2c_t *i2c_dev, GPIO_TypeDef *scl_port, uint
                                  uint32_t sys_clk_hz);
 #endif
 
-#endif /* __BSP_I2C_SW_PORT_H__ */
+#endif /* __SW_I2C_PORT_H__ */

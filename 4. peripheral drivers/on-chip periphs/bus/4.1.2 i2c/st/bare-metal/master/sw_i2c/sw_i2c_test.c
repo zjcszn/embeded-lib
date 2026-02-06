@@ -2,8 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "bsp_i2c_sw_port.h"
-
+#include "sw_i2c_port.h"
 
 /* Defines -------------------------------------------------------------------*/
 #define TEST_BUFFER_SIZE 32
@@ -31,6 +30,8 @@ static void hex_dump(const char *desc, const uint8_t *data, uint16_t len) {
  */
 void sw_i2c_test_scan(sw_i2c_t *i2c_dev) {
     // Wrapper around the driver's scan function
+    printf("[I2C Test] Clock Streching: %s\r\n",
+           i2c_dev->enable_clock_stretch ? "Enabled" : "Disabled");
     if (sw_i2c_scan(i2c_dev) != SOFT_I2C_OK) {
         printf("[I2C Test] Scan failed or driver error.\r\n");
     }
@@ -78,5 +79,19 @@ void sw_i2c_test_rw(sw_i2c_t *i2c_dev, uint32_t mem_addr, uint16_t addr_len) {
         printf("[I2C] Verify FAILED!\n");
         hex_dump("Expected", tx_buf, TEST_BUFFER_SIZE);
         hex_dump("Actual", rx_buf, TEST_BUFFER_SIZE);
+    }
+}
+
+/**
+ * @brief  Test I2C Bus Unlock/Recovery
+ * @param  i2c_dev Initialized I2C handle
+ */
+void sw_i2c_test_unlock(sw_i2c_t *i2c_dev) {
+    printf("[I2C] Testing Bus Unlock...\n");
+    sw_i2c_err_t ret = sw_i2c_unlock(i2c_dev);
+    if (ret == SOFT_I2C_OK) {
+        printf("[I2C] Bus Unlock Successful (or Bus was already Free)\n");
+    } else {
+        printf("[I2C] Bus Unlock FAILED (Bus still stuck)\n");
     }
 }

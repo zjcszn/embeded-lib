@@ -1,5 +1,5 @@
 
-#include "bsp_i2c_sw.h"
+#include "sw_i2c.h"
 
 #ifdef USE_HAL_DRIVER
 #include "stm32h7xx_ll_bus.h"
