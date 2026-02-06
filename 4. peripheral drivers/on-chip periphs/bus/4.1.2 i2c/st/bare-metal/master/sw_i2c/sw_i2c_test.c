@@ -95,3 +95,128 @@ void sw_i2c_test_unlock(sw_i2c_t *i2c_dev) {
         printf("[I2C] Bus Unlock FAILED (Bus still stuck)\n");
     }
 }
+
+/**
+ * @brief  Test new API extensions
+ * @param  i2c_dev Initialized I2C handle
+ */
+void sw_i2c_test_api_ext(sw_i2c_t *i2c_dev) {
+    uint16_t old_addr = sw_i2c_get_addr(i2c_dev);
+    printf("[I2C] Testing API Extensions...\n");
+
+    // Test Set/Get Addr
+    sw_i2c_set_addr(i2c_dev, 0x55);
+    if (sw_i2c_get_addr(i2c_dev) == 0x55) {
+        printf("  [PASS] Set/Get Addr\n");
+    } else {
+        printf("  [FAIL] Set/Get Addr\n");
+    }
+
+    // Restore addr
+    sw_i2c_set_addr(i2c_dev, old_addr);
+
+    // Test Device Ready (Assumes device at old_addr exists, or at least we test the call)
+    if (sw_i2c_is_device_ready(i2c_dev, old_addr) == SOFT_I2C_OK) {
+        printf("  [INFO] Device at 0x%02X is READY\n", old_addr);
+    } else {
+        printf("  [INFO] Device at 0x%02X is NOT READY (NACK)\n", old_addr);
+    }
+}
+
+/**
+ * @brief  Test Register Access APIs (8-bit and 16-bit)
+ * @param  i2c_dev Initialized I2C handle
+ * @param  reg_addr Register address to test
+ */
+void sw_i2c_test_reg_access(sw_i2c_t *i2c_dev, uint8_t reg_addr) {
+    printf("[I2C] Testing Register Access APIs...\n");
+    uint8_t val8 = 0;
+    uint16_t val16 = 0;
+
+    // Test 8-bit Write/Read
+    printf("  [TEST] Write Reg8 0x%02X <- 0xAB\n", reg_addr);
+    if (sw_i2c_write_reg8(i2c_dev, reg_addr, 0xAB) == SOFT_I2C_OK) {
+        if (sw_i2c_read_reg8(i2c_dev, reg_addr, &val8) == SOFT_I2C_OK) {
+            if (val8 == 0xAB)
+                printf("    [PASS] Read back 0xAB\n");
+            else
+                printf("    [FAIL] Read back 0x%02X != 0xAB\n", val8);
+        } else {
+            printf("    [FAIL] Read Reg8 Failed\n");
+        }
+    } else {
+        printf("    [FAIL] Write Reg8 Failed\n");
+    }
+
+    // Test 16-bit Write/Read
+    printf("  [TEST] Write Reg16 0x%02X <- 0x1234\n", reg_addr);
+    if (sw_i2c_write_reg16(i2c_dev, reg_addr, 0x1234) == SOFT_I2C_OK) {
+        if (sw_i2c_read_reg16(i2c_dev, reg_addr, &val16) == SOFT_I2C_OK) {
+            if (val16 == 0x1234)
+                printf("    [PASS] Read back 0x1234\n");
+            else
+                printf("    [FAIL] Read back 0x%04X != 0x1234\n", val16);
+        } else {
+            printf("    [FAIL] Read Reg16 Failed\n");
+        }
+    } else {
+        printf("    [FAIL] Write Reg16 Failed\n");
+    }
+}
+
+/**
+ * @brief  Test Clock Stretching API
+ * @param  i2c_dev Initialized I2C handle
+ */
+void sw_i2c_test_clock_stretch_api(sw_i2c_t *i2c_dev) {
+    printf("[I2C] Testing Clock Stretch API...\n");
+
+    // Test Enable
+    if (sw_i2c_clock_stretch_enable(i2c_dev, true) == SOFT_I2C_OK) {
+        if (i2c_dev->enable_clock_stretch == true) {
+            printf("  [PASS] Enable Clock Stretch\n");
+        } else {
+            printf("  [FAIL] Enable Clock Stretch (internal flag mismatch)\n");
+        }
+    } else {
+        printf("  [FAIL] Enable Clock Stretch call failed\n");
+    }
+
+    // Test Disable
+    if (sw_i2c_clock_stretch_enable(i2c_dev, false) == SOFT_I2C_OK) {
+        if (i2c_dev->enable_clock_stretch == false) {
+            printf("  [PASS] Disable Clock Stretch\n");
+        } else {
+            printf("  [FAIL] Disable Clock Stretch (internal flag mismatch)\n");
+        }
+    } else {
+        printf("  [FAIL] Disable Clock Stretch call failed\n");
+    }
+}
+
+/**
+ * @brief  Example of how to use the new Init API
+ * @return 0 on success, error code otherwise
+ */
+sw_i2c_err_t sw_i2c_test_init_example(void) {
+    sw_i2c_t my_i2c_dev;
+
+    // Define configuration
+    sw_i2c_port_cfg_t cfg = {
+        .scl_port = GPIOB,  // Use actual GPIO_TypeDef* if available or void* cast
+        .scl_pin = 0x0040,  // Example PIN_6
+        .sda_port = GPIOB,
+        .sda_pin = 0x0080,  // Example PIN_7
+        .freq_khz = 400,
+        .sys_clk_hz = 0  // Auto-detect
+    };
+
+    // Initialize
+    if (sw_i2c_init_default(&my_i2c_dev, &cfg) != SOFT_I2C_OK) {
+        printf("[I2C] Init Failed\n");
+        return SOFT_I2C_ERR_BUS;
+    }
+
+    printf("[I2C] Init Success\n");
+    return SOFT_I2C_OK;
+}

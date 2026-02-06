@@ -46,7 +46,15 @@ sw_i2c_init(&i2c_dev, &my_ops, &my_param, 400, 168000000);
 如果您使用的是 STM32 且包含了 `sw_i2c_port.h`，可以使用辅助函数：
 
 ```c
-sw_i2c_init_default(&i2c_dev, GPIOB, LL_GPIO_PIN_6, GPIOB, LL_GPIO_PIN_7, 400, 0);
+sw_i2c_port_cfg_t cfg = {
+    .scl_port = GPIOB,
+    .scl_pin  = LL_GPIO_PIN_6,
+    .sda_port = GPIOB,
+    .sda_pin  = LL_GPIO_PIN_7,
+    .freq_khz = 400,
+    .sys_clk_hz = 0
+};
+sw_i2c_init_default(&i2c_dev, &cfg);
 ```
 
 ---
@@ -80,6 +88,32 @@ sw_i2c_master_mem_read(&i2c_dev, 0x10, 1, buf, 4);
 **说明**：
 - `mem_addr`: 寄存器地址。
 - `addr_len`: 寄存器地址长度（通常为 1 字节或 2 字节）。
+
+---
+
+
+### 3.3 管理从机地址 (Managing Slave Address)
+`sw_i2c_init` 初始化时不绑定特定从机地址。如果需要与多个从机通信，或者在不同时间切换设备：
+
+```c
+// 设置新的从机地址 (7位地址)
+sw_i2c_set_addr(&i2c_dev, 0x55);
+
+// 获取当前地址
+uint16_t current_addr = sw_i2c_get_addr(&i2c_dev);
+```
+
+### 3.4 设备就绪检测 (Device Readiness Check)
+在操作设备前，可以检查设备是否在线（是否响应 ACK）：
+
+```c
+// 检查地址 0x55 的设备是否就绪
+if (sw_i2c_is_device_ready(&i2c_dev, 0x55) == SOFT_I2C_OK) {
+    // 设备存在，可以通信
+} else {
+    // 设备未响应
+}
+```
 
 ---
 

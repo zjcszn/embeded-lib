@@ -31,8 +31,9 @@
  *         Approx cycles = loops * SW_I2C_CYCLES_PER_LOOP
  */
 static void __attribute__((noinline)) i2c_delay_ticks(uint32_t loops) {
-    if (loops == 0)
+    if (loops == 0) {
         return;
+    }
 #if defined(__GNUC__) || defined(__clang__) || defined(__CC_ARM)
     __asm__ volatile(
         "1: \n"
@@ -109,8 +110,9 @@ static int i2c_scl_high_check(sw_i2c_t *dev) {
         // Use calculated timeout ticks
         uint32_t timeout = dev->ticks_timeout;
         while (i2c_scl_read(dev) == 0) {
-            if (--timeout == 0)
+            if (--timeout == 0) {
                 return 1;
+            }
         }
     }
     return 0;
@@ -156,8 +158,9 @@ static int i2c_wait_ack(sw_i2c_t *dev) {
     i2c_sda_write(dev, 1);
     i2c_delay_setup(dev);
 
-    if (i2c_scl_high_check(dev))
+    if (i2c_scl_high_check(dev)) {
         return SOFT_I2C_ERR_TIMEOUT;
+    }
     i2c_delay_high(dev);
 
     uint8_t ack = i2c_sda_read(dev);
@@ -196,8 +199,9 @@ static int i2c_send_byte(sw_i2c_t *dev, uint8_t byte) {
         i2c_delay_hold(dev);
         i2c_sda_write(dev, (byte & 0x80) ? 1 : 0);
         i2c_delay_setup(dev);
-        if (i2c_scl_high_check(dev))
+        if (i2c_scl_high_check(dev)) {
             return SOFT_I2C_ERR_TIMEOUT;
+        }
         i2c_delay_high(dev);
         byte <<= 1;
     }
@@ -212,8 +216,9 @@ static uint8_t i2c_recv_byte(sw_i2c_t *dev) {
         i2c_scl_write(dev, 0);
         i2c_delay_hold(dev);
         i2c_delay_setup(dev);
-        if (i2c_scl_high_check(dev))
+        if (i2c_scl_high_check(dev)) {
             return 0;
+        }
         i2c_delay_high(dev);
         byte = (byte << 1) | i2c_sda_read(dev);
     }
@@ -228,8 +233,9 @@ sw_i2c_err_t sw_i2c_init(sw_i2c_t *i2c_dev, const sw_i2c_ops_t *ops, void *user_
     if (!i2c_dev || !ops || !ops->set_scl || !ops->set_sda || !ops->get_sda) {
         return SOFT_I2C_ERR_BUS;
     }
-    if (sys_clk_hz == 0)
+    if (sys_clk_hz == 0) {
         return SOFT_I2C_ERR_PARAM;
+    }
 
     // Check if sys_clk is sufficient for target freq (approx check)
     if (sys_clk_hz / (freq_khz * 1000) < 20) {
@@ -246,11 +252,12 @@ sw_i2c_err_t sw_i2c_init(sw_i2c_t *i2c_dev, const sw_i2c_ops_t *ops, void *user_
     // Loops = Total Cycles / POLL_CYCLES
     uint32_t timeout_cycles = (sys_clk_hz / 1000) * SW_I2C_TIMEOUT_MS;
     i2c_dev->ticks_timeout = timeout_cycles / SW_I2C_POLL_CYCLES;
-    if (i2c_dev->ticks_timeout == 0)
+    if (i2c_dev->ticks_timeout == 0) {
         i2c_dev->ticks_timeout = 1000;  // Safety floor
+    }
 
-    // Default to Enabled for backward compatibility
-    i2c_dev->enable_clock_stretch = true;
+    // Default to Disabled as per user request (safer for bare-metal)
+    i2c_dev->enable_clock_stretch = false;
 
     if (sw_i2c_set_speed(i2c_dev, freq_khz) != SOFT_I2C_OK) {
         return SOFT_I2C_ERR_PARAM;
@@ -265,8 +272,9 @@ sw_i2c_err_t sw_i2c_init(sw_i2c_t *i2c_dev, const sw_i2c_ops_t *ops, void *user_
 }
 
 sw_i2c_err_t sw_i2c_set_speed(sw_i2c_t *i2c_dev, uint32_t freq_khz) {
-    if (freq_khz == 0)
+    if (freq_khz == 0) {
         freq_khz = 100;
+    }
 
     // Convert ns to cycles: cycles = ns * (sys_clk_hz / 1000000000)
     // Avoid overflow: cycles = sys_clk_hz / freq_hz
@@ -290,8 +298,9 @@ sw_i2c_err_t sw_i2c_set_speed(sw_i2c_t *i2c_dev, uint32_t freq_khz) {
     // Convert cycles to loop counts
     uint32_t loops_high = cycles_high / SW_I2C_CYCLES_PER_LOOP;
 
-    if (loops_high == 0)
+    if (loops_high == 0) {
         loops_high = 1;
+    }
 
     // Low period distribution
     if (freq_khz >= 400) {
@@ -308,10 +317,12 @@ sw_i2c_err_t sw_i2c_set_speed(sw_i2c_t *i2c_dev, uint32_t freq_khz) {
     uint32_t loops_hold = cycles_hold / SW_I2C_CYCLES_PER_LOOP;
     uint32_t loops_setup = cycles_setup / SW_I2C_CYCLES_PER_LOOP;
 
-    if (loops_hold == 0)
+    if (loops_hold == 0) {
         loops_hold = 1;
-    if (loops_setup == 0)
+    }
+    if (loops_setup == 0) {
         loops_setup = 1;
+    }
 
     i2c_dev->freq_khz = freq_khz;
     i2c_dev->ticks_high = loops_high;
@@ -413,19 +424,22 @@ sw_i2c_err_t sw_i2c_master_mem_write(sw_i2c_t *i2c_dev, uint32_t mem_addr, uint1
     i2c_start(i2c_dev);
 
     ret = i2c_send_byte(i2c_dev, i2c_dev->dev_addr << 1);
-    if (ret != SOFT_I2C_OK)
+    if (ret != SOFT_I2C_OK) {
         goto error;
+    }
 
     for (int i = addr_len - 1; i >= 0; i--) {
         ret = i2c_send_byte(i2c_dev, (mem_addr >> (8 * i)) & 0xFF);
-        if (ret != SOFT_I2C_OK)
+        if (ret != SOFT_I2C_OK) {
             goto error;
+        }
     }
 
     for (int i = 0; i < len; i++) {
         ret = i2c_send_byte(i2c_dev, data[i]);
-        if (ret != SOFT_I2C_OK)
+        if (ret != SOFT_I2C_OK) {
             goto error;
+        }
     }
 
     i2c_stop(i2c_dev);
@@ -442,20 +456,23 @@ sw_i2c_err_t sw_i2c_master_mem_read(sw_i2c_t *i2c_dev, uint32_t mem_addr, uint16
     i2c_start(i2c_dev);
 
     ret = i2c_send_byte(i2c_dev, i2c_dev->dev_addr << 1);
-    if (ret != SOFT_I2C_OK)
+    if (ret != SOFT_I2C_OK) {
         goto error;
+    }
 
     for (int i = addr_len - 1; i >= 0; i--) {
         ret = i2c_send_byte(i2c_dev, (mem_addr >> (8 * i)) & 0xFF);
-        if (ret != SOFT_I2C_OK)
+        if (ret != SOFT_I2C_OK) {
             goto error;
+        }
     }
 
     i2c_restart(i2c_dev);
 
     ret = i2c_send_byte(i2c_dev, (i2c_dev->dev_addr << 1) | 1);
-    if (ret != SOFT_I2C_OK)
+    if (ret != SOFT_I2C_OK) {
         goto error;
+    }
 
     for (int i = 0; i < len; i++) {
         data[i] = i2c_recv_byte(i2c_dev);
@@ -475,8 +492,9 @@ error:
 }
 
 sw_i2c_err_t sw_i2c_check_stuck(sw_i2c_t *i2c_dev) {
-    if (!i2c_dev)
+    if (!i2c_dev) {
         return SOFT_I2C_ERR_PARAM;
+    }
 
     // 1. Set SCL High
     i2c_scl_write(i2c_dev, 1);
@@ -499,8 +517,9 @@ sw_i2c_err_t sw_i2c_check_stuck(sw_i2c_t *i2c_dev) {
 }
 
 sw_i2c_err_t sw_i2c_unlock(sw_i2c_t *i2c_dev) {
-    if (!i2c_dev)
+    if (!i2c_dev) {
         return SOFT_I2C_ERR_PARAM;
+    }
 
     // Try up to 9 clocks to clear stuck data (slave might be outputting Low bit)
     for (int i = 0; i < 9; i++) {
@@ -526,4 +545,85 @@ sw_i2c_err_t sw_i2c_unlock(sw_i2c_t *i2c_dev) {
     }
 
     return SOFT_I2C_ERR_BUS;
+}
+
+sw_i2c_err_t sw_i2c_set_addr(sw_i2c_t *i2c_dev, uint16_t dev_addr) {
+    if (!i2c_dev) {
+        return SOFT_I2C_ERR_PARAM;
+    }
+    i2c_dev->dev_addr = dev_addr;
+    return SOFT_I2C_OK;
+}
+
+uint16_t sw_i2c_get_addr(sw_i2c_t *i2c_dev) {
+    return i2c_dev ? i2c_dev->dev_addr : 0;
+}
+
+sw_i2c_err_t sw_i2c_is_device_ready(sw_i2c_t *i2c_dev, uint16_t dev_addr) {
+    sw_i2c_err_t ret;
+    uint16_t original_addr;
+
+    if (!i2c_dev) {
+        return SOFT_I2C_ERR_PARAM;
+    }
+
+    // Backup current address
+    original_addr = i2c_dev->dev_addr;
+
+    // Set temporary address
+    i2c_dev->dev_addr = dev_addr;
+
+    // Attempt simple write (0 bytes) to check for ACK
+    // Implementation detail: sw_i2c_master_write sends ADDR+W and checks ACK
+    // If len is 0, it just pings the address.
+    ret = sw_i2c_master_write(i2c_dev, NULL, 0);
+
+    // Restore address
+    i2c_dev->dev_addr = original_addr;
+
+    return ret == SOFT_I2C_OK ? SOFT_I2C_OK : SOFT_I2C_ERR_NACK;
+}
+
+sw_i2c_err_t sw_i2c_write_reg8(sw_i2c_t *i2c_dev, uint8_t reg_addr, uint8_t val) {
+    if (!i2c_dev) {
+        return SOFT_I2C_ERR_PARAM;
+    }
+    return sw_i2c_master_mem_write(i2c_dev, reg_addr, 1, &val, 1);
+}
+
+sw_i2c_err_t sw_i2c_read_reg8(sw_i2c_t *i2c_dev, uint8_t reg_addr, uint8_t *val) {
+    if (!i2c_dev || !val) {
+        return SOFT_I2C_ERR_PARAM;
+    }
+    return sw_i2c_master_mem_read(i2c_dev, reg_addr, 1, val, 1);
+}
+
+sw_i2c_err_t sw_i2c_write_reg16(sw_i2c_t *i2c_dev, uint8_t reg_addr, uint16_t val) {
+    if (!i2c_dev) {
+        return SOFT_I2C_ERR_PARAM;
+    }
+    uint8_t data[2];
+    data[0] = (uint8_t) (val >> 8);
+    data[1] = (uint8_t) (val & 0xFF);
+    return sw_i2c_master_mem_write(i2c_dev, reg_addr, 1, data, 2);
+}
+
+sw_i2c_err_t sw_i2c_read_reg16(sw_i2c_t *i2c_dev, uint8_t reg_addr, uint16_t *val) {
+    if (!i2c_dev || !val) {
+        return SOFT_I2C_ERR_PARAM;
+    }
+    uint8_t data[2];
+    sw_i2c_err_t ret = sw_i2c_master_mem_read(i2c_dev, reg_addr, 1, data, 2);
+    if (ret == SOFT_I2C_OK) {
+        *val = (uint16_t) ((data[0] << 8) | data[1]);
+    }
+    return ret;
+}
+
+sw_i2c_err_t sw_i2c_clock_stretch_enable(sw_i2c_t *i2c_dev, bool enable) {
+    if (!i2c_dev) {
+        return SOFT_I2C_ERR_PARAM;
+    }
+    i2c_dev->enable_clock_stretch = enable;
+    return SOFT_I2C_OK;
 }

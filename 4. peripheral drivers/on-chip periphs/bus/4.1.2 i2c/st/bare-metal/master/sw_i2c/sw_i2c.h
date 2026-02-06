@@ -81,10 +81,10 @@ typedef struct {
     /**
      * @brief Enable/Disable Clock Stretching support
      *
-     * - true (Default): Fully supports clock stretching. If Slave holds SCL Low,
+     * - true: Fully supports clock stretching. If Slave holds SCL Low,
      *   Master waits up to 'ticks_timeout' loop cycles.
      *
-     * - false: Minimal support. Master only waits for 'ticks_setup' (approx 1/4 cycle)
+     * - false (Default): Minimal support. Master only waits for 'ticks_setup' (approx 1/4 cycle)
      *   to allow for physical rise time. If SCL remains Low after this short period,
      *   it considers the bus stuck/error and returns immediately.
      *   Useful for preventing Master blocking in bare-metal systems with faulty slaves.
@@ -126,15 +126,84 @@ sw_i2c_err_t sw_i2c_set_speed(sw_i2c_t *i2c_dev, uint32_t freq_khz);
  */
 sw_i2c_err_t sw_i2c_scan(sw_i2c_t *i2c_dev);
 
+/**
+ * @brief  Reset the I2C master state
+ *         (e.g., release bus, reset finite state machine if any)
+ * @param  i2c_dev I2C device handle
+ * @return sw_i2c_err_t SOFT_I2C_OK
+ */
 sw_i2c_err_t sw_i2c_master_reset(sw_i2c_t *i2c_dev);
 
+/**
+ * @brief  Master Transmit Data
+ * @param  i2c_dev I2C device handle
+ * @param  data    Pointer to data buffer
+ * @param  len     Amount of data to be sent
+ * @return sw_i2c_err_t SOFT_I2C_OK or error code
+ */
 sw_i2c_err_t sw_i2c_master_write(sw_i2c_t *i2c_dev, const uint8_t *data, uint16_t len);
 
+/**
+ * @brief  Enable or Disable Clock Stretching
+ * @param  i2c_dev I2C device handle
+ * @param  enable  true: Enable, false: Disable (Default)
+ * @return sw_i2c_err_t
+ */
+sw_i2c_err_t sw_i2c_clock_stretch_enable(sw_i2c_t *i2c_dev, bool enable);
+
+/**
+ * @brief  Set the I2C Slave Address (7-bit)
+ * @param  i2c_dev  I2C device handle
+ * @param  dev_addr Slave address (7-bit, right aligned)
+ * @return sw_i2c_err_t SOFT_I2C_OK
+ */
+sw_i2c_err_t sw_i2c_set_addr(sw_i2c_t *i2c_dev, uint16_t dev_addr);
+
+/**
+ * @brief  Get the current I2C Slave Address
+ * @param  i2c_dev I2C device handle
+ * @return uint16_t Current Slave address (7-bit)
+ */
+uint16_t sw_i2c_get_addr(sw_i2c_t *i2c_dev);
+
+/**
+ * @brief  Check if an I2C device is ready (ACKs address)
+ * @param  i2c_dev  I2C device handle
+ * @param  dev_addr Slave address to check
+ * @return sw_i2c_err_t SOFT_I2C_OK if ready, SOFT_I2C_ERR_NACK if not
+ */
+sw_i2c_err_t sw_i2c_is_device_ready(sw_i2c_t *i2c_dev, uint16_t dev_addr);
+
+/**
+ * @brief  Master Transmit Data to specific memory address (Register Write)
+ * @param  i2c_dev   I2C device handle
+ * @param  mem_addr  Internal memory address/Register address
+ * @param  addr_len  Address length (1: 8-bit, 2: 16-bit)
+ * @param  data      Pointer to data buffer
+ * @param  len       Amount of data to be sent
+ * @return sw_i2c_err_t SOFT_I2C_OK or error code
+ */
 sw_i2c_err_t sw_i2c_master_mem_write(sw_i2c_t *i2c_dev, uint32_t mem_addr, uint16_t addr_len,
                                      const uint8_t *data, uint16_t len);
 
+/**
+ * @brief  Master Receive Data
+ * @param  i2c_dev I2C device handle
+ * @param  data    Pointer to data buffer
+ * @param  len     Amount of data to be received
+ * @return sw_i2c_err_t SOFT_I2C_OK or error code
+ */
 sw_i2c_err_t sw_i2c_master_read(sw_i2c_t *i2c_dev, uint8_t *data, uint16_t len);
 
+/**
+ * @brief  Master Receive Data from specific memory address (Register Read)
+ * @param  i2c_dev   I2C device handle
+ * @param  mem_addr  Internal memory address/Register address
+ * @param  addr_len  Address length (1: 8-bit, 2: 16-bit)
+ * @param  data      Pointer to data buffer
+ * @param  len       Amount of data to be received
+ * @return sw_i2c_err_t SOFT_I2C_OK or error code
+ */
 sw_i2c_err_t sw_i2c_master_mem_read(sw_i2c_t *i2c_dev, uint32_t mem_addr, uint16_t addr_len,
                                     uint8_t *data, uint16_t len);
 
@@ -152,5 +221,44 @@ sw_i2c_err_t sw_i2c_check_stuck(sw_i2c_t *i2c_dev);
  * @return sw_i2c_err_t
  */
 sw_i2c_err_t sw_i2c_unlock(sw_i2c_t *i2c_dev);
+
+/**
+ * @brief  Write 8-bit value to an 8-bit register
+ * @param  i2c_dev  I2C device handle
+ * @param  reg_addr Register address (8-bit)
+ * @param  val      Value to write (8-bit)
+ * @return sw_i2c_err_t
+ */
+sw_i2c_err_t sw_i2c_write_reg8(sw_i2c_t *i2c_dev, uint8_t reg_addr, uint8_t val);
+
+/**
+ * @brief  Read 8-bit value from an 8-bit register
+ * @param  i2c_dev  I2C device handle
+ * @param  reg_addr Register address (8-bit)
+ * @param  val      Pointer to store read value
+ * @return sw_i2c_err_t
+ */
+sw_i2c_err_t sw_i2c_read_reg8(sw_i2c_t *i2c_dev, uint8_t reg_addr, uint8_t *val);
+
+/**
+ * @brief  Write 16-bit value to an 8-bit register
+ *         (Writes 2 bytes: [Low, High] or [High, Low] depending on device?
+ *          Defaulting to Big Endian [MSB, LSB] as is common in I2C)
+ * @param  i2c_dev  I2C device handle
+ * @param  reg_addr Register address (8-bit)
+ * @param  val      Value to write (16-bit)
+ * @return sw_i2c_err_t
+ */
+sw_i2c_err_t sw_i2c_write_reg16(sw_i2c_t *i2c_dev, uint8_t reg_addr, uint16_t val);
+
+/**
+ * @brief  Read 16-bit value from an 8-bit register
+ *         (Reads 2 bytes: [MSB, LSB])
+ * @param  i2c_dev  I2C device handle
+ * @param  reg_addr Register address (8-bit)
+ * @param  val      Pointer to store read value
+ * @return sw_i2c_err_t
+ */
+sw_i2c_err_t sw_i2c_read_reg16(sw_i2c_t *i2c_dev, uint8_t reg_addr, uint16_t *val);
 
 #endif /* __SW_I2C_H__ */
