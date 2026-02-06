@@ -17,7 +17,23 @@
 #define SOFT_I2C_USE_LOG 0
 #endif
 
+// Auto-Calibration Configuration
+#ifndef SW_I2C_ENABLE_AUTO_CALIB
+#if defined(__ARM_ARCH_7EM__) || defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_6M__) || \
+    defined(__ARM_ARCH_8M_BASE__) || defined(__ARM_ARCH_8M_MAIN__) || defined(__CORTEX_M)
+// Enable by default for Cortex-M
+#define SW_I2C_ENABLE_AUTO_CALIB 1
+#else
+// Disable by default for others (including RISC-V unless explicitly enabled)
+#define SW_I2C_ENABLE_AUTO_CALIB 0
+#endif
+#endif
+
 /* Exported types ------------------------------------------------------------*/
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef enum {
     SOFT_I2C_OK,
@@ -92,7 +108,11 @@ typedef struct {
      */
     bool enable_clock_stretch;  // Enable/Disable Clock Stretching support
 
-    float cycles_per_loop;    // Runtime calibrated cycles per loop (float for precision)
+#if SW_I2C_ENABLE_AUTO_CALIB
+    float cycles_per_loop;  // Runtime calibrated cycles per loop (float for precision)
+#else
+    uint16_t cycles_per_loop;  // Fixed cycles per loop (integer to save space)
+#endif
     uint32_t ticks_overhead;  // Fixed overhead ticks
 } sw_i2c_t;
 
@@ -271,5 +291,9 @@ sw_i2c_err_t sw_i2c_write_reg16(sw_i2c_t *i2c_dev, uint8_t reg_addr, uint16_t va
  * @return sw_i2c_err_t
  */
 sw_i2c_err_t sw_i2c_read_reg16(sw_i2c_t *i2c_dev, uint8_t reg_addr, uint16_t *val);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __SW_I2C_H__ */

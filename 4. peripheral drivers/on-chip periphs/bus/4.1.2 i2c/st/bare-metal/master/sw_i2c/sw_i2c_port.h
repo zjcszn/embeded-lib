@@ -4,6 +4,10 @@
 #include "sw_i2c.h"
 
 #ifdef USE_HAL_DRIVER
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /**
  * @brief  I2C Port Configuration Structure
  *         Holds platform-specific resource handles and pin definitions.
@@ -26,6 +30,10 @@ typedef struct {
  */
 sw_i2c_err_t sw_i2c_init_default(sw_i2c_t *i2c_dev, const sw_i2c_port_cfg_t *cfg, uint32_t freq_khz,
                                  uint32_t sys_clk_hz);
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* __SW_I2C_PORT_H__ */
