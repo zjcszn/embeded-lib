@@ -806,6 +806,7 @@ void test_monitor_consistency(void) {
 
     printf("Std_Ramp_InternalSP,1.00,%.2f\n", mon.target);
     printf("Std_Monitor_Error,1.00,%.2f\n", mon.error);
+    printf("Std_Raw_Error,5.00,%.2f\n", pid.error_raw);
 
     // Test 2: Incremental PID - First Run Sync
     pid_reset(&pid);
@@ -830,6 +831,7 @@ void test_monitor_consistency(void) {
     pid_get_monitor(&pid, &mon);
     printf("Inc_Ramp_Target,6.00,%.2f\n", mon.target);
     printf("Inc_Monitor_Error,6.00,%.2f\n", mon.error);
+    printf("Inc_Raw_Error,10.00,%.2f\n", pid.error_raw);
 
     print_test_footer();
 }

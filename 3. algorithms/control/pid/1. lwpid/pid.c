@@ -383,7 +383,7 @@ pid_real_t pid_update(pid_t *pid, pid_real_t setpoint, pid_real_t measurement, p
 
     // Update History
     pid->prev_measure = filtered_measure;
-    pid->prev_error = target_setpoint - filtered_measure;  // Store raw error
+    pid->prev_error = target_setpoint - filtered_measure;  // Store calculated error
     pid->out = out;
 
     // Store Diagnostic Data
@@ -547,7 +547,7 @@ pid_real_t pid_update_incremental(pid_t *pid, pid_real_t setpoint, pid_real_t me
     pid->i_out = i_diff;
     pid->d_out = d_diff;
     pid->f_out = 0.0f;  // No F-term delta in this implementation
-    pid->error_raw = target_setpoint - measurement;
+    pid->error_raw = setpoint - measurement;
 
     // Update internal output state for Monitor
     // We estimate current output as (User_Provided_Current_Output + Delta)

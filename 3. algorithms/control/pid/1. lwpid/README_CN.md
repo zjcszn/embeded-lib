@@ -265,7 +265,7 @@ if (mon.saturated) {
 ### 监控字段说明
 *   `target`: 当前内部设定值 (如果启用了斜坡，则是斜坡后的值)。
 *   `measure`: 当前使用的测量值 (经过 Input Filter 滤波后的值)。
-*   `error`: 计算用的误差 (SP - PV)。
+*   `error`: PID计算误差 (内部设定值[含Ramp] - 滤波后测量值)。
 *   `p_term`, `i_term`, `d_term`, `f_term`: 各项对最终输出的贡献值。
     *   注意：对于**增量式 PID**，这些值代表的是**增量 (Delta)**。
 *   `saturated`: 输出是否达到限幅值。
