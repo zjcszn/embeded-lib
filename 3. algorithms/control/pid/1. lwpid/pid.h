@@ -14,6 +14,21 @@
 extern "C" {
 #endif
 
+// --- Configuration Macros ---
+
+// Robustness: Check for Finite (NaN/Inf)
+#ifndef PID_CHECK_FINITE
+#include <math.h>
+#define PID_CHECK_FINITE(val) isfinite(val)
+#endif
+
+// Logging: Define PID_LOG to printf or other sink if needed
+#ifndef PID_LOG
+#define PID_LOG(fmt, ...)
+#endif
+
+// --- Data Types ---
+
 // float or double
 typedef float pid_real_t;
 typedef uint32_t pid_tick_t;
@@ -24,9 +39,36 @@ typedef uint32_t pid_tick_t;
 typedef enum {
     PID_ANTI_WINDUP_CONDITIONAL = 0,  // Conditional Integration (Default)
     PID_ANTI_WINDUP_BACK_CALC,        // Back-calculation (Tracking)
-    PID_ANTI_WINDUP_CLAMP,            // Integral State Clamping
+    PID_ANTI_WINDUP_CLAMP,            // Integral State Clamping (Static limits)
+    PID_ANTI_WINDUP_DYNAMIC_CLAMP,    // Dynamic Clamping based on P/D headroom
     PID_ANTI_WINDUP_NONE              // No Anti-windup
 } pid_anti_windup_mode_t;
+
+/**
+ * @brief Derivative Filter Type
+ */
+typedef enum {
+    PID_FILTER_NONE = 0,
+    PID_FILTER_PT1,    // First Order Low Pass (RC)
+    PID_FILTER_BIQUAD  // Second Order (Biquad)
+} pid_filter_type_t;
+
+/**
+ * @brief Biquad Filter Coefficients
+ * y[n] = b0*x[n] + b1*x[n-1] + b2*x[n-2] - a1*y[n-1] - a2*y[n-2]
+ */
+typedef struct {
+    pid_real_t b0, b1, b2;
+    pid_real_t a1, a2;
+} pid_biquad_coeffs_t;
+
+/**
+ * @brief Biquad Filter State
+ */
+typedef struct {
+    pid_real_t x1, x2;  // Input history
+    pid_real_t y1, y2;  // Output history
+} pid_filter_biquad_state_t;
 
 /**
  * @brief PID Configuration Structure
@@ -44,14 +86,25 @@ typedef struct {
     pid_real_t deadband;  // Linear Deadband (0 to disable)
     pid_real_t max_rate;  // Maximum output change per second (0 to disable)
 
-    // Advanced Features
-    /* Advanced Features */
+    // --- Advanced Features ---
+
     pid_real_t max_setpoint_ramp;             // Max setpoint change/sec (0 to disable)
     pid_real_t kw;                            // Anti-windup Tracking Gain (for BACK_CALC)
     pid_anti_windup_mode_t anti_windup_mode;  // Anti-windup Strategy
 
-    pid_real_t d_lpf_alpha;          // Derivative LPF Alpha (0.0 - 1.0)
+    // --- Filter Configuration ---
+
+    // 1. Derivative Line Filter
+    pid_real_t d_tau;        // Derivative Filter Time Constant (Seconds). Preferred over alpha.
+    pid_real_t d_lpf_alpha;  // DEPRECATED: Manual Alpha (0.0-1.0). Used if d_tau <= 0.
+
+    // 2. Advanced Filter (Biquad) for Derivative Term (Optional)
+    // If set to PID_FILTER_BIQUAD, this overrides d_tau/alpha behavior for D-term.
+    pid_filter_type_t d_filter_type;
+    pid_biquad_coeffs_t d_biquad_coeffs;  // Pre-calculated coefficients for Biquad
+
     bool derivative_on_measurement;  // true: d(PV)/dt, false: d(Error)/dt
+
 } pid_cfg_t;
 
 /**
@@ -63,10 +116,14 @@ typedef struct {
     pid_real_t out;  // Final Output
 
     // Internal State
-    pid_real_t integral;           // Accumulated Integral
-    pid_real_t prev_measure;       // Previous PV (for D-term)
-    pid_real_t prev_error;         // Previous Error (for Incremental P-term)
-    pid_real_t d_lpf;              // Derivative Low-Pass Filter State
+    pid_real_t integral;      // Accumulated Integral
+    pid_real_t prev_measure;  // Previous PV (for D-term)
+    pid_real_t prev_error;    // Previous Error
+
+    // Filter State
+    pid_real_t d_lpf;                    // PT1 Filter State
+    pid_filter_biquad_state_t d_biquad;  // Biquad Filter State
+
     pid_real_t internal_setpoint;  // Current internal setpoint (for Ramp Control)
     bool first_run;                // Flag to handle first-run initialization
 
@@ -93,7 +150,6 @@ bool pid_init(pid_t *pid, const pid_cfg_t *cfg);
 
 /**
  * @brief Reset PID internal state (integral, history)
- * Useful when system re-enables or recovers from error.
  * @param pid Pointer to PID context
  */
 void pid_reset(pid_t *pid);
@@ -113,7 +169,6 @@ pid_real_t pid_update(pid_t *pid, pid_real_t setpoint, pid_real_t measurement,
 /**
  * @brief Update PID controller (Incremental / Velocity Form)
  * Returns the CHANGE in output (Delta U).
- * Useful for integrating actuators (like stepper motors).
  *
  * @param pid Pointer to PID context
  * @param setpoint Target value (SP)
@@ -126,8 +181,6 @@ pid_real_t pid_update_incremental(pid_t *pid, pid_real_t setpoint, pid_real_t me
 
 /**
  * @brief Force set the integral term (Pre-loading)
- * Useful for initializing the controller to a known state or recovering from specific conditions.
- *
  * @param pid Pointer to PID context
  * @param value Target integral value (will be clamped to output limits)
  */
@@ -135,9 +188,6 @@ void pid_set_integral(pid_t *pid, pid_real_t value);
 
 /**
  * @brief Manual Mode Tracking (Bumpless Transfer)
- * Call this periodically when in Manual Mode to keep PID internal state
- * synchronized with the manual output.
- *
  * @param pid Pointer to PID context
  * @param manual_output Current manual output value
  * @param measurement Current Process Variable (PV)
@@ -146,26 +196,32 @@ void pid_set_integral(pid_t *pid, pid_real_t value);
 void pid_track_manual(pid_t *pid, pid_real_t manual_output, pid_real_t measurement,
                       pid_real_t setpoint);
 
+/* --- Helper Functions for Filter Coefficients --- */
+
+/**
+ * @brief Calculate Biquad Coefficients for Low Pass Filter (PT2)
+ * @param coeffs Output coeffs structure
+ * @param dt Time step in seconds
+ * @param cutoff_freq Cutoff frequency in Hz
+ * @param q_factor Q factor (0.707 for Butterworth)
+ */
+void pid_filter_calc_pt2(pid_biquad_coeffs_t *coeffs, pid_real_t dt, pid_real_t cutoff_freq,
+                         pid_real_t q_factor);
+
+/**
+ * @brief Calculate Biquad Coefficients for Notch Filter
+ * @param coeffs Output coeffs structure
+ * @param dt Time step in seconds
+ * @param center_freq Center frequency in Hz
+ * @param bandwidth Bandwidth in Hz
+ */
+void pid_filter_calc_notch(pid_biquad_coeffs_t *coeffs, pid_real_t dt, pid_real_t center_freq,
+                           pid_real_t bandwidth);
+
 /* --- Cascade PID API --- */
 
-/**
- * @brief Initialize Cascade PID
- * @param cascade Pointer to cascade structure
- * @param outer Pointer to initialized outer PID
- * @param inner Pointer to initialized inner PID
- * @return true if successful
- */
 bool pid_cascade_init(pid_cascade_t *cascade, pid_t *outer, pid_t *inner);
 
-/**
- * @brief Update Cascade PID
- * @param cascade Pointer to cascade structure
- * @param setpoint Target for outer loop
- * @param outer_measure Measurement for outer loop
- * @param inner_measure Measurement for inner loop
- * @param dt Time step
- * @return Inner loop output
- */
 pid_real_t pid_cascade_update(pid_cascade_t *cascade, pid_real_t setpoint, pid_real_t outer_measure,
                               pid_real_t inner_measure, pid_real_t dt);
 

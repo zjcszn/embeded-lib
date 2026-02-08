@@ -3,8 +3,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "../pid.h"
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846f
+#endif
 
 // --- Simulation Parameters ---
 #define DT       0.01f
@@ -49,7 +54,6 @@ float plant_update(plant_t *p, float input, float dt) {
     // Simple First Order: dy/dt = (K*u - y) / tau
     float derivative = (p->gain * input - p->output) / p->time_constant;
     p->output += derivative * dt;
-    // Simple Euler integration
     return p->output;
 }
 
@@ -72,12 +76,19 @@ void test_init_check(void) {
     // 2. Test Invalid Range
     cfg.out_max = -100;
     cfg.out_min = 100;
-    res = !pid_init(&pid, &cfg);  // Expect false
+    res = !pid_init(&pid, &cfg);
     printf("%d,Invalid_Range\n", res);
 
     // 3. Test Null Pointers
-    res = !pid_init(NULL, &cfg);  // Expect false
+    res = !pid_init(NULL, &cfg);
     printf("%d,Null_PID\n", res);
+
+    // 4. Test NaN (Input validation)
+    cfg.out_max = 100;
+    cfg.out_min = -100;
+    cfg.kp = NAN;
+    res = pid_init(&pid, &cfg);
+    printf("%d,NaN_Check_Init\n", !res);
 
     print_test_footer();
 }
@@ -93,13 +104,11 @@ void test_p_term(void) {
 
     for (int i = 0; i < 5; i++) {
         float err = errors[i];
-        // Manually setting error via setpoint/measurement
         float sp = err;
         float meas = 0.0f;
 
         float out = pid_update(&pid, sp, meas, 0.1f);
 
-        // Expected: Kp * err, clamped
         float expected = cfg.kp * err;
         if (expected > cfg.out_max)
             expected = cfg.out_max;
@@ -118,21 +127,17 @@ void test_i_term(void) {
     pid_t pid;
     pid_init(&pid, &cfg);
 
-    float error = 10.0f;  // Constant error
+    float error = 10.0f;
     float t = 0.0f;
     float dt = 0.1f;
 
-    // Phase 1: Accumulate
     for (int i = 0; i < 20; i++) {
         float out = pid_update(&pid, error, 0.0f, dt);
         printf("%.2f,%.2f,%.2f,%.2f\n", t, error, pid.integral, out);
         t += dt;
 
-        // Phase 2: Reset at t=1.0
-        if (i == 9) {
+        if (i == 9)
             pid_reset(&pid);
-            // Error persists, integral should restart from 0
-        }
     }
     print_test_footer();
 }
@@ -154,12 +159,9 @@ void test_d_term(void) {
     float meas = 0.0f;
 
     // Ramp measurement: slope = 5.0
-    // D should be -5.0 (since derivative is on -measurement)
-
     for (int i = 0; i < 10; i++) {
         meas = 5.0f * t;
         float out = pid_update(&pid, 0.0f, meas, dt);
-
         printf("%.2f,%.2f,%.2f,%.2f,%.2f\n", t, 0.0f, meas, out, -5.0f);
         t += dt;
     }
@@ -173,8 +175,7 @@ void test_d_term(void) {
 void test_anti_windup(void) {
     print_test_header("Anti_Windup", "Time,Integral,Output,Mode");
 
-    // Test Clamp
-    pid_cfg_t cfg = {.kp = 0.5f,  // Reduced Kp so Output != Integral
+    pid_cfg_t cfg = {.kp = 0.5f,
                      .ki = 1.0f,
                      .kd = 0.0f,
                      .out_max = 10.0f,
@@ -185,39 +186,39 @@ void test_anti_windup(void) {
 
     float t = 0.0f;
     float dt = 0.1f;
+    float error = 100.0f;
 
-    // Run into saturation
+    // Static Clamp
     for (int i = 0; i < 10; i++) {
-        float out = pid_update(&pid, 10.0f, 0.0f, dt);  // Error = 10
+        float out = pid_update(&pid, error, 0.0f, dt);
         printf("%.2f,%.2f,%.2f,CLAMP\n", t, pid.integral, out);
         t += dt;
     }
 
-    // Reset and Test Conditional
-    cfg.anti_windup_mode = PID_ANTI_WINDUP_CONDITIONAL;
-    pid_init(&pid, &cfg);  // re-init to reset
-    // t = 0.0f; // Keep time continuous to avoid plotting artifacts (zigzag/triangle)
+    // Dynamic Clamp
+    cfg.anti_windup_mode = PID_ANTI_WINDUP_DYNAMIC_CLAMP;
+    cfg.kp = 5.0f;
+
+    pid_reset(&pid);
+    pid_init(&pid, &cfg);
 
     for (int i = 0; i < 10; i++) {
-        float out = pid_update(&pid, 10.0f, 0.0f, dt);
-        printf("%.2f,%.2f,%.2f,COND\n", t, pid.integral, out);
+        float out = pid_update(&pid, error, 0.0f, dt);
+        printf("%.2f,%.2f,%.2f,DYN_CLAMP\n", t, pid.integral, out);
         t += dt;
     }
-
     print_test_footer();
 }
 
 void test_setpoint_ramp(void) {
     print_test_header("Setpoint_Ramp", "Time,TargetSP,InternalSP,Output");
 
-    pid_cfg_t cfg = {
-        .kp = 1.0f,
-        .ki = 0.0f,
-        .kd = 0.0f,
-        .out_max = 100.0f,
-        .out_min = -100.0f,
-        .max_setpoint_ramp = 10.0f  // 10 units per second
-    };
+    pid_cfg_t cfg = {.kp = 1.0f,
+                     .ki = 0.0f,
+                     .kd = 0.0f,
+                     .out_max = 100.0f,
+                     .out_min = -100.0f,
+                     .max_setpoint_ramp = 10.0f};
     pid_t pid;
     pid_init(&pid, &cfg);
 
@@ -225,68 +226,12 @@ void test_setpoint_ramp(void) {
     float dt = 0.1f;
     float sp = 0.0f;
 
-    // Initial stabilize
     pid_update(&pid, 0.0f, 0.0f, dt);
 
-    // Step SP to 50
     sp = 50.0f;
-
     for (int i = 0; i < 10; i++) {
         float out = pid_update(&pid, sp, 0.0f, dt);
         printf("%.2f,%.2f,%.2f,%.2f\n", t, sp, pid.internal_setpoint, out);
-        t += dt;
-    }
-    print_test_footer();
-}
-
-void test_output_rate_limit(void) {
-    print_test_header("Output_Rate_Limit", "Time,Error,Output,DeltaOut");
-
-    pid_cfg_t cfg = {
-        .kp = 0.0f,  // Use Integral for continuous change
-        .ki = 10.0f,
-        .kd = 0.0f,
-        .out_max = 100.0f,
-        .out_min = -100.0f,
-        .max_rate = 5.0f  // Max 5 units per second -> 0.5 per 0.1s
-    };
-    pid_t pid;
-    pid_init(&pid, &cfg);
-
-    float t = 0.0f;
-    float dt = 0.1f;
-    float prev_out = 0.0f;
-
-    // Large error step: Error 10 -> Target Out 100.
-    // Initial Out is 0.
-    // Should behave as Incremental output limitation?
-    // Wait, Standard PID rate limit is usually implemented on the output change?
-    // Looking at pid.c, standard PID does NOT have rate limiting in `pid_update`!
-    // It's only in `pid_update_incremental`!
-    // Let's re-read pid.h/c.
-    // pid_update: "1. Setpoint Ramp", "2. Error", "3. Deadband", "4. P", "5. I", "6. D", "7. FF",
-    // "8. Clamp". Wait, I missed reading rate limiting in `pid_update`. Checking `pid.c` again...
-    // Ah, `pid_update` does NOT have `max_rate` logic applied to `out`.
-    // The `max_rate` in `pid_cfg_t` is described as "Maximum output change per second".
-    // But in `pid.c`, `pid_update` implementation does not use `max_rate`.
-    // ONLY `pid_update_incremental` uses it: `/* --- 5. Rate Limiting (Slew Rate) --- */`.
-
-    // THIS IS A BUG/MISSING FEATURE IN STANDARD PID or intentional?
-    // Usually standard PID rate limits output by rate limiting setpoint or using filter.
-    // If user wants rate limited output in Position form, they should use Setpoint Ramp or Filter.
-    // BUT, the config struct has `max_rate`.
-
-    // Let's test `pid_update_incremental` here for rate limit.
-    // Or I should note this discrepancy.
-    // For now I will test Incremental Rate Limit.
-
-    for (int i = 0; i < 10; i++) {
-        float out_change = pid_update_incremental(&pid, 100.0f, 0.0f, dt);
-        float current_out = prev_out + out_change;  // Simulate accumulation
-
-        printf("%.2f,%.2f,%.2f,%.2f\n", t, 100.0f, current_out, out_change);
-
-        prev_out = current_out;
         t += dt;
     }
     print_test_footer();
@@ -304,292 +249,333 @@ void test_deadband(void) {
     pid_t pid;
     pid_init(&pid, &cfg);
 
-    // Sweep error from -5 to 5 to show deadband region [-2, 2] clearly
     float err = -5.0f;
-    float step = 0.5f;
-
     while (err <= 5.0f) {
         float out = pid_update(&pid, err, 0.0f, 0.1f);
         printf("%.2f,%.2f\n", err, out);
-        err += step;
+        err += 0.5f;
     }
     print_test_footer();
 }
 
 void test_d_lpf(void) {
-    print_test_header("D_LPF_Filter", "Time,Measurement,Derivative,Output,Alpha");
+    print_test_header("D_LPF_Robustness", "Time,RawDeriv,FilteredTau,FilteredAlpha,Dt");
 
-    // Two PIDs to compare: No Filter vs Filter
-    pid_cfg_t cfg_clean = {
-        .kp = 0.0f,
-        .ki = 0.0f,
-        .kd = 1.0f,
-        .out_max = 100.0f,
-        .out_min = -100.0f,
-        .d_lpf_alpha =
-            1.0f,  // No filter (Alpha 1.0 means new value fully taken? Wait, let's check formula)
-        // Formula: lpf = lpf + alpha * (input - lpf)
-        // If alpha = 1.0: lpf = lpf + input - lpf = input. Correct.
-        .derivative_on_measurement = true};
+    pid_cfg_t cfg_tau = {.kp = 0.0f,
+                         .ki = 0.0f,
+                         .kd = 1.0f,
+                         .out_max = 100.0f,
+                         .out_min = -100.0f,
+                         .d_tau = 0.1f,
+                         .derivative_on_measurement = false};
 
-    pid_cfg_t cfg_filter = cfg_clean;
-    cfg_filter.d_lpf_alpha = 0.1f;  // Heavy filter
+    pid_cfg_t cfg_alpha = cfg_tau;
+    cfg_alpha.d_tau = 0.0f;
+    cfg_alpha.d_lpf_alpha = 0.1f;
 
-    pid_t pid1, pid2;
-    pid_init(&pid1, &cfg_clean);
-    pid_init(&pid2, &cfg_filter);
+    pid_t pid_tau, pid_alpha;
+    pid_init(&pid_tau, &cfg_tau);
+    pid_init(&pid_alpha, &cfg_alpha);
 
     float t = 0.0f;
-    float dt = 0.01f;
     float meas = 0.0f;
 
-    // Noisy signal
-    for (int i = 0; i < 100; i++) {
-        // Base sine wave + noise
-        float pure = sinf(t * 2.0f);
-        float noise = (i % 2 == 0) ? 0.1f : -0.1f;
-        meas = pure + noise;
+    for (int i = 0; i < 50; i++) {
+        float dt = (i % 2 == 0) ? 0.01f : 0.05f;
+        float sp = sinf(t);
 
-        float out1 = pid_update(&pid1, 0.0f, meas, dt);  // Raw Derivative
-        float out2 = pid_update(&pid2, 0.0f, meas, dt);  // Filtered
+        float out1 = pid_update(&pid_tau, sp, meas, dt);
+        float out2 = pid_update(&pid_alpha, sp, meas, dt);
 
-        printf("%.2f,%.3f,%.3f,%.3f,0.1\n", t, meas, out1, out2);
+        printf("%.2f,0.0,%.3f,%.3f,%.3f\n", t, out1, out2, dt);
         t += dt;
     }
     print_test_footer();
 }
 
-// ==========================================
-// 3. Advanced Control Tests
-// ==========================================
+void test_biquad(void) {
+    print_test_header("Biquad_Filter", "Time,Freq,Output_LowPass,Output_Notch");
+
+    pid_cfg_t cfg_pt2 = {.kp = 0.0f,
+                         .kd = 1.0f,
+                         .out_max = 10000.0f,
+                         .out_min = -10000.0f,
+                         .d_filter_type = PID_FILTER_BIQUAD,
+                         .derivative_on_measurement = false};
+    pid_filter_calc_pt2(&cfg_pt2.d_biquad_coeffs, 0.001f, 10.0f, 0.707f);
+
+    pid_cfg_t cfg_notch = {.kp = 0.0f,
+                           .kd = 1.0f,
+                           .out_max = 10000.0f,
+                           .out_min = -10000.0f,
+                           .d_filter_type = PID_FILTER_BIQUAD,
+                           .derivative_on_measurement = false};
+    pid_filter_calc_notch(&cfg_notch.d_biquad_coeffs, 0.001f, 50.0f, 10.0f);
+
+    pid_t pid_pt2, pid_notch;
+    pid_init(&pid_pt2, &cfg_pt2);
+    pid_init(&pid_notch, &cfg_notch);
+
+    float dt = 0.001f;
+    float t = 0.0f;
+
+    float freqs[] = {10.0f, 50.0f, 90.0f};
+
+    for (int f_idx = 0; f_idx < 3; f_idx++) {
+        float freq = freqs[f_idx];
+        // Run for 0.5s at this freq
+        for (int i = 0; i < 500; i++) {
+            float signal = sinf(2.0f * M_PI * freq * t);
+            float out1 = pid_update(&pid_pt2, signal, 0.0f, dt);
+            float out2 = pid_update(&pid_notch, signal, 0.0f, dt);
+
+            if (i > 400) {  // Log stable part
+                printf("%.3f,%.1f,%.3f,%.3f\n", t, freq, out1, out2);
+            }
+            t += dt;
+        }
+    }
+    print_test_footer();
+}
+
+// 3. New Tests for Missing Coverage
+
+void test_rate_limit(void) {
+    print_test_header("Output_Rate_Limit", "Time,Error,Output,DeltaOut");
+
+    pid_cfg_t cfg = {.kp = 0.0f,
+                     .ki = 1.0f,
+                     .kd = 0.0f,
+                     .out_max = 100.0f,
+                     .out_min = -100.0f,
+                     .max_rate = 50.0f};
+    pid_t pid;
+    pid_init(&pid, &cfg);
+
+    // Use Incremental for rate limit test as per implementation
+    pid_reset(&pid);
+
+    float t = 0.0f;
+    float dt = 0.1f;
+    float sp = 100.0f;
+    float meas = 0.0f;
+    float total_out = 0.0f;
+
+    // Run longer to see ramping
+    for (int i = 0; i < 20; i++) {
+        float inc = pid_update_incremental(&pid, sp, meas, dt);
+        total_out += inc;
+        printf("%.2f,%.2f,%.2f,%.2f\n", t, sp - meas, total_out, inc);
+        t += dt;
+    }
+    print_test_footer();
+}
 
 void test_incremental(void) {
-    print_test_header("Incremental_PID", "Time,Setpoint,Measurement,DeltaOut,TotalOut");
+    print_test_header("Incremental_Convergence", "Time,Setpoint,Measurement,TotalOut,DeltaOut");
 
-    pid_cfg_t cfg = {.kp = 1.0f,
-                     .ki = 0.5f,
-                     .kd = 0.1f,
-                     .out_max = 100.0f,
-                     .out_min = -100.0f,
-                     .max_rate = 0.0f};
-    pid_t pid;
-    pid_init(&pid, &cfg);
-
-    float output_accum = 0.0f;
-    float sp = 10.0f;
-    float meas = 0.0f;  // Open loop to see step response behavior
-    float dt = 0.1f;
-    float t = 0.0f;
-
-    // Increased plant gain from 0.01 to 0.5 so Output=20 -> Meas=10
-    // Gain 0.01 required Output=1000 which is > max 100.
-    float plant_gain = 0.5f;
-
-    for (int i = 0; i < 50; i++) {
-        float delta = pid_update_incremental(&pid, sp, meas, dt);
-        output_accum += delta;
-        // Simple plant feedback
-        meas += output_accum * plant_gain * dt;
-
-        printf("%.2f,%.2f,%.2f,%.2f,%.2f\n", t, sp, meas, delta, output_accum);
-        t += dt;
-    }
-    print_test_footer();
-}
-
-void test_cascade_sim(void) {
-    print_test_header("Cascade_Control", "Time,Setpoint,OuterOut,InnerOut,ProcessVal");
-
-    // Outer Loop: Position Control
-    pid_cfg_t cfg_outer = {
-        .kp = 2.0f,
-        .ki = 0.0f,
-        .kd = 0.0f,
-        .out_max = 50.0f,
-        .out_min = -50.0f  // Limit velocity setpoint
-    };
-    pid_t pid_outer;
-    pid_init(&pid_outer, &cfg_outer);
-
-    // Inner Loop: Velocity Control
-    pid_cfg_t cfg_inner = {
-        .kp = 5.0f, .ki = 2.0f, .kd = 0.0f, .out_max = 100.0f, .out_min = -100.0f};
-    pid_t pid_inner;
-    pid_init(&pid_inner, &cfg_inner);
-
-    pid_cascade_t cas;
-    pid_cascade_init(&cas, &pid_outer, &pid_inner);
-
-    // Plant: Position and Velocity
-    float pos = 0.0f;
-    float vel = 0.0f;
-    float dt = 0.01f;
-    float t = 0.0f;
-    float sp_pos = 100.0f;
-
-    // Increased steps to 1000 (10s)
-    for (int i = 0; i < 1000; i++) {
-        // Update Cascade
-        // Outer Meas = Position, Inner Meas = Velocity
-        float force = pid_cascade_update(&cas, sp_pos, pos, vel, dt);
-
-        // Physics: F = ma (m=1) -> acc = force
-        // vel = vel + acc * dt
-        // pos = pos + vel * dt
-        // Add some friction
-        float acc = force - 0.1f * vel;
-        vel += acc * dt;
-        pos += vel * dt;
-
-        if (i % 10 == 0) {  // Downsample output
-            printf("%.2f,%.2f,%.2f,%.2f,%.2f\n", t, sp_pos, pid_outer.out, force, pos);
-        }
-        t += dt;
-    }
-    print_test_footer();
-}
-
-void test_bumpless_full(void) {
-    print_test_header("Bumpless_Transfer", "Time,Setpoint,Measurement,Output,Mode");
-
-    pid_cfg_t cfg = {
-        .kp = 2.0f,
-        .ki = 0.5f,
-        .kd = 0.0f,
-        .out_max = 100.0f,
-        .out_min = -100.0f,
-        .kw = 1.0f  // Back-calculation gain
-    };
-    pid_t pid;
-    pid_init(&pid, &cfg);
-
-    float meas = 10.0f;
-    float sp = 20.0f;
-    float dt = 0.1f;
-    float t = 0.0f;
-
-    // 1. Auto Mode (0 - 2s)
-    for (int i = 0; i < 20; i++) {
-        float out = pid_update(&pid, sp, meas, dt);
-        printf("%.2f,%.2f,%.2f,%.2f,AUTO\n", t, sp, meas, out);
-        t += dt;
-    }
-
-    // 2. Manual Mode (External override) (2s - 4s)
-    float manual_val = 50.0f;
-    // Simulate setpoint change during manual mode to test tracking
-    sp = 30.0f;
-
-    for (int i = 0; i < 20; i++) {
-        // Force manual output and track
-        // Important: In real system, we read manual_val from actuator or user input
-        pid_track_manual(&pid, manual_val, meas, sp);
-
-        printf("%.2f,%.2f,%.2f,%.2f,MANUAL\n", t, sp, meas, manual_val);
-        t += dt;
-    }
-
-    // 3. Switch back to Auto (4s - 6s)
-    // Should start near manual_val
-    for (int i = 0; i < 20; i++) {
-        float out = pid_update(&pid, sp, meas, dt);
-        printf("%.2f,%.2f,%.2f,%.2f,AUTO_RE\n", t, sp, meas, out);
-        t += dt;
-    }
-
-    print_test_footer();
-}
-
-void test_tick_update(void) {
-    print_test_header("Tick_Update", "Time,DeltaTime,Output");
-
-    pid_cfg_t cfg = {.kp = 1.0f, .ki = 0.0f, .kd = 0.0f, .out_max = 100.0f, .out_min = -100.0f};
-    pid_t pid;
-    pid_init(&pid, &cfg);
-
-    uint32_t current_tick = 1000;
-    uint32_t last_tick = 1000;
-    float tick_scale = 0.001f;  // 1ms per tick
-
-    // Initial stabilize
-    pid_update(&pid, 10.0f, 0.0f, 0.01f);
-
-    float t = 0.0f;
-
-    // Simulate jittery ticks (large jitter for visibility)
-    // Nominal 10ms (10 ticks)
-    uint32_t increments[] = {10, 20, 5, 30, 10, 5};
-
-    for (int i = 0; i < 6; i++) {
-        current_tick += increments[i];
-
-        // Manual dt calculation
-        uint32_t delta_tick = current_tick - last_tick;
-        float dt_real = delta_tick * tick_scale;
-
-        last_tick = current_tick;
-        t += dt_real;
-
-        float out = pid_update(&pid, 10.0f, 0.0f, dt_real);
-        printf("%.3f,%.3f,%.2f\n", t, dt_real, out);
-    }
-    print_test_footer();
-}
-
-// ==========================================
-// 4. Robustness Tests (Simplified)
-// ==========================================
-
-void test_noise_robustness(void) {
-    print_test_header("Noise_Response", "Time,Signal,Noisy,Filtered");
-
-    // Just re-use D-Term LPF test pattern essentially, or test closed loop performance?
-    // Let's do a simple closed loop step response with noise.
-
-    pid_cfg_t cfg = {.kp = 1.0f,
-                     .ki = 0.5f,
-                     .kd = 0.1f,
-                     .d_lpf_alpha = 0.1f,
-                     .out_max = 100.0f,
-                     .out_min = -100.0f,
-                     .derivative_on_measurement = true};
+    pid_cfg_t cfg = {.kp = 0.5f, .ki = 0.5f, .out_max = 100.0f, .out_min = -100.0f};
     pid_t pid;
     pid_init(&pid, &cfg);
 
     plant_t plant;
     plant_init(&plant);
 
-    float sp = 10.0f;
-    float dt = 0.01f;
     float t = 0.0f;
+    float dt = 0.1f;
+    float sp = 10.0f;
+    float meas = 0.0f;
+    float u = 0.0f;
 
-    srand(1234);  // Fixed seed
+    // Increased to 300 steps (30s) for convergence
+    for (int i = 0; i < 300; i++) {
+        float inc = pid_update_incremental(&pid, sp, meas, dt);
+        u += inc;
+        if (u > 100)
+            u = 100;
+        if (u < -100)
+            u = -100;
+        meas = plant_update(&plant, u, dt);
 
-    // Increased steps to 2000 (20s)
-    for (int i = 0; i < 2000; i++) {
-        float noise = ((float) (rand() % 100) / 50.0f) - 1.0f;  // +/- 1.0
-        float meas = plant.output;
-        float meas_noisy = meas + noise;
-
-        float out = pid_update(&pid, sp, meas_noisy, dt);
-        plant_update(&plant, out, dt);
-
-        if (i % 20 == 0)  // Downsample
-            printf("%.2f,%.3f,%.3f,%.3f\n", t, meas, meas_noisy, out);
+        if (i % 10 == 0)
+            printf("%.2f,%.2f,%.2f,%.2f,%.2f\n", t, sp, meas, u, inc);
         t += dt;
     }
     print_test_footer();
 }
 
-// --- Main Dispatcher ---
+void test_cascade(void) {
+    print_test_header("Cascade_Control", "Time,Setpoint,ProcessVal,OuterOut,InnerOut");
+
+    pid_cfg_t cfg_out = {.kp = 2.0f, .out_max = 20.0f, .out_min = -20.0f};
+    pid_t pid_out;
+    pid_init(&pid_out, &cfg_out);
+
+    pid_cfg_t cfg_in = {.kp = 1.0f, .ki = 0.5f, .out_max = 100.0f, .out_min = -100.0f};
+    pid_t pid_in;
+    pid_init(&pid_in, &cfg_in);
+
+    pid_cascade_t cascade;
+    pid_cascade_init(&cascade, &pid_out, &pid_in);
+
+    float pos = 0.0f;
+    float vel = 0.0f;
+    float t = 0.0f;
+    float dt = 0.05f;
+    float sp = 10.0f;
+
+    // Increased to 300 steps (15s) for convergence
+    for (int i = 0; i < 300; i++) {
+        float force = pid_cascade_update(&cascade, sp, pos, vel, dt);
+        float accel = force;
+        vel += accel * dt;
+        pos += vel * dt;
+
+        if (i % 10 == 0)
+            printf("%.2f,%.2f,%.2f,%.2f,%.2f\n", t, sp, pos, pid_out.out, force);
+        t += dt;
+    }
+    print_test_footer();
+}
+
+void test_bumpless(void) {
+    print_test_header("Bumpless_Manual", "Time,Setpoint,Measurement,Output,Mode");
+
+    pid_cfg_t cfg = {.kp = 1.0f,
+                     .ki = 0.5f,
+                     .out_max = 100.0f,
+                     .out_min = -100.0f,
+                     .anti_windup_mode = PID_ANTI_WINDUP_CLAMP};
+    pid_t pid;
+    pid_init(&pid, &cfg);
+
+    float t = 0.0f;
+    float dt = 0.1f;
+    float sp = 10.0f;
+    float meas = 0.0f;
+    float man_val = 50.0f;
+    char *mode = "AUTO";
+
+    for (int i = 0; i < 60; i++) {
+        float out;
+        if (t >= 2.0f && t < 4.0f) {
+            mode = "MANUAL";
+            pid_track_manual(&pid, man_val, meas, sp);
+            out = man_val;
+        } else {
+            if (t >= 4.0f)
+                mode = "AUTO_RE";
+            else
+                mode = "AUTO";
+            out = pid_update(&pid, sp, meas, dt);
+            if (out > meas)
+                meas += 0.5f;
+        }
+        printf("%.2f,%.2f,%.2f,%.2f,%s\n", t, sp, meas, out, mode);
+        t += dt;
+    }
+    print_test_footer();
+}
+
+void test_noise(void) {
+    print_test_header("Noise_Robustness", "Time,Signal,Noisy,Filtered");
+
+    pid_cfg_t cfg = {
+        .kp = 1.0f, .ki = 0.1f, .kd = 0.5f, .d_tau = 0.1f, .out_max = 100.0f, .out_min = -100.0f};
+    pid_t pid;
+    pid_init(&pid, &cfg);
+
+    float t = 0.0f;
+    float dt = 0.05f;
+    float sp = 10.0f;
+    float meas = 0.0f;
+
+    for (int i = 0; i < 100; i++) {
+        meas += (sp - meas) * 0.1f;
+        float noise = ((float) (rand() % 200) / 100.0f) - 1.0f;
+        float meas_noisy = meas + noise;
+        float out = pid_update(&pid, sp, meas_noisy, dt);
+        printf("%.2f,%.2f,%.2f,%.2f\n", t, meas, meas_noisy, out);
+        t += dt;
+    }
+    print_test_footer();
+}
+
+void test_tick(void) {
+    print_test_header("Tick_Update", "Time,DeltaTime,Output");
+
+    pid_cfg_t cfg = {.kp = 1.0f};
+    pid_t pid;
+    pid_init(&pid, &cfg);
+
+    float t = 0.0f;
+
+    for (int i = 0; i < 20; i++) {
+        float dt = 0.01f + ((float) (rand() % 40) / 1000.0f);
+        float out = pid_update(&pid, 10.0f, 0.0f, dt);
+        printf("%.3f,%.3f,%.2f\n", t, dt, out);
+        t += dt;
+    }
+    print_test_footer();
+}
+
+void test_perf_metrics(void) {
+    print_test_header("Perf_Metrics", "Metric,Value,Unit");
+
+    pid_cfg_t cfg = {.kp = 1.0f,
+                     .ki = 0.1f,
+                     .kd = 0.05f,
+                     .out_max = 100.0f,
+                     .out_min = -100.0f,
+                     .d_tau = 0.01f,
+                     .anti_windup_mode = PID_ANTI_WINDUP_DYNAMIC_CLAMP};
+    pid_t pid;
+    pid_init(&pid, &cfg);
+
+    clock_t start = clock();
+    int iterations = 100000;
+    volatile float out;
+
+    for (int i = 0; i < iterations; i++) {
+        out = pid_update(&pid, 1.0f, 0.0f, 0.001f);
+    }
+
+    clock_t end = clock();
+    double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    double avg_time_ns = (cpu_time_used * 1e9) / iterations;  // in ns
+
+    printf("Avg_Time_Per_Update,%.2f,ns\n", avg_time_ns);
+
+    pid_reset(&pid);
+    plant_t plant;
+    plant_init(&plant);
+    float t = 0.0f;
+    float dt = 0.01f;
+    float sp = 10.0f;
+    float rise_time = 0.0f;
+    bool risen = false;
+
+    for (int i = 0; i < 200; i++) {
+        float meas = plant.output;
+        float u = pid_update(&pid, sp, meas, dt);
+        plant_update(&plant, u, dt);
+
+        if (!risen && meas >= 0.9f * sp) {
+            rise_time = t;
+            risen = true;
+        }
+        t += dt;
+    }
+    printf("Rise_Time_(0-90),%.3f,s\n", rise_time);
+    print_test_footer();
+    (void) out;
+}
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         printf("Usage: %s <test_name>\n", argv[0]);
-        printf("Available tests: init_check, p_term, i_term, d_term, anti_windup, ...\n");
         return 1;
     }
-
     const char *test = argv[1];
 
     if (strcmp(test, "init_check") == 0)
@@ -604,26 +590,29 @@ int main(int argc, char *argv[]) {
         test_anti_windup();
     else if (strcmp(test, "setpoint_ramp") == 0)
         test_setpoint_ramp();
-    else if (strcmp(test, "output_rate_limit") == 0)
-        test_output_rate_limit();
     else if (strcmp(test, "deadband") == 0)
         test_deadband();
     else if (strcmp(test, "d_lpf") == 0)
         test_d_lpf();
+    else if (strcmp(test, "biquad") == 0)
+        test_biquad();
+    else if (strcmp(test, "perf") == 0)
+        test_perf_metrics();
+    else if (strcmp(test, "output_rate_limit") == 0)
+        test_rate_limit();
     else if (strcmp(test, "incremental") == 0)
         test_incremental();
     else if (strcmp(test, "cascade") == 0)
-        test_cascade_sim();
+        test_cascade();
     else if (strcmp(test, "bumpless") == 0)
-        test_bumpless_full();
+        test_bumpless();
     else if (strcmp(test, "tick_update") == 0)
-        test_tick_update();
+        test_tick();
     else if (strcmp(test, "noise") == 0)
-        test_noise_robustness();
+        test_noise();
     else {
         printf("Unknown test: %s\n", test);
         return 1;
     }
-
     return 0;
 }

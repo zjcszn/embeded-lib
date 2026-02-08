@@ -8,41 +8,64 @@
 
 #include <math.h>
 
-/* --- Private Helper Functions (MISRA-C Compliance) --- */
+#ifndef M_PI
+#define M_PI 3.14159265358979323846f
+#endif
 
-/**
- * @brief Clamp value between min and max
- */
+// --- Private Helper Functions ---
+
 static inline pid_real_t pid_clamp(pid_real_t val, pid_real_t min, pid_real_t max) {
     if (val < min) {
         return min;
-    } else if (val > max) {
-        return max;
-    } else {
-        return val;
     }
+    if (val > max) {
+        return max;
+    }
+    return val;
 }
 
-/* --- Public API Implementation --- */
+static inline bool pid_inputs_valid(pid_real_t sp, pid_real_t meas, pid_real_t dt) {
+    return PID_CHECK_FINITE(sp) && PID_CHECK_FINITE(meas) && PID_CHECK_FINITE(dt) && (dt > 1e-6f);
+}
+
+static pid_real_t pid_filter_apply_biquad(pid_real_t input, const pid_biquad_coeffs_t *c,
+                                          pid_filter_biquad_state_t *s) {
+    // Direct Form I: y[n] = b0*x[n] + b1*x[n-1] + b2*x[n-2] - a1*y[n-1] - a2*y[n-2]
+    pid_real_t output =
+        c->b0 * input + c->b1 * s->x1 + c->b2 * s->x2 - c->a1 * s->y1 - c->a2 * s->y2;
+
+    if (!PID_CHECK_FINITE(output)) {
+        s->x1 = s->x2 = 0.0f;
+        s->y1 = s->y2 = 0.0f;
+        return input;
+    }
+
+    s->x2 = s->x1;
+    s->x1 = input;
+    s->y2 = s->y1;
+    s->y1 = output;
+
+    return output;
+}
+
+// --- Public API ---
 
 bool pid_init(pid_t *pid, const pid_cfg_t *cfg) {
     if ((pid == NULL) || (cfg == NULL)) {
         return false;
     }
-
-    // Basic configuration validation
     if (cfg->out_max < cfg->out_min) {
-        return false;  // Invalid output range
+        return false;
     }
 
-    // Check for negative time constants or gains if applicable (optional but recommended)
-    if (cfg->d_lpf_alpha < 0.0f || cfg->d_lpf_alpha > 1.0f) {
-        return false;  // Invalid filter alpha
+#ifdef PID_CHECK_FINITE
+    if (!PID_CHECK_FINITE(cfg->kp) || !PID_CHECK_FINITE(cfg->ki) || !PID_CHECK_FINITE(cfg->kd)) {
+        return false;
     }
+#endif
 
     pid->cfg = cfg;
     pid_reset(pid);
-
     return true;
 }
 
@@ -54,7 +77,13 @@ void pid_reset(pid_t *pid) {
     pid->integral = 0.0f;
     pid->prev_measure = 0.0f;
     pid->prev_error = 0.0f;
+
     pid->d_lpf = 0.0f;
+    pid->d_biquad.x1 = 0.0f;
+    pid->d_biquad.x2 = 0.0f;
+    pid->d_biquad.y1 = 0.0f;
+    pid->d_biquad.y2 = 0.0f;
+
     pid->out = 0.0f;
     pid->first_run = true;
 }
@@ -64,15 +93,14 @@ pid_real_t pid_update(pid_t *pid, pid_real_t setpoint, pid_real_t measurement, p
         return 0.0f;
     }
 
-    // Protection against invalid dt
-    if (dt <= 1e-6f) {
+    if (!pid_inputs_valid(setpoint, measurement, dt)) {
+        PID_LOG("PID Error: Invalid inputs\n");
         return pid->out;
     }
 
-    /* --- 1. Setpoint Ramp Control --- */
+    // 1. Setpoint Ramp
     pid_real_t target_setpoint = setpoint;
 
-    // Initialization on first run
     if (pid->first_run) {
         pid->internal_setpoint = target_setpoint;
         pid->prev_measure = measurement;
@@ -80,28 +108,25 @@ pid_real_t pid_update(pid_t *pid, pid_real_t setpoint, pid_real_t measurement, p
         pid->first_run = false;
     }
 
-    // Rate limiting
     if (pid->cfg->max_setpoint_ramp > 0.0f) {
         pid_real_t max_change = pid->cfg->max_setpoint_ramp * dt;
         pid_real_t diff = target_setpoint - pid->internal_setpoint;
 
+        // Optimize clamping
         if (diff > max_change) {
-            pid->internal_setpoint += max_change;
+            diff = max_change;
         } else if (diff < -max_change) {
-            pid->internal_setpoint -= max_change;
-        } else {
-            pid->internal_setpoint = target_setpoint;
+            diff = -max_change;
         }
 
+        pid->internal_setpoint += diff;
         setpoint = pid->internal_setpoint;
     }
 
-    /* --- 2. Error Calculation --- */
+    // 2. Error
     pid_real_t error = setpoint - measurement;
 
-    /* --- 3. Linear Deadband (Upgrade from simple zeroing) --- */
-
-    /* --- 3. Deadband --- */
+    // 3. Deadband
     if (pid->cfg->deadband > 0.0f) {
         if (error > pid->cfg->deadband) {
             error -= pid->cfg->deadband;
@@ -112,120 +137,122 @@ pid_real_t pid_update(pid_t *pid, pid_real_t setpoint, pid_real_t measurement, p
         }
     }
 
-    /* --- 4. Proportional Term --- */
+    // 4. Proportional
     pid_real_t p_term = pid->cfg->kp * error;
 
-    /* --- 5. Integral Term (with Configurable Anti-windup) --- */
-    bool output_saturated = (pid->out >= pid->cfg->out_max) || (pid->out <= pid->cfg->out_min);
-    bool error_sign_same_as_out = (error * pid->out) > 0.0f;
-
-    switch (pid->cfg->anti_windup_mode) {
-        case PID_ANTI_WINDUP_CONDITIONAL:
-            if (!output_saturated || !error_sign_same_as_out) {
-                pid->integral += pid->cfg->ki * error * dt;
-            }
-            break;
-
-        case PID_ANTI_WINDUP_BACK_CALC:
-            /* Standard I-term accumulation; correction applied after output clamping */
-            pid->integral += pid->cfg->ki * error * dt;
-            break;
-
-        case PID_ANTI_WINDUP_CLAMP:
-            pid->integral += pid->cfg->ki * error * dt;
-            pid->integral = pid_clamp(pid->integral, pid->cfg->out_min, pid->cfg->out_max);
-            break;
-
-        case PID_ANTI_WINDUP_NONE:
-        default:
-            pid->integral += pid->cfg->ki * error * dt;
-            break;
-    }
-
-    /* --- 5. Derivative Term (Robust) --- */
-    pid_real_t d_term = 0.0f;
-    pid_real_t derivative = 0.0f;
-
+    // 5. Derivative (Robust)
+    pid_real_t derivative;
     if (pid->cfg->derivative_on_measurement) {
         derivative = -(measurement - pid->prev_measure) / dt;
     } else {
         derivative = (error - pid->prev_error) / dt;
     }
 
-    // Always update history
-    pid->prev_measure = measurement;
-    pid->prev_error = error;
-
-    // Low Pass Filter for Derivative
-    if (pid->cfg->d_lpf_alpha > 0.0f) {
-        pid->d_lpf = pid->d_lpf + pid->cfg->d_lpf_alpha * (derivative - pid->d_lpf);
-        d_term = pid->cfg->kd * pid->d_lpf;
+    // Filter Derivative
+    if (pid->cfg->d_filter_type == PID_FILTER_BIQUAD) {
+        pid->d_lpf =
+            pid_filter_apply_biquad(derivative, &pid->cfg->d_biquad_coeffs, &pid->d_biquad);
     } else {
-        pid->d_lpf = derivative;
-        d_term = pid->cfg->kd * derivative;
+        // PT1: Alpha calculation
+        pid_real_t alpha = 1.0f;
+        if (pid->cfg->d_tau > 0.0f) {
+            alpha = dt / (dt + pid->cfg->d_tau);
+        } else if (pid->cfg->d_lpf_alpha > 0.0f) {
+            alpha = pid->cfg->d_lpf_alpha;
+        }
+        pid->d_lpf += alpha * (derivative - pid->d_lpf);
     }
+    pid_real_t d_term = pid->cfg->kd * pid->d_lpf;
 
-    /* --- 6. Feed-Forward Term --- */
+    // 6. Feed-Forward
     pid_real_t f_term = pid->cfg->kf * setpoint;
 
-    /* --- 7. Calculate Unclamped Output --- */
-    pid_real_t out_unclamped = p_term + pid->integral + d_term + f_term;
+    // 7. Integral (Dynamic Anti-windup)
+    pid_real_t i_term_change = pid->cfg->ki * error * dt;
 
-    /* --- 8. Final Clamping --- */
+    if (pid->cfg->anti_windup_mode == PID_ANTI_WINDUP_DYNAMIC_CLAMP) {
+        // Dynamic Clamping: Restrict I-term based on P+D+FF headroom
+        pid_real_t pdff = p_term + d_term + f_term;
+        pid_real_t i_max = pid->cfg->out_max - pdff;
+        pid_real_t i_min = pid->cfg->out_min - pdff;
+
+        bool sat_max = (pdff > pid->cfg->out_max);
+        bool sat_min = (pdff < pid->cfg->out_min);
+
+        if (sat_max) {
+            i_max = 0.0f;
+            if (i_min > 0.0f) {
+                i_min = -i_max;
+            }
+        } else if (sat_min) {
+            i_min = 0.0f;
+            if (i_max < 0.0f) {
+                i_max = -i_min;
+            }
+        }
+
+        // Ensure regular ordering for clamp
+        if (i_min > i_max) {
+            pid_real_t t = i_min;
+            i_min = i_max;
+            i_max = t;
+        }
+
+        pid->integral += i_term_change;
+        pid->integral = pid_clamp(pid->integral, i_min, i_max);
+
+    } else if (pid->cfg->anti_windup_mode == PID_ANTI_WINDUP_CLAMP) {
+        pid->integral += i_term_change;
+        pid->integral = pid_clamp(pid->integral, pid->cfg->out_min, pid->cfg->out_max);
+    } else if (pid->cfg->anti_windup_mode == PID_ANTI_WINDUP_CONDITIONAL) {
+        // Calculate predicted output with current P, D, FF and OLD Integral
+        pid_real_t out_predict = p_term + pid->integral + d_term + f_term;
+
+        bool sat_high = (out_predict >= pid->cfg->out_max);
+        bool sat_low = (out_predict <= pid->cfg->out_min);
+
+        // Only integrate if not saturated, or if error helps unsaturate
+        bool integrate = true;
+        if (sat_high && (i_term_change > 0.0f)) {
+            integrate = false;
+        } else if (sat_low && (i_term_change < 0.0f)) {
+            integrate = false;
+        }
+
+        if (integrate) {
+            pid->integral += i_term_change;
+        }
+    } else {
+        pid->integral += i_term_change;
+    }
+
+    // 8. Output
+    pid_real_t out_unclamped = p_term + pid->integral + d_term + f_term;
     pid_real_t out = pid_clamp(out_unclamped, pid->cfg->out_min, pid->cfg->out_max);
 
-    /* --- 9. Back-calculation Correction --- */
+    // 9. Back-calculation
     if (pid->cfg->anti_windup_mode == PID_ANTI_WINDUP_BACK_CALC) {
         if (pid->cfg->kw > 0.0f) {
-            /* I += Kw * (u_sat - u_unclamped) * dt */
-            pid_real_t saturation_diff = out - out_unclamped;
-            pid->integral += pid->cfg->kw * saturation_diff * dt;
+            pid->integral += pid->cfg->kw * (out - out_unclamped) * dt;
         }
     }
 
+    // Update History
+    pid->prev_measure = measurement;
+    pid->prev_error = error;
     pid->out = out;
+
     return out;
 }
 
-/* ... (Incremental PID remains unchanged) ... */
-
-/* --- Cascade PID Implementation --- */
-
-bool pid_cascade_init(pid_cascade_t *cascade, pid_t *outer, pid_t *inner) {
-    if (cascade == NULL || outer == NULL || inner == NULL) {
-        return false;
-    }
-    cascade->outer = outer;
-    cascade->inner = inner;
-    return true;
-}
-
-pid_real_t pid_cascade_update(pid_cascade_t *cascade, pid_real_t setpoint, pid_real_t outer_measure,
-                              pid_real_t inner_measure, pid_real_t dt) {
-    if (cascade == NULL) {
-        return 0.0f;
-    }
-
-    // 1. Update Outer Loop
-    // The output of outer loop is the setpoint for inner loop.
-    pid_real_t inner_setpoint = pid_update(cascade->outer, setpoint, outer_measure, dt);
-
-    // 2. Update Inner Loop
-    pid_real_t output = pid_update(cascade->inner, inner_setpoint, inner_measure, dt);
-
-    /* 3. Sync Anti-windup (Placeholders for future expansion) */
-    /* Note: Advanced cascade strategies may require feedback from inner to outer loop */
-
-    return output;
-}
+// ... Incremental PID ... //
 
 pid_real_t pid_update_incremental(pid_t *pid, pid_real_t setpoint, pid_real_t measurement,
                                   pid_real_t dt) {
     if ((pid == NULL) || (pid->cfg == NULL)) {
         return 0.0f;
     }
-
-    if (dt <= 1e-6f) {
+    if (!pid_inputs_valid(setpoint, measurement, dt)) {
         return 0.0f;
     }
 
@@ -235,21 +262,21 @@ pid_real_t pid_update_incremental(pid_t *pid, pid_real_t setpoint, pid_real_t me
         pid->prev_measure = measurement;
         pid->prev_error = error;
         pid->d_lpf = 0.0f;
+        pid->d_biquad.x1 = 0;
+        pid->d_biquad.x2 = 0;
+        pid->d_biquad.y1 = 0;
+        pid->d_biquad.y2 = 0;
         pid->first_run = false;
-        return 0.0f;  // No output change on first run
+        return 0.0f;
     }
 
-    /* --- 1. Proportional Change --- */
-    // dP = Kp * (error - prev_error)
+    // 1. Proportional (dE)
     pid_real_t p_diff = pid->cfg->kp * (error - pid->prev_error);
 
-    /* --- 2. Integral Change --- */
-    // dI = Ki * error * dt
-    // Note: No anti-windup needed here usually, but output rate limiting handles it.
+    // 2. Integral (E*dt)
     pid_real_t i_diff = pid->cfg->ki * error * dt;
 
-    /* --- 3. Derivative Change --- */
-    // Calculate new derivative
+    // 3. Derivative (d(dE)/dt or d(dPV)/dt)
     pid_real_t derivative;
     if (pid->cfg->derivative_on_measurement) {
         derivative = -(measurement - pid->prev_measure) / dt;
@@ -257,29 +284,33 @@ pid_real_t pid_update_incremental(pid_t *pid, pid_real_t setpoint, pid_real_t me
         derivative = (error - pid->prev_error) / dt;
     }
 
-    // Remember old filtered value
     pid_real_t old_d_lpf = pid->d_lpf;
 
-    // Update LPF
-    if (pid->cfg->d_lpf_alpha > 0.0f) {
-        pid->d_lpf = pid->d_lpf + pid->cfg->d_lpf_alpha * (derivative - pid->d_lpf);
+    if (pid->cfg->d_filter_type == PID_FILTER_BIQUAD) {
+        pid->d_lpf =
+            pid_filter_apply_biquad(derivative, &pid->cfg->d_biquad_coeffs, &pid->d_biquad);
     } else {
-        pid->d_lpf = derivative;
+        pid_real_t alpha = 1.0f;
+        if (pid->cfg->d_tau > 0.0f) {
+            alpha = dt / (dt + pid->cfg->d_tau);
+        } else if (pid->cfg->d_lpf_alpha > 0.0f) {
+            alpha = pid->cfg->d_lpf_alpha;
+        }
+
+        pid->d_lpf += alpha * (derivative - pid->d_lpf);
     }
 
-    // dD = Kd * (new_D - old_D)
     pid_real_t d_diff = pid->cfg->kd * (pid->d_lpf - old_d_lpf);
 
-    /* --- 4. Total Change --- */
+    // 4. Total Change
     pid_real_t delta_out = p_diff + i_diff + d_diff;
 
-    /* --- 5. Rate Limiting (Slew Rate) --- */
+    // 5. Rate Limit
     if (pid->cfg->max_rate > 0.0f) {
-        pid_real_t max_delta = pid->cfg->max_rate * dt;
-        delta_out = pid_clamp(delta_out, -max_delta, max_delta);
+        pid_real_t limit = pid->cfg->max_rate * dt;
+        delta_out = pid_clamp(delta_out, -limit, limit);
     }
 
-    /* --- 6. Update History --- */
     pid->prev_measure = measurement;
     pid->prev_error = error;
 
@@ -290,8 +321,6 @@ void pid_set_integral(pid_t *pid, pid_real_t value) {
     if ((pid == NULL) || (pid->cfg == NULL)) {
         return;
     }
-
-    // Direct assignment with clamping
     pid->integral = pid_clamp(value, pid->cfg->out_min, pid->cfg->out_max);
 }
 
@@ -301,33 +330,79 @@ void pid_track_manual(pid_t *pid, pid_real_t manual_output, pid_real_t measureme
         return;
     }
 
-    /*
-     * Bumpless Transfer Logic:
-     * We want: pid_out = manual_output
-     * From: pid_out = P + I + D + FF
-     * So: I = manual_output - (P + D + FF)
-     */
-
+    // Bumpless: I = u_man - P - D - FF
     pid_real_t error = setpoint - measurement;
-
-    // 1. Calculate P-term
     pid_real_t p_term = pid->cfg->kp * error;
-
-    // 2. Calculate D-term
-    // Since we don't have dt, we assume D = 0 for tracking to be safe.
-    pid_real_t d_term = 0.0f;
-
-    // 3. Calculate FF-term
+    // Assume D=0 for tracking safely
     pid_real_t f_term = pid->cfg->kf * setpoint;
 
-    // 4. Back-calculate Integral
-    pid_real_t new_integral = manual_output - p_term - d_term - f_term;
+    pid->integral =
+        pid_clamp(manual_output - p_term - f_term, pid->cfg->out_min, pid->cfg->out_max);
 
-    // 5. Update State
-    pid->integral = pid_clamp(new_integral, pid->cfg->out_min, pid->cfg->out_max);
-
-    // Update history to prevent derivative kick when switching back to Auto
     pid->prev_measure = measurement;
     pid->prev_error = error;
     pid->internal_setpoint = setpoint;
+}
+
+// --- Cascade ---
+
+bool pid_cascade_init(pid_cascade_t *cascade, pid_t *outer, pid_t *inner) {
+    if (!cascade || !outer || !inner) {
+        return false;
+    }
+    cascade->outer = outer;
+    cascade->inner = inner;
+    return true;
+}
+
+pid_real_t pid_cascade_update(pid_cascade_t *cascade, pid_real_t setpoint, pid_real_t outer_measure,
+                              pid_real_t inner_measure, pid_real_t dt) {
+    if (!cascade) {
+        return 0.0f;
+    }
+    pid_real_t inner_sp = pid_update(cascade->outer, setpoint, outer_measure, dt);
+    return pid_update(cascade->inner, inner_sp, inner_measure, dt);
+}
+
+// --- Filter Init ---
+
+void pid_filter_calc_pt2(pid_biquad_coeffs_t *coeffs, pid_real_t dt, pid_real_t cutoff_freq,
+                         pid_real_t q_factor) {
+    if (!coeffs || dt <= 0.0f || cutoff_freq <= 0.0f) {
+        return;
+    }
+
+    pid_real_t w0 = 2.0f * M_PI * cutoff_freq * dt;
+    pid_real_t alpha = sinf(w0) / (2.0f * q_factor);
+    pid_real_t cos_w0 = cosf(w0);
+
+    pid_real_t a0 = 1.0f + alpha;  // Normalize by a0
+
+    coeffs->b0 = ((1.0f - cos_w0) / 2.0f) / a0;
+    coeffs->b1 = (1.0f - cos_w0) / a0;
+    coeffs->b2 = coeffs->b0;  // b2 = b0
+
+    coeffs->a1 = (-2.0f * cos_w0) / a0;
+    coeffs->a2 = (1.0f - alpha) / a0;
+}
+
+void pid_filter_calc_notch(pid_biquad_coeffs_t *coeffs, pid_real_t dt, pid_real_t center_freq,
+                           pid_real_t bandwidth) {
+    if (!coeffs || dt <= 0.0f || center_freq <= 0.0f) {
+        return;
+    }
+
+    pid_real_t w0 = 2.0f * M_PI * center_freq * dt;
+    pid_real_t q = center_freq / bandwidth;
+    pid_real_t alpha = sinf(w0) / (2.0f * q);
+    pid_real_t cos_w0 = cosf(w0);
+
+    pid_real_t a0 = 1.0f + alpha;  // Normalize
+
+    coeffs->b0 = 1.0f / a0;
+    coeffs->b1 = (-2.0f * cos_w0) / a0;
+    coeffs->b2 = 1.0f / a0;
+
+    coeffs->a1 = (-2.0f * cos_w0) / a0;
+    coeffs->a2 = (1.0f - alpha) / a0;
 }
