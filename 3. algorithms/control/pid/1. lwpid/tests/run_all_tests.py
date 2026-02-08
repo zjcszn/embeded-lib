@@ -116,6 +116,18 @@ TEST_METADATA = {
         "purpose": "评估算法的计算耗时和阶跃响应时间。",
         "condition": "循环运行 100,000 次计算平均耗时。",
         "expected": "单次计算时间 < 1us (通常为几十 ns)。"
+    },
+    "pid_monitor_incremental": {
+        "name": "增量监控测试 (Incremental Monitor)",
+        "purpose": "验证增量模式下 Monitor 输出是否正确反映绝对值。",
+        "condition": "执行增量更新，检查 Monitor.Output 是否等于 Current + Delta。",
+        "expected": "Monitor.Output = Current + Delta, Monitor.P = Delta P。"
+    },
+    "monitor_consistency": {
+        "name": "监控一致性 (Monitor Consistency)",
+        "purpose": "验证 Monitor.Error 定义统一以及增量模式下的斜坡和首次运行行为。",
+        "condition": "标准PID斜坡，增量PID首次运行及斜坡。",
+        "expected": "Error=Setpoint-PV; InternalSP随Ramp变化; FirstRun同步Output。"
     }
 }
 
@@ -315,6 +327,40 @@ def verify_noise(data):
     avg = statistics.mean(data['Signal'][-50:])
     return (abs(avg - 10.0) < 1.0), f"Stable, Avg={avg:.2f}"
 
+def verify_pid_monitor_incremental(data):
+    # Check if we have data
+    if not data or 'MonOut' not in data: return False, "No Data"
+    
+    # Check the single row of data
+    # Expected: MonOut = CurrentOut + DeltaOut
+    # MonP = Delta P (approximated by DeltaOut if others 0, here I only enabled P?)
+    # In test: Kp=1, Error changes from 10 to 9 -> DeltaP = -1. 
+    # DeltaOut = -1.
+    
+    mon_out = data['MonOut'][0]
+    expected_out = data['CurrentOut'][0] + data['DeltaOut'][0]
+    mon_p = data['MonP'][0]
+    expected_p = data['DeltaOut'][0] # In this test config
+    
+    if abs(mon_out - expected_out) > 0.001:
+        return False, f"MonOut {mon_out} != Expected {expected_out}"
+    if abs(mon_p - expected_p) > 0.001:
+        return False, f"MonP {mon_p} != Expected {expected_p}"
+        
+    return True, "Monitor Values Correct"
+
+def verify_monitor_consistency(data):
+    if not data or 'Type' not in data: return False, "No Data"
+    failures = []
+    for i, t in enumerate(data['Type']):
+        exp = data['Expected'][i]
+        act = data['Actual'][i]
+        if abs(exp - act) > 0.05:
+            failures.append(f"{t}: Exp {exp} != Act {act}")
+            
+    if failures: return False, "; ".join(failures)
+    return True, "All checks passed"
+
 def generate_report(results, verification_results):
     with open(report_file, "w", encoding="utf-8") as f:
         f.write("# PID Library Verification Report (PID库验证报告)\n\n")
@@ -379,6 +425,8 @@ def main():
         ("bumpless", "bumpless", "test_bumpless", "Time", verify_bumpless, ["Setpoint", "Measurement", "Output"], None),
         ("tick_update", "tick_update", "test_tick_update", "Time", verify_tick_update, ["Output"], ["DeltaTime"]),
         ("noise", "noise", "test_noise", "Time", verify_noise, ["Signal", "Noisy", "Filtered"], None),
+        ("pid_monitor_incremental", "pid_monitor_incremental", None, None, verify_pid_monitor_incremental, None, None),
+        ("monitor_consistency", "monitor_consistency", None, None, verify_monitor_consistency, None, None),
         ("perf", "perf", None, None, verify_perf, None, None),
     ]
 

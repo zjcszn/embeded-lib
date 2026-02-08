@@ -399,7 +399,121 @@ void test_rate_limit(void) {
     print_test_footer();
 }
 
-void test_incremental(void) {
+// Test Case 8: PID Monitor / Snapshot
+void test_pid_monitor(void) {
+    print_test_header("PID_Monitor", "Time,Setpoint,Measurement,Output,P,I,D,Error");
+
+    pid_t pid;
+    pid_cfg_t cfg = {.kp = 2.0f,
+                     .ki = 1.0f,
+                     .kd = 0.5f,
+                     .out_max = 100.0f,
+                     .out_min = -100.0f,
+                     .deadband = 0.0f,
+                     .d_tau = 0.01f,  // PT1 for D-term
+                     .beta = 1.0f,
+                     .anti_windup_mode = PID_ANTI_WINDUP_CLAMP};
+    pid_init(&pid, &cfg);
+
+    // Step 1: Run PID
+    float setpoint = 10.0f;
+    float measure = 0.0f;
+    float dt = 0.1f;
+
+    // Initial Run
+    pid_update(&pid, setpoint, measure, dt);
+
+    // Step 2: Get Snapshot
+    pid_monitor_t mon;
+    pid_get_monitor(&pid, &mon);
+
+    // Check values
+    // Error = 10
+    // P = 2 * 10 = 20
+    // I = 1 * 10 * 0.1 = 1.0
+    // D is transient, just check it exists
+
+    printf("Monitor: Err=%.2f, P=%.2f, I=%.2f, D=%.2f\n", mon.error, mon.p_term, mon.i_term,
+           mon.d_term);
+
+    // Naive checks to verify logic
+    if (fabsf(mon.error - 10.0f) < 0.001f)
+        printf("Error Check Passed\n");
+    if (fabsf(mon.p_term - 20.0f) < 0.001f)
+        printf("P Check Passed\n");
+    if (fabsf(mon.i_term - 1.0f) < 0.001f)
+        printf("I Check Passed\n");
+
+    print_test_footer();
+}
+
+void test_pid_monitor_incremental(void) {
+    print_test_header("PID_Monitor_Incremental",
+                      "Setpoint,Measurement,CurrentOut,DeltaOut,MonOut,MonP");
+
+    pid_t pid;
+    pid_cfg_t cfg = {
+        .kp = 1.0f, .ki = 0.0f, .kd = 0.0f, .out_max = 100.0f, .out_min = -100.0f, .beta = 1.0f};
+    pid_init(&pid, &cfg);
+
+    // Initial State Check (should be zero/clean)
+    pid_monitor_t mon_init;
+    pid_get_monitor(&pid, &mon_init);
+    if (mon_init.target != 0.0f)
+        printf("FAIL_Init_Target\n");
+
+    // Step 1: Incremental Update
+    float sp = 10.0f;
+    float meas = 0.0f;
+    float dt = 0.1f;
+    float current_out = 50.0f;  // Arbitrary current output
+
+    // Error = 10, Kp = 1 -> P_current = 10. P_prev = 0 (init internal setpoint=0, prev_meas=0? No
+    // wait) On first run of incremental: prev_error calculated from (sp - meas) = 10 But p_prev is
+    // calculated from internal state which is init to meas/sp? Let's trace pid_update_incremental
+    // first run logic: It returns 0.0f and initializes state.
+
+    // Run 1: Initialization
+    float delta1 = pid_update_incremental(&pid, sp, meas, dt, current_out);
+    (void) delta1;  // Suppress unused variable warning
+    // Should be 0
+
+    // Run 2: Step
+    // Now prev_measure = 0, prev_error = 10.
+    // Let's change measurement to generate a Delta P
+    meas = 1.0f;
+    // Error = 9.
+    // P_current = 1 * 9 = 9.
+    // P_prev = 1 * 10 = 10.
+    // Delta P = -1.
+    // Delta Out = -1.
+
+    // Update with NEW current_out (assuming we applied delta1=0)
+    float delta2 = pid_update_incremental(&pid, sp, meas, dt, current_out);
+
+    pid_get_monitor(&pid, &mon_init);
+
+    // Check Monitor Output
+    // Expected: current_out + delta2
+    // Monitor Output = 50 + (-1) = 49.
+
+    printf("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n", sp, meas, current_out, delta2, mon_init.output,
+           mon_init.p_term);
+
+    if (fabsf(mon_init.output - (current_out + delta2)) < 0.001f) {
+        printf("Monitor_Output_Correct\n");
+    } else {
+        printf("Monitor_Output_Fail\n");
+    }
+
+    if (fabsf(mon_init.p_term - delta2) < 0.001f) {
+        printf("Monitor_P_Term_Correct\n");
+    }
+
+    print_test_footer();
+}
+
+void test_pid_incremental_saturation(void) {
     print_test_header("Incremental_Convergence", "Time,Setpoint,Measurement,TotalOut,DeltaOut");
 
     pid_cfg_t cfg = {.kp = 0.5f, .ki = 0.5f, .out_max = 100.0f, .out_min = -100.0f, .beta = 1.0f};
@@ -646,9 +760,8 @@ void test_input_filter(void) {
         float raw = signal + noise;
 
         // We only care about how the measurement is filtered internally
-        // To verify this without exposing internal state, we can look at P-term if Kp=1, Setpoint=0
-        // Error = 0 - FilteredVal = -FilteredVal
-        // Output = Kp * Error = -FilteredVal
+        // To verify this without exposing internal state, we can look at P-term if Kp=1,
+        // Setpoint=0 Error = 0 - FilteredVal = -FilteredVal Output = Kp * Error = -FilteredVal
         // So FilteredVal = -Output
 
         float out_pt1 = pid_update(&pid_pt1, 0.0f, raw, dt);
@@ -657,6 +770,67 @@ void test_input_filter(void) {
         printf("%.3f,%.3f,%.3f,%.3f\n", t, raw, -out_pt1, -out_notch);
         t += dt;
     }
+    print_test_footer();
+}
+
+void test_monitor_consistency(void) {
+    print_test_header("Monitor_Consistency", "Type,Expected,Actual");
+
+    pid_cfg_t cfg = {.kp = 1.0f,
+                     .ki = 0.0f,
+                     .kd = 0.0f,
+                     .out_max = 100.0f,
+                     .out_min = -100.0f,
+                     .max_setpoint_ramp = 10.0f,  // 10 units/sec
+                     .beta = 1.0f};
+    pid_t pid;
+    pid_init(&pid, &cfg);
+
+    float dt = 0.1f;
+    float sp = 5.0f;
+    float meas = 0.0f;
+
+    // Initialize (First Run takes SP directly)
+    pid_update(&pid, 0.0f, 0.0f, dt);
+
+    // Test 1: Standard PID - Ramp and Error
+    // Max change = 10 * 0.1 = 1.0 per step.
+    // Step 1: TargetSP = 5.0. InternalSP increases by 1.0 from 0.0 -> 1.0.
+    // PV = 0. Error calculation should be InternalSP - PV = 1.0 - 0 = 1.0.
+    // Monitor Error should be 1.0.
+
+    pid_update(&pid, sp, meas, dt);
+
+    pid_monitor_t mon;
+    pid_get_monitor(&pid, &mon);
+
+    printf("Std_Ramp_InternalSP,1.00,%.2f\n", mon.target);
+    printf("Std_Monitor_Error,1.00,%.2f\n", mon.error);
+
+    // Test 2: Incremental PID - First Run Sync
+    pid_reset(&pid);
+    float current_out = 50.0f;
+    // First run incremental
+    pid_update_incremental(&pid, sp, meas, dt, current_out);
+
+    pid_get_monitor(&pid, &mon);
+    // Monitor Output should be synced to current_out
+    printf("Inc_FirstRun_Out,50.00,%.2f\n", mon.output);
+    // Internal Setpoint should be synced to SP (5.0) on first run
+    printf("Inc_FirstRun_Target,5.00,%.2f\n", mon.target);
+
+    // Test 3: Incremental PID - Ramp
+    // Next step. SP=10.0. InternalSP was 5.0. Max change 1.0.
+    // New InternalSP = 6.0.
+    // Error = 6.0 - 0.0 = 6.0.
+    sp = 10.0f;
+    pid_update_incremental(&pid, sp, meas, dt,
+                           current_out);  // current_out doesn't matter much here for target
+
+    pid_get_monitor(&pid, &mon);
+    printf("Inc_Ramp_Target,6.00,%.2f\n", mon.target);
+    printf("Inc_Monitor_Error,6.00,%.2f\n", mon.error);
+
     print_test_footer();
 }
 
@@ -681,6 +855,8 @@ int main(int argc, char *argv[]) {
         test_setpoint_ramp();
     else if (strcmp(test, "deadband") == 0)
         test_deadband();
+    else if (strcmp(test, "monitor_consistency") == 0)
+        test_monitor_consistency();
     else if (strcmp(test, "d_lpf") == 0)
         test_d_lpf();
     else if (strcmp(test, "biquad") == 0)
@@ -689,8 +865,12 @@ int main(int argc, char *argv[]) {
         test_perf_metrics();
     else if (strcmp(test, "output_rate_limit") == 0)
         test_rate_limit();
+    else if (strcmp(test, "pid_monitor") == 0)
+        test_pid_monitor();
+    else if (strcmp(test, "pid_monitor_incremental") == 0)
+        test_pid_monitor_incremental();
     else if (strcmp(test, "incremental") == 0)
-        test_incremental();
+        test_pid_incremental_saturation();
     else if (strcmp(test, "cascade") == 0)
         test_cascade();
     else if (strcmp(test, "bumpless") == 0)

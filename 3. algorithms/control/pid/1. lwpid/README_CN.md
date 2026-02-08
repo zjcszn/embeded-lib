@@ -164,3 +164,111 @@ pid_cfg_t cfg = {
     .gamma = 0.0f, // 推荐: 微分项仅响应测量值 (无冲击)
 };
 ```
+
+### 5.4 滤波器配置 (Filter Configuration)
+
+本库支持对**测量值(Input/PV)**和**微分项(Derivative)**分别通过滤波器进行处理，以抑制噪声或消除特定频率的干扰。
+
+#### (1) 滤波器类型
+*   **PID_FILTER_NONE**: 直通 (默认)
+*   **PID_FILTER_PT1**: 一阶低通 (RC Filter)，简单高效，适用于一般高频噪声抑制。
+*   **PID_FILTER_BIQUAD**: 二阶 Biquad 滤波器，支持低通(Low Pass)或陷波(Notch)，适用于更复杂的噪声场景（如消除机械共振）。
+
+#### (2) 输入前置滤波器 (Input Filter)
+在某些高噪环境下，直接对测量值 PV 进行滤波比仅对 D 项滤波效果更好。
+
+```c
+pid_cfg_t cfg = {
+    // ...
+    // 使用一阶低通滤波器
+    .input_filter_type = PID_FILTER_PT1,
+    .input_filter_tau = 0.02f, // 时间常数 20ms
+};
+```
+
+#### (3) 微分滤波器 (Derivative Filter)
+微分项对噪声极度敏感，通常必须滤波。默认使用 PT1。
+
+```c
+pid_cfg_t cfg = {
+    // ...
+    // 方法 A: 使用一阶低通 (推荐)
+    .d_filter_type = PID_FILTER_PT1, // 默认
+    .d_tau = 0.01f,                  // 时间常数 (s), cutoff_freq ≈ 1 / (2*PI*tau)
+    
+    // 方法 B: 使用二阶 Biquad (如 50Hz 陷波)
+    .d_filter_type = PID_FILTER_BIQUAD,
+    // .d_biquad_coeffs 需预先计算填入 (见下文)
+};
+```
+
+#### (4) Biquad 系数计算辅助
+本库提供了辅助函数来计算 Biquad 系数。建议在初始化阶段计算一次即可。
+
+```c
+// 示例：初始化时计算滤波器系数
+// 假设采样时间 dt = 0.001s (1kHz)
+
+pid_biquad_coeffs_t notch_50hz;
+// 计算 50Hz 陷波器系数, 带宽 5Hz
+pid_filter_calc_notch(&notch_50hz, 0.001f, 50.0f, 5.0f);
+
+pid_cfg_t cfg = {
+    // ...
+    .d_filter_type = PID_FILTER_BIQUAD,
+    .d_biquad_coeffs = notch_50hz, // 应用系数
+};
+
+pid_init(&pid, &cfg);
+```
+
+### 5.5 滤波器系数计算
+本库提供了标准的 `pid_filter_calc_pt2` (低通) 和 `pid_filter_calc_notch` (陷波) 函数。
+
+*   **低通滤波 (Low Pass)**: 消除高频噪声。
+    ```c
+    // 计算 20Hz 低通滤波器系数 (采样率 1kHz)
+    pid_filter_calc_pt2(&coeffs, 0.001f, 20.0f, 0.707f);
+    ```
+*   **陷波滤波 (Notch)**: 消除特定频率（如 50Hz 工频或机械共振）。
+    ```c
+    // 计算 50Hz 陷波器系数 (带宽 5Hz, 采样率 1kHz)
+    pid_filter_calc_notch(&coeffs, 0.001f, 50.0f, 5.0f);
+    ```
+
+## 6. 诊断与监控 (Diagnosis & Monitoring)
+
+为了方便调试，本库提供了**非侵入式**的快照接口，允许用户获取 PID 内部的详细状态（P/I/D 分项贡献、滤波后误差等），而不会影响控制回路的实时性。
+
+### 使用方法
+
+1.  定义一个 `pid_monitor_t` 结构体会。
+2.  在主循环或低优先级任务中调用 `pid_get_monitor`。
+
+```c
+pid_monitor_t mon;
+
+// 获取当前 PID 状态快照
+pid_get_monitor(&pid, &mon);
+
+printf("Target: %.2f, Measure: %.2f, Out: %.2f\n", 
+       mon.target, mon.measure, mon.output);
+       
+printf("Terms -> P: %.2f, I: %.2f, D: %.2f\n", 
+       mon.p_term, mon.i_term, mon.d_term);
+
+if (mon.saturated) {
+    printf("Warning: PID Saturated!\n");
+}
+```
+
+### 监控字段说明
+*   `target`: 当前内部设定值 (如果启用了斜坡，则是斜坡后的值)。
+*   `measure`: 当前使用的测量值 (经过 Input Filter 滤波后的值)。
+*   `error`: 计算用的误差 (SP - PV)。
+*   `p_term`, `i_term`, `d_term`, `f_term`: 各项对最终输出的贡献值。
+    *   注意：对于**增量式 PID**，这些值代表的是**增量 (Delta)**。
+*   `saturated`: 输出是否达到限幅值。
+
+
+

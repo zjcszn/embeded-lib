@@ -141,9 +141,35 @@ typedef struct {
     pid_real_t internal_setpoint;  // Current internal setpoint (for Ramp Control)
     bool first_run;                // Flag to handle first-run initialization
 
+    // Diagnostic/Monitoring State (Read-only)
+    pid_real_t p_out;      // P-term output (last step)
+    pid_real_t i_out;      // I-term output (Accumulated Integral) or I-term change (Incremental)
+    pid_real_t d_out;      // D-term output (last step)
+    pid_real_t f_out;      // F-term output (last step)
+    pid_real_t error_raw;  // Raw Error (SP - PV)
+
     // Configuration Reference
     const pid_cfg_t *cfg;  // Pointer to configuration (must be persistent)
 } pid_t;
+
+/**
+ * @brief PID Monitor/Snapshot Structure
+ * Used to retrieve internal state for debugging/logging
+ */
+typedef struct {
+    pid_real_t target;   // Setpoint
+    pid_real_t measure;  // Process Variable
+    pid_real_t output;   // Total Output
+
+    pid_real_t p_term;  // Standard: Absolute P-Term | Incremental: Delta P
+    pid_real_t i_term;  // Standard: Absolute I-Term | Incremental: Delta I
+    pid_real_t d_term;  // Standard: Absolute D-Term | Incremental: Delta D
+    pid_real_t f_term;  // Standard: Absolute F-Term | Incremental: N/A (0)
+
+    pid_real_t error;  // Error used for calculation
+
+    bool saturated;  // Output is at min/max limit
+} pid_monitor_t;
 
 /**
  * @brief Cascade PID Structure
@@ -200,6 +226,15 @@ pid_real_t pid_update_incremental(pid_t *pid, pid_real_t setpoint, pid_real_t me
  * @param value Target integral value (will be clamped to output limits)
  */
 void pid_set_integral(pid_t *pid, pid_real_t value);
+
+/**
+ * @brief Get PID Monitor Snapshot
+ * Populates usage statistics and internal terms. Safe to call anytime.
+ *
+ * @param pid Pointer to PID context
+ * @param monitor Pointer to monitor structure to populate
+ */
+void pid_get_monitor(const pid_t *pid, pid_monitor_t *monitor);
 
 /**
  * @brief Manual Mode Tracking (Bumpless Transfer)

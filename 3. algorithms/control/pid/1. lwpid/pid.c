@@ -53,6 +53,25 @@ static pid_real_t pid_filter_apply_biquad(pid_real_t input, const pid_biquad_coe
     return output;
 }
 
+static pid_real_t pid_process_setpoint_ramp(pid_t *pid, pid_real_t target_setpoint, pid_real_t dt) {
+    if (pid->cfg->max_setpoint_ramp > 0.0f) {
+        pid_real_t max_change = pid->cfg->max_setpoint_ramp * dt;
+        pid_real_t diff = target_setpoint - pid->internal_setpoint;
+
+        // Optimize clamping
+        if (diff > max_change) {
+            diff = max_change;
+        } else if (diff < -max_change) {
+            diff = -max_change;
+        }
+
+        pid->internal_setpoint += diff;
+    } else {
+        pid->internal_setpoint = target_setpoint;
+    }
+    return pid->internal_setpoint;
+}
+
 // --- Public API ---
 
 bool pid_init(pid_t *pid, const pid_cfg_t *cfg) {
@@ -159,6 +178,15 @@ void pid_reset(pid_t *pid) {
     pid->input_biquad.y2 = 0.0f;
 
     pid->out = 0.0f;
+
+    // Reset Diagnostic fields
+    pid->p_out = 0.0f;
+    pid->i_out = 0.0f;
+    pid->d_out = 0.0f;
+    pid->f_out = 0.0f;
+    pid->error_raw = 0.0f;
+    pid->internal_setpoint = 0.0f;
+
     pid->first_run = true;
 }
 
@@ -213,20 +241,7 @@ pid_real_t pid_update(pid_t *pid, pid_real_t setpoint, pid_real_t measurement, p
         filtered_measure = pid->input_lpf;
     }
 
-    if (pid->cfg->max_setpoint_ramp > 0.0f) {
-        pid_real_t max_change = pid->cfg->max_setpoint_ramp * dt;
-        pid_real_t diff = target_setpoint - pid->internal_setpoint;
-
-        // Optimize clamping
-        if (diff > max_change) {
-            diff = max_change;
-        } else if (diff < -max_change) {
-            diff = -max_change;
-        }
-
-        pid->internal_setpoint += diff;
-        target_setpoint = pid->internal_setpoint;
-    }
+    target_setpoint = pid_process_setpoint_ramp(pid, setpoint, dt);
 
     // 2. Error Calculation
     // Always SP - PV
@@ -371,6 +386,13 @@ pid_real_t pid_update(pid_t *pid, pid_real_t setpoint, pid_real_t measurement, p
     pid->prev_error = target_setpoint - filtered_measure;  // Store raw error
     pid->out = out;
 
+    // Store Diagnostic Data
+    pid->p_out = p_term;
+    pid->i_out = pid->integral;
+    pid->d_out = d_term;
+    pid->f_out = f_term;
+    pid->error_raw = setpoint - measurement;  // Truly raw error
+
     return out;
 }
 
@@ -403,6 +425,11 @@ pid_real_t pid_update_incremental(pid_t *pid, pid_real_t setpoint, pid_real_t me
         pid->d_biquad.x2 = 0;
         pid->d_biquad.y1 = 0;
         pid->d_biquad.y2 = 0;
+
+        // Sync state
+        pid->internal_setpoint = setpoint;
+        pid->out = current_output;
+
         pid->first_run = false;
         return 0.0f;
     }
@@ -424,14 +451,17 @@ pid_real_t pid_update_incremental(pid_t *pid, pid_real_t setpoint, pid_real_t me
         filtered_measure = pid->input_lpf;
     }
 
-    pid_real_t error = setpoint - filtered_measure;
+    // Process Setpoint Ramp (reuse same logic as Standard PID)
+    pid_real_t target_setpoint = pid_process_setpoint_ramp(pid, setpoint, dt);
+
+    pid_real_t error = target_setpoint - filtered_measure;
 
     // 1. Proportional Change (dP)
     // 2DOF P = Kp * (beta * SP - PV)
     // dP = P_current - P_previous
     pid_real_t prev_sp = pid->prev_error + pid->prev_measure;
 
-    pid_real_t p_current = pid->cfg->kp * ((pid->cfg->beta * setpoint) - filtered_measure);
+    pid_real_t p_current = pid->cfg->kp * ((pid->cfg->beta * target_setpoint) - filtered_measure);
     pid_real_t p_prev = pid->cfg->kp * ((pid->cfg->beta * prev_sp) - pid->prev_measure);
 
     pid_real_t p_diff = p_current - p_prev;
@@ -443,7 +473,7 @@ pid_real_t pid_update_incremental(pid_t *pid, pid_real_t setpoint, pid_real_t me
     // 3. Derivative Change (dD)
     // D = Kd * d/dt(gamma * SP - PV)
     // dD = D_current - D_previous
-    pid_real_t d_input = (pid->cfg->gamma * setpoint) - filtered_measure;
+    pid_real_t d_input = (pid->cfg->gamma * target_setpoint) - filtered_measure;
     pid_real_t prev_d_input = (pid->cfg->gamma * prev_sp) - pid->prev_measure;
 
     pid_real_t derivative = (d_input - prev_d_input) / dt;
@@ -512,6 +542,17 @@ pid_real_t pid_update_incremental(pid_t *pid, pid_real_t setpoint, pid_real_t me
     pid->prev_measure = filtered_measure;
     pid->prev_error = error;
 
+    // Store Diagnostic Data (Incremental Deltas)
+    pid->p_out = p_diff;
+    pid->i_out = i_diff;
+    pid->d_out = d_diff;
+    pid->f_out = 0.0f;  // No F-term delta in this implementation
+    pid->error_raw = target_setpoint - measurement;
+
+    // Update internal output state for Monitor
+    // We estimate current output as (User_Provided_Current_Output + Delta)
+    pid->out = current_output + delta_out;
+
     return delta_out;
 }
 
@@ -569,6 +610,31 @@ void pid_track_manual(pid_t *pid, pid_real_t manual_output, pid_real_t measureme
     pid->input_biquad.x2 = measurement;
     pid->input_biquad.y1 = measurement;
     pid->input_biquad.y2 = measurement;
+}
+
+void pid_get_monitor(const pid_t *pid, pid_monitor_t *monitor) {
+    if ((pid == NULL) || (monitor == NULL)) {
+        return;
+    }
+
+    // Report internal setpoint (ramped if active)
+    monitor->target = pid->internal_setpoint;
+    monitor->measure = pid->prev_measure;  // Filtered PV
+    monitor->output = pid->out;            // Absolute Output (or Estimated in Incremental)
+
+    monitor->p_term = pid->p_out;
+    monitor->i_term = pid->i_out;
+    monitor->d_term = pid->d_out;
+    monitor->f_term = pid->f_out;
+
+    monitor->error =
+        pid->internal_setpoint - pid->prev_measure;  // Calculation Error (RampedSP - FilteredPV)
+
+    if (pid->cfg) {
+        monitor->saturated = (pid->out >= pid->cfg->out_max) || (pid->out <= pid->cfg->out_min);
+    } else {
+        monitor->saturated = false;
+    }
 }
 
 // --- Cascade ---
