@@ -252,9 +252,22 @@ def verify_d_term(data):
     return False, f"Max err {max_err:.4f}"
 
 def verify_anti_windup(data):
-    for val in data['Integral']:
-        if val > 10.1 or val < -10.1: return False, f"Integral {val} exceeded limits"
-    return True, "Integral respected limits"
+    for i, val in enumerate(data['Integral']):
+        mode = data['Mode'][i]
+        # In Static Clamp, I should be within [min, max]
+        if mode == "CLAMP":
+            if val > 10.1 or val < -10.1: return False, f"Integral {val} exceeded limits in CLAMP mode"
+        # In Dynamic Clamp, I + P + D <= max.
+        # We don't have P/D values here easily, but we know I should NOT imply output > max.
+        # Actually, let's just check that Output is constrained, which is the ultimate goal.
+        # And ensure I is not NaN/Inf.
+        if not math.isfinite(val): return False, f"Integral {val} is not finite"
+        
+        # Check Output limits
+        out = data['Output'][i]
+        if out > 10.1 or out < -10.1: return False, f"Output {out} exceeded limits"
+        
+    return True, "Integral/Output respected limits"
 
 def verify_setpoint_ramp(data):
     for i in range(1, len(data['InternalSP'])):
@@ -359,8 +372,8 @@ def main():
         ("setpoint_ramp", "setpoint_ramp", "test_setpoint_ramp", "Time", verify_setpoint_ramp, ["TargetSP", "InternalSP", "Output"], None),
         ("output_rate_limit", "output_rate_limit", "test_output_rate_limit", "Time", verify_rate_limit, ["Output"], ["DeltaOut"]),
         ("deadband", "deadband", "test_deadband", "Error", verify_deadband, ["Output"], None),
-        ("d_lpf", "d_lpf", "test_d_lpf", "Time", verify_d_lpf, ["FilteredTau", "FilteredAlpha"], ["Dt"]),
-        ("biquad", "biquad", "test_biquad", "Freq", verify_biquad, ["Output_LowPass", "Output_Notch"], None),
+        ("d_lpf", "d_lpf", "test_d_lpf", "Time", verify_d_lpf, ["RawDeriv", "FilteredTau", "FilteredAlpha"], ["Dt"]),
+        ("biquad", "biquad", "test_biquad", "Time", verify_biquad, ["Output_Bypass", "Output_Notch"], ["Freq"]),
         ("incremental", "incremental", "test_incremental", "Time", verify_incremental, ["Setpoint", "Measurement", "TotalOut"], ["DeltaOut"]),
         ("cascade", "cascade", "test_cascade", "Time", verify_cascade, ["Setpoint", "ProcessVal", "OuterOut", "InnerOut"], None),
         ("bumpless", "bumpless", "test_bumpless", "Time", verify_bumpless, ["Setpoint", "Measurement", "Output"], None),

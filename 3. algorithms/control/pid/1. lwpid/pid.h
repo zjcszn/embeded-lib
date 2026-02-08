@@ -16,12 +16,6 @@ extern "C" {
 
 // --- Configuration Macros ---
 
-// Robustness: Check for Finite (NaN/Inf)
-#ifndef PID_CHECK_FINITE
-#include <math.h>
-#define PID_CHECK_FINITE(val) isfinite(val)
-#endif
-
 // Logging: Define PID_LOG to printf or other sink if needed
 #ifndef PID_LOG
 #define PID_LOG(fmt, ...)
@@ -31,7 +25,6 @@ extern "C" {
 
 // float or double
 typedef float pid_real_t;
-typedef uint32_t pid_tick_t;
 
 /**
  * @brief Anti-windup Modes
@@ -92,18 +85,36 @@ typedef struct {
     pid_real_t kw;                            // Anti-windup Tracking Gain (for BACK_CALC)
     pid_anti_windup_mode_t anti_windup_mode;  // Anti-windup Strategy
 
+    // --- 2DOF (Two-Degree-of-Freedom) Weights ---
+    // Proportional Setpoint Weight (0.0 to 1.0)
+    // - 1.0 = Standard PID (Error based)
+    // - 0.0 = I-PD (Proportional on Measurement only) - smoothest
+    // NOTE: If beta != 1.0, P-term will ignore Deadband to maintain disturbance rejection.
+    pid_real_t beta;
+
+    // Derivative Setpoint Weight (0.0 to 1.0)
+    // - 1.0 = Derivative on Error (Standard)
+    // - 0.0 = Derivative on Measurement (Kick-free)
+    pid_real_t gamma;
+
     // --- Filter Configuration ---
 
     // 1. Derivative Line Filter
     pid_real_t d_tau;        // Derivative Filter Time Constant (Seconds). Preferred over alpha.
-    pid_real_t d_lpf_alpha;  // DEPRECATED: Manual Alpha (0.0-1.0). Used if d_tau <= 0.
+    pid_real_t d_lpf_alpha;  // [DEPRECATED] Manual Alpha (0.0-1.0). Used if d_tau <= 0.
+                             // NOTE: d_lpf_alpha will be clamped to [0.0, 1.0]
 
-    // 2. Advanced Filter (Biquad) for Derivative Term (Optional)
+    // 2. Advanced Filter (Biquad) for Derivative Term
     // If set to PID_FILTER_BIQUAD, this overrides d_tau/alpha behavior for D-term.
     pid_filter_type_t d_filter_type;
     pid_biquad_coeffs_t d_biquad_coeffs;  // Pre-calculated coefficients for Biquad
 
-    bool derivative_on_measurement;  // true: d(PV)/dt, false: d(Error)/dt
+    // 3. Input Filter Configuration (Optional)
+    // Pre-filter applied to the Measurement (PV) before it enters the PID loop.
+    // Useful for noise reduction or resonance suppression (Notch).
+    pid_filter_type_t input_filter_type;      // Input Filter Type
+    pid_real_t input_filter_tau;              // Input Filter Time Constant (for PID_FILTER_PT1)
+    pid_biquad_coeffs_t input_biquad_coeffs;  // Input Filter Coeffs (for PID_FILTER_BIQUAD)
 
 } pid_cfg_t;
 
@@ -121,8 +132,11 @@ typedef struct {
     pid_real_t prev_error;    // Previous Error
 
     // Filter State
-    pid_real_t d_lpf;                    // PT1 Filter State
-    pid_filter_biquad_state_t d_biquad;  // Biquad Filter State
+    pid_real_t d_lpf;                    // PT1 Filter State (Derivative)
+    pid_filter_biquad_state_t d_biquad;  // Biquad Filter State (Derivative)
+
+    pid_real_t input_lpf;                    // PT1 Filter State (Input)
+    pid_filter_biquad_state_t input_biquad;  // Biquad Filter State (Input)
 
     pid_real_t internal_setpoint;  // Current internal setpoint (for Ramp Control)
     bool first_run;                // Flag to handle first-run initialization
@@ -174,10 +188,11 @@ pid_real_t pid_update(pid_t *pid, pid_real_t setpoint, pid_real_t measurement,
  * @param setpoint Target value (SP)
  * @param measurement Process Variable (PV)
  * @param dt_seconds Time delta in seconds (> 0)
+ * @param current_output Current actual output (for anti-windup clamping)
  * @return Calculated output change (Delta U)
  */
 pid_real_t pid_update_incremental(pid_t *pid, pid_real_t setpoint, pid_real_t measurement,
-                                  pid_real_t dt_seconds);
+                                  pid_real_t dt_seconds, pid_real_t current_output);
 
 /**
  * @brief Force set the integral term (Pre-loading)

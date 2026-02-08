@@ -15,8 +15,8 @@
     -   **Clamping**: 硬限幅积分值。
 2.  **设定值斜坡控制 (Setpoint Ramp)**: 限制设定值的变化率，防止系统受到阶跃信号的剧烈冲击。
 3.  **串级控制 (Cascade PID)**: 原生支持串级（外环位置-内环速度）控制结构。
-4.  **微分噪声抑制 (Derivative LPF)**: 内置一阶低通滤波器，平滑微分项。
-5.  **测量值微分 (Kick-free)**: 可选对测量值而非误差进行微分，避免设定值突变引起的输出尖峰。
+4.  **微分噪声抑制 (Derivative LPF)**: 内置一阶低通滤波器或二阶 Biquad 滤波器。
+5.  **2DOF 控制 (Setpoint Weighting)**: 通过 `beta` 和 `gamma` 参数灵活调整设定值对比例和微分项的权重，实现踢除设定值突变（Kick-free）或调节超调量。
 6.  **死区控制 (Linear Deadband)**: 防止微小误差引起的执行器抖动。
 7.  **前馈控制 (Feed-Forward)**: 提高系统对设定值变化的响应速度。
 
@@ -27,13 +27,15 @@
 | :--- | :--- | :--- |
 | `kp`, `ki`, `kd`, `kf` | `float` | PID 及前馈增益 |
 | `out_max`, `out_min` | `float` | 输出限幅 |
-| `deadband` | `float` | 线性死区 (0 为禁用) |
+| `deadband` | `float` | 线性死区 (0 为禁用)。注意：若启用 2DOF (beta!=1)，死区仅对积分项生效。 |
 | `max_rate` | `float` | 输出变化率限制 (Unit/s, 仅增量式) |
 | `max_setpoint_ramp` | `float` | **[新增]** 设定值最大变化率 (Unit/s)，0 为禁用 |
 | `anti_windup_mode` | `enum` | **[新增]** 抗饱和模式: `CONDITIONAL`, `BACK_CALC`, `CLAMP`, `NONE` |
 | `kw` | `float` | **[新增]** 抗饱和追踪增益 (仅用于 `BACK_CALC` 模式) |
-| `d_lpf_alpha` | `float` | 微分滤波系数 (0.0~1.0) |
-| `derivative_on_measurement` | `bool` | 是否使用测量值微分 |
+| `beta` | `float` | **[新增]** 比例项设定值权重 (0~1)。1=标准, 0=反馈比例(I-PD) |
+| `gamma` | `float` | **[新增]** 微分项设定值权重 (0~1)。1=误差微分, 0=测量微分 |
+| `d_tau` | `float` | 微分滤波器时间常数 (秒) |
+| `d_lpf_alpha` | `float` | **[弃用]** 手动 Alpha (使用 d_tau 替代) |
 
 ## 3. 使用方法
 
@@ -94,8 +96,10 @@ void loop(void) {
 ### 增量式 PID
 与标准版一致，使用 `pid_update_incremental`。
 
+
 ### 时间戳调用
-使用 `pid_update_tick`，自动计算 `dt`。
+⚠️ **注意**: 本库**不**自动计算 `dt`。用户必须在调用 `pid_update` 时传入精确的时间间隔（秒）。
+推荐使用高精度硬件定时器或系统滴答计数器计算两次调用之间的差值。
 
 
 ## 4. 优缺点分析
@@ -142,4 +146,21 @@ void control_loop(void) {
 ```c
 // 将积分项强制设为 50.0 (会被限制在 out_min/max 之间)
 pid_set_integral(&pid, 50.0f);
+```
+
+### 5.3 2DOF 控制 (二自由度 PID)
+
+通过调整 `beta` (比例权重) 和 `gamma` (微分权重)，可以解耦跟踪性能（对设定值响应）和抗扰性能（对负载响应）。
+
+*   **标准 PID**: `beta = 1.0`, `gamma = 1.0` (对误差操作)
+*   **微分先行 (Kick-free)**: `gamma = 0.0` (对测量值微分，避免 SP 突变导致 D 项冲击)
+*   **I-PD 控制**: `beta = 0.0`, `gamma = 0.0` (仅积分项响应 SP 变化，P/D 仅抑制干扰。响应最平滑，但较慢)
+*   **软化响应**: `beta = 0.5` (降低设定值变化引起的比例冲击，减少超调)
+
+```c
+pid_cfg_t cfg = {
+    // ...
+    .beta = 1.0f,  // 默认: 比例项完全响应设定值
+    .gamma = 0.0f, // 推荐: 微分项仅响应测量值 (无冲击)
+};
 ```

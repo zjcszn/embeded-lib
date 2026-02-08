@@ -96,7 +96,14 @@ void test_init_check(void) {
 void test_p_term(void) {
     print_test_header("P_Term", "Error,Output,Expected");
 
-    pid_cfg_t cfg = {.kp = 2.0f, .ki = 0.0f, .kd = 0.0f, .out_max = 100.0f, .out_min = -100.0f};
+    pid_cfg_t cfg = {.kp = 1.0f,
+                     .ki = 0.0f,
+                     .kd = 0.1f,
+                     .out_max = 100.0f,
+                     .out_min = -100.0f,
+                     .d_tau = 0.0f,
+                     .beta = 1.0f,
+                     .gamma = 0.0f};
     pid_t pid;
     pid_init(&pid, &cfg);
 
@@ -150,7 +157,8 @@ void test_d_term(void) {
                      .kd = 1.0f,
                      .out_max = 100.0f,
                      .out_min = -100.0f,
-                     .derivative_on_measurement = true};
+                     .beta = 1.0f,
+                     .gamma = 0.0f};
     pid_t pid;
     pid_init(&pid, &cfg);
 
@@ -175,11 +183,13 @@ void test_d_term(void) {
 void test_anti_windup(void) {
     print_test_header("Anti_Windup", "Time,Integral,Output,Mode");
 
-    pid_cfg_t cfg = {.kp = 0.5f,
+    pid_cfg_t cfg = {.kp = 0.0f,
                      .ki = 1.0f,
                      .kd = 0.0f,
                      .out_max = 10.0f,
                      .out_min = -10.0f,
+                     .beta = 1.0f,
+                     .gamma = 1.0f,
                      .anti_windup_mode = PID_ANTI_WINDUP_CLAMP};
     pid_t pid;
     pid_init(&pid, &cfg);
@@ -218,6 +228,7 @@ void test_setpoint_ramp(void) {
                      .kd = 0.0f,
                      .out_max = 100.0f,
                      .out_min = -100.0f,
+                     .beta = 1.0f,
                      .max_setpoint_ramp = 10.0f};
     pid_t pid;
     pid_init(&pid, &cfg);
@@ -245,6 +256,7 @@ void test_deadband(void) {
                      .kd = 0.0f,
                      .out_max = 100.0f,
                      .out_min = -100.0f,
+                     .beta = 1.0f,
                      .deadband = 2.0f};
     pid_t pid;
     pid_init(&pid, &cfg);
@@ -267,7 +279,8 @@ void test_d_lpf(void) {
                          .out_max = 100.0f,
                          .out_min = -100.0f,
                          .d_tau = 0.1f,
-                         .derivative_on_measurement = false};
+                         .beta = 1.0f,
+                         .gamma = 0.0f};
 
     pid_cfg_t cfg_alpha = cfg_tau;
     cfg_alpha.d_tau = 0.0f;
@@ -278,62 +291,76 @@ void test_d_lpf(void) {
     pid_init(&pid_alpha, &cfg_alpha);
 
     float t = 0.0f;
-    float meas = 0.0f;
 
-    for (int i = 0; i < 50; i++) {
-        float dt = (i % 2 == 0) ? 0.01f : 0.05f;
-        float sp = sinf(t);
+    // Use a higher frequency signal (5Hz) to be in the stopband of the filter (fc=1.6Hz)
+    // This makes the attenuation sensitive to the actual cutoff frequency.
+    float signal_freq = 5.0f;
+    float omega = 2.0f * M_PI * signal_freq;
 
-        float out1 = pid_update(&pid_tau, sp, meas, dt);
-        float out2 = pid_update(&pid_alpha, sp, meas, dt);
+    // Run for longer to see effects
+    for (int i = 0; i < 200; i++) {
+        float dt = (i / 20 % 2 == 0) ? 0.01f : 0.05f;  // Switch dt every 20 steps
+        float input = sinf(omega * t);
 
-        printf("%.2f,0.0,%.3f,%.3f,%.3f\n", t, out1, out2, dt);
+        float out1 = pid_update(&pid_tau, input, 0.0f, dt);    // Low Pass (Robust)
+        float out2 = pid_update(&pid_alpha, input, 0.0f, dt);  // Fixed Alpha (Sensitive to dt)
+
+        printf("%.3f,%.2f,%.3f,%.3f,%.3f\n", t, input, out1, out2, dt);
         t += dt;
     }
     print_test_footer();
 }
 
 void test_biquad(void) {
-    print_test_header("Biquad_Filter", "Time,Freq,Output_LowPass,Output_Notch");
+    print_test_header("Biquad_Filter", "Time,Freq,Output_Bypass,Output_Notch");
 
-    pid_cfg_t cfg_pt2 = {.kp = 0.0f,
-                         .kd = 1.0f,
-                         .out_max = 10000.0f,
-                         .out_min = -10000.0f,
-                         .d_filter_type = PID_FILTER_BIQUAD,
-                         .derivative_on_measurement = false};
-    pid_filter_calc_pt2(&cfg_pt2.d_biquad_coeffs, 0.001f, 10.0f, 0.707f);
+    pid_cfg_t cfg_bypass = {.kp = 0.0f,
+                            .kd = 1.0f,
+                            .out_max = 10000.0f,
+                            .out_min = -10000.0f,
+                            .beta = 1.0f,
+                            .gamma = 0.0f};
+    // No filter or very high cutoff LPF acting as bypass
+    cfg_bypass.d_filter_type = PID_FILTER_NONE;
 
     pid_cfg_t cfg_notch = {.kp = 0.0f,
                            .kd = 1.0f,
                            .out_max = 10000.0f,
                            .out_min = -10000.0f,
                            .d_filter_type = PID_FILTER_BIQUAD,
-                           .derivative_on_measurement = false};
+                           .beta = 1.0f,
+                           .gamma = 0.0f};  // Kick-free
     pid_filter_calc_notch(&cfg_notch.d_biquad_coeffs, 0.001f, 50.0f, 10.0f);
 
-    pid_t pid_pt2, pid_notch;
-    pid_init(&pid_pt2, &cfg_pt2);
+    pid_t pid_bypass, pid_notch;
+    pid_init(&pid_bypass, &cfg_bypass);
     pid_init(&pid_notch, &cfg_notch);
 
     float dt = 0.001f;
     float t = 0.0f;
+    float total_time = 2.0f;
+    float start_freq = 10.0f;
+    float end_freq = 100.0f;
 
-    float freqs[] = {10.0f, 50.0f, 90.0f};
+    // Chirp sweep
+    int steps = (int) (total_time / dt);
+    for (int i = 0; i < steps; i++) {
+        // Instantaneous frequency: f(t) = f0 + (f1-f0)*t/T
+        // Phase phi(t) = integral(2*pi*f(t)) = 2*pi*(f0*t + (f1-f0)/(2*T)*t^2)
+        float current_freq = start_freq + (end_freq - start_freq) * t / total_time;
+        float phi =
+            2.0f * M_PI * (start_freq * t + (end_freq - start_freq) / (2.0f * total_time) * t * t);
 
-    for (int f_idx = 0; f_idx < 3; f_idx++) {
-        float freq = freqs[f_idx];
-        // Run for 0.5s at this freq
-        for (int i = 0; i < 500; i++) {
-            float signal = sinf(2.0f * M_PI * freq * t);
-            float out1 = pid_update(&pid_pt2, signal, 0.0f, dt);
-            float out2 = pid_update(&pid_notch, signal, 0.0f, dt);
+        float signal = sinf(phi);
 
-            if (i > 400) {  // Log stable part
-                printf("%.3f,%.1f,%.3f,%.3f\n", t, freq, out1, out2);
-            }
-            t += dt;
+        float out1 = pid_update(&pid_bypass, signal, 0.0f, dt);
+        float out2 = pid_update(&pid_notch, signal, 0.0f, dt);
+
+        // Subsample for plotting
+        if (i % 10 == 0) {
+            printf("%.3f,%.1f,%.3f,%.3f\n", t, current_freq, out1, out2);
         }
+        t += dt;
     }
     print_test_footer();
 }
@@ -348,6 +375,7 @@ void test_rate_limit(void) {
                      .kd = 0.0f,
                      .out_max = 100.0f,
                      .out_min = -100.0f,
+                     .beta = 1.0f,
                      .max_rate = 50.0f};
     pid_t pid;
     pid_init(&pid, &cfg);
@@ -363,7 +391,7 @@ void test_rate_limit(void) {
 
     // Run longer to see ramping
     for (int i = 0; i < 20; i++) {
-        float inc = pid_update_incremental(&pid, sp, meas, dt);
+        float inc = pid_update_incremental(&pid, sp, meas, dt, total_out);
         total_out += inc;
         printf("%.2f,%.2f,%.2f,%.2f\n", t, sp - meas, total_out, inc);
         t += dt;
@@ -374,7 +402,7 @@ void test_rate_limit(void) {
 void test_incremental(void) {
     print_test_header("Incremental_Convergence", "Time,Setpoint,Measurement,TotalOut,DeltaOut");
 
-    pid_cfg_t cfg = {.kp = 0.5f, .ki = 0.5f, .out_max = 100.0f, .out_min = -100.0f};
+    pid_cfg_t cfg = {.kp = 0.5f, .ki = 0.5f, .out_max = 100.0f, .out_min = -100.0f, .beta = 1.0f};
     pid_t pid;
     pid_init(&pid, &cfg);
 
@@ -389,7 +417,7 @@ void test_incremental(void) {
 
     // Increased to 300 steps (30s) for convergence
     for (int i = 0; i < 300; i++) {
-        float inc = pid_update_incremental(&pid, sp, meas, dt);
+        float inc = pid_update_incremental(&pid, sp, meas, dt, u);
         u += inc;
         if (u > 100)
             u = 100;
@@ -407,11 +435,12 @@ void test_incremental(void) {
 void test_cascade(void) {
     print_test_header("Cascade_Control", "Time,Setpoint,ProcessVal,OuterOut,InnerOut");
 
-    pid_cfg_t cfg_out = {.kp = 2.0f, .out_max = 20.0f, .out_min = -20.0f};
+    pid_cfg_t cfg_out = {.kp = 2.0f, .out_max = 20.0f, .out_min = -20.0f, .beta = 1.0f};
     pid_t pid_out;
     pid_init(&pid_out, &cfg_out);
 
-    pid_cfg_t cfg_in = {.kp = 1.0f, .ki = 0.5f, .out_max = 100.0f, .out_min = -100.0f};
+    pid_cfg_t cfg_in = {
+        .kp = 1.0f, .ki = 0.5f, .out_max = 100.0f, .out_min = -100.0f, .beta = 1.0f};
     pid_t pid_in;
     pid_init(&pid_in, &cfg_in);
 
@@ -445,6 +474,7 @@ void test_bumpless(void) {
                      .ki = 0.5f,
                      .out_max = 100.0f,
                      .out_min = -100.0f,
+                     .beta = 1.0f,
                      .anti_windup_mode = PID_ANTI_WINDUP_CLAMP};
     pid_t pid;
     pid_init(&pid, &cfg);
@@ -480,8 +510,13 @@ void test_bumpless(void) {
 void test_noise(void) {
     print_test_header("Noise_Robustness", "Time,Signal,Noisy,Filtered");
 
-    pid_cfg_t cfg = {
-        .kp = 1.0f, .ki = 0.1f, .kd = 0.5f, .d_tau = 0.1f, .out_max = 100.0f, .out_min = -100.0f};
+    pid_cfg_t cfg = {.kp = 1.0f,
+                     .ki = 0.0f,
+                     .kd = 0.1f,
+                     .out_max = 100.0f,
+                     .out_min = -100.0f,
+                     .d_tau = 0.0f,
+                     .gamma = 0.0f};
     pid_t pid;
     pid_init(&pid, &cfg);
 
@@ -504,7 +539,7 @@ void test_noise(void) {
 void test_tick(void) {
     print_test_header("Tick_Update", "Time,DeltaTime,Output");
 
-    pid_cfg_t cfg = {.kp = 1.0f};
+    pid_cfg_t cfg = {.kp = 1.0f, .beta = 1.0f};
     pid_t pid;
     pid_init(&pid, &cfg);
 
@@ -528,6 +563,7 @@ void test_perf_metrics(void) {
                      .out_max = 100.0f,
                      .out_min = -100.0f,
                      .d_tau = 0.01f,
+                     .beta = 1.0f,
                      .anti_windup_mode = PID_ANTI_WINDUP_DYNAMIC_CLAMP};
     pid_t pid;
     pid_init(&pid, &cfg);
@@ -571,6 +607,59 @@ void test_perf_metrics(void) {
     (void) out;
 }
 
+void test_input_filter(void) {
+    print_test_header("Input_Filter", "Time,Raw,Filtered_PT1,Filtered_Notch");
+
+    // 1. PT1 Filter Test
+    pid_cfg_t cfg_pt1 = {.kp = 1.0f,
+                         .input_filter_type = PID_FILTER_PT1,
+                         .input_filter_tau = 0.1f,
+                         .out_max = 1000.0f,
+                         .out_min = -1000.0f,
+                         .beta = 1.0f};
+    pid_t pid_pt1;
+    pid_init(&pid_pt1, &cfg_pt1);
+
+    // 2. Notch Filter Test (50Hz Notch at 1kHz sampling)
+    pid_cfg_t cfg_notch = {.kp = 1.0f,
+                           .input_filter_type = PID_FILTER_BIQUAD,
+                           .out_max = 1000.0f,
+                           .out_min = -1000.0f,
+                           .beta = 1.0f};
+
+    // Calculate Notch Coeffs: center=50Hz, bw=10Hz, dt=0.001s
+    pid_filter_calc_notch(&cfg_notch.input_biquad_coeffs, 0.001f, 50.0f, 10.0f);
+
+    pid_t pid_notch;
+    pid_init(&pid_notch, &cfg_notch);
+
+    float t = 0.0f;
+    float dt = 0.001f;  // 1kHz
+
+    // Generate signal: 5Hz sine + 50Hz noise
+    float freq_sig = 5.0f;
+    float freq_noise = 50.0f;
+
+    for (int i = 0; i < 200; i++) {
+        float signal = sinf(2.0f * M_PI * freq_sig * t);
+        float noise = 0.5f * sinf(2.0f * M_PI * freq_noise * t);
+        float raw = signal + noise;
+
+        // We only care about how the measurement is filtered internally
+        // To verify this without exposing internal state, we can look at P-term if Kp=1, Setpoint=0
+        // Error = 0 - FilteredVal = -FilteredVal
+        // Output = Kp * Error = -FilteredVal
+        // So FilteredVal = -Output
+
+        float out_pt1 = pid_update(&pid_pt1, 0.0f, raw, dt);
+        float out_notch = pid_update(&pid_notch, 0.0f, raw, dt);
+
+        printf("%.3f,%.3f,%.3f,%.3f\n", t, raw, -out_pt1, -out_notch);
+        t += dt;
+    }
+    print_test_footer();
+}
+
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         printf("Usage: %s <test_name>\n", argv[0]);
@@ -610,6 +699,8 @@ int main(int argc, char *argv[]) {
         test_tick();
     else if (strcmp(test, "noise") == 0)
         test_noise();
+    else if (strcmp(test, "input_filter") == 0)
+        test_input_filter();
     else {
         printf("Unknown test: %s\n", test);
         return 1;
