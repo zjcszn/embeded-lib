@@ -68,7 +68,6 @@ typedef struct {
     pid_real_t prev_error;         // Previous Error (for Incremental P-term)
     pid_real_t d_lpf;              // Derivative Low-Pass Filter State
     pid_real_t internal_setpoint;  // Current internal setpoint (for Ramp Control)
-    pid_tick_t last_tick;          // Time tracking for auto-dt
     bool first_run;                // Flag to handle first-run initialization
 
     // Configuration Reference
@@ -126,17 +125,26 @@ pid_real_t pid_update_incremental(pid_t *pid, pid_real_t setpoint, pid_real_t me
                                   pid_real_t dt_seconds);
 
 /**
- * @brief Update PID with automatic time delta calculation
+ * @brief Force set the integral term (Pre-loading)
+ * Useful for initializing the controller to a known state or recovering from specific conditions.
  *
  * @param pid Pointer to PID context
- * @param setpoint Target value (SP)
- * @param measurement Process Variable (PV)
- * @param current_tick System tick count
- * @param tick_scale Scale factor to convert ticks to seconds (e.g. 0.001 for ms)
- * @return Calculated output
+ * @param value Target integral value (will be clamped to output limits)
  */
-pid_real_t pid_update_tick(pid_t *pid, pid_real_t setpoint, pid_real_t measurement,
-                           pid_tick_t current_tick, pid_real_t tick_scale);
+void pid_set_integral(pid_t *pid, pid_real_t value);
+
+/**
+ * @brief Manual Mode Tracking (Bumpless Transfer)
+ * Call this periodically when in Manual Mode to keep PID internal state
+ * synchronized with the manual output.
+ *
+ * @param pid Pointer to PID context
+ * @param manual_output Current manual output value
+ * @param measurement Current Process Variable (PV)
+ * @param setpoint Current Target value (SP)
+ */
+void pid_track_manual(pid_t *pid, pid_real_t manual_output, pid_real_t measurement,
+                      pid_real_t setpoint);
 
 /* --- Cascade PID API --- */
 

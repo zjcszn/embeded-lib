@@ -56,7 +56,6 @@ void pid_reset(pid_t *pid) {
     pid->prev_error = 0.0f;
     pid->d_lpf = 0.0f;
     pid->out = 0.0f;
-    pid->last_tick = 0;
     pid->first_run = true;
 }
 
@@ -78,7 +77,6 @@ pid_real_t pid_update(pid_t *pid, pid_real_t setpoint, pid_real_t measurement, p
         pid->internal_setpoint = target_setpoint;
         pid->prev_measure = measurement;
         pid->prev_error = target_setpoint - measurement;
-        pid->last_tick = 0;
         pid->first_run = false;
     }
 
@@ -237,7 +235,6 @@ pid_real_t pid_update_incremental(pid_t *pid, pid_real_t setpoint, pid_real_t me
         pid->prev_measure = measurement;
         pid->prev_error = error;
         pid->d_lpf = 0.0f;
-        pid->last_tick = 0;
         pid->first_run = false;
         return 0.0f;  // No output change on first run
     }
@@ -289,32 +286,48 @@ pid_real_t pid_update_incremental(pid_t *pid, pid_real_t setpoint, pid_real_t me
     return delta_out;
 }
 
-pid_real_t pid_update_tick(pid_t *pid, pid_real_t setpoint, pid_real_t measurement,
-                           pid_tick_t current_tick, pid_real_t tick_scale) {
-    if (pid == NULL) {
-        return 0.0f;
+void pid_set_integral(pid_t *pid, pid_real_t value) {
+    if ((pid == NULL) || (pid->cfg == NULL)) {
+        return;
     }
 
-    // Calculate delta tick with overflow handling
-    pid_tick_t delta_tick = current_tick - pid->last_tick;
+    // Direct assignment with clamping
+    pid->integral = pid_clamp(value, pid->cfg->out_min, pid->cfg->out_max);
+}
 
-    // First run or reset condition check could be here if needed
-    // Assuming pid_init sets last_tick to 0, which might cause a large jump on first call if system
-    // time is large. Better to handle first call gracefully. However, for simplicity and standard
-    // behavior, we just calculate. Ideally, user calls init, then update loop starts.
-
-    pid_real_t dt = (pid_real_t) delta_tick * tick_scale;
-
-    // Safety: Cap huge dt (system pause/debug breakpoint)
-    if (dt > 1.0f) {
-        dt = 0.001f;  // Default small step or skip
+void pid_track_manual(pid_t *pid, pid_real_t manual_output, pid_real_t measurement,
+                      pid_real_t setpoint) {
+    if ((pid == NULL) || (pid->cfg == NULL)) {
+        return;
     }
 
-    pid->last_tick = current_tick;
+    /*
+     * Bumpless Transfer Logic:
+     * We want: pid_out = manual_output
+     * From: pid_out = P + I + D + FF
+     * So: I = manual_output - (P + D + FF)
+     */
 
-    if (dt < 1e-6f) {
-        return pid->out;  // Too fast or zero time
-    }
+    pid_real_t error = setpoint - measurement;
 
-    return pid_update(pid, setpoint, measurement, dt);
+    // 1. Calculate P-term
+    pid_real_t p_term = pid->cfg->kp * error;
+
+    // 2. Calculate D-term
+    // Since we don't have dt, we assume D = 0 for tracking to be safe.
+    pid_real_t d_term = 0.0f;
+
+    // 3. Calculate FF-term
+    pid_real_t f_term = pid->cfg->kf * setpoint;
+
+    // 4. Back-calculate Integral
+    pid_real_t new_integral = manual_output - p_term - d_term - f_term;
+
+    // 5. Update State
+    pid->integral = pid_clamp(new_integral, pid->cfg->out_min, pid->cfg->out_max);
+
+    // Update history to prevent derivative kick when switching back to Auto
+    pid->prev_measure = measurement;
+    pid->prev_error = error;
+    pid->internal_setpoint = setpoint;
 }
